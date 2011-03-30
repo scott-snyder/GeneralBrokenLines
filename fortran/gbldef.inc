@@ -1,14 +1,11 @@
-* common for general broken line fit
-      DOUBLE PRECISION BVEC(MXPAR),CMAT(MXPAR2),CMATSD(MXPAR2),
-     &                 DJAC(MXAUX*MXPAR),DPSD(MXAUX2),
-     &                 JMAT,SMAT,DVEC,PMAT
-      COMMON / CGBLFT / 
-     &   BVEC,CMAT,CMATSD,DJAC,DPSD,
-     &   JMAT(8,MXPNT),SMAT(8,MXPNT),DVEC(4,MXPNT),PMAT(4,MXPNT),
-     &   NLVL,LPR,NDIM,NPNT,NMEAS,NSCAT,NOFF,NKNK,LPNT,LSCAT,
-     &   NPAR,NCRV,NBND,NLOC,IXSD,NBNDSD,NDFSD,ICRD0,LDWM,
-     &   IMEAS(MXPNT),ISCAT(MXPNT),IOFF(MXPNT),IKNK(MXPNT),IO2P(MXPNT),
-     &   YVEC(2,MXPNT),WVEC(2,MXPNT),
-     &   IDLC(2,MXPNT),IDGL(2,MXPNT),
-     &   NDAT,LDAT,MDAT,IDAT(MXDAT),ADAT(MXDAT)
+*
+* definitions general broken line fit
+      PARAMETER (MXPAR=200)  ! max. #parameters
+      PARAMETER (MXPAR2=(MXPAR*MXPAR+MXPAR)/2)
+      PARAMETER (MXBND=20)   ! max. band size
+      PARAMETER (MXBDR=10)   ! max. border size
+      PARAMETER (MXAUX=MXBDR+5)
+      PARAMETER (MXAUX2=(MXAUX*MXAUX+MXAUX)/2) 
+      PARAMETER (MXPNT=1000) ! max. #points
+      PARAMETER (MXDAT=10*MXPNT)
 *
