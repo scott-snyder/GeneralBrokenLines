@@ -254,7 +254,8 @@ C        CALL GBLFIT('HT',MRANK,NDF,CHI2,WLS)
            print *, ' DCOV(cvl) '
            CALL DBPRV(6,DAUX,5)
         ENDIF
-        CALL GBLMP2(IRET) ! prepare input for Millepede-II
+*
+C        CALL GBLMP2(IRET) ! prepare input for Millepede-II
 *
       ENDDO
 *
