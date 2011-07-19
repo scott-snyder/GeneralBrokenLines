@@ -41,9 +41,6 @@ Derivation of Jacobians for the propagation of covariance
 matrices of track parameters in homogeneous magnetic fields
 A. Strandlie, W. Wittek, NIM A, 566 (2006) 687-698
 
-Units for length, magnetic field and momentum are 
-m, T, GeV (or cm, kG, MeV).
-
 ===========================================================
 
 Description of Subroutines:
