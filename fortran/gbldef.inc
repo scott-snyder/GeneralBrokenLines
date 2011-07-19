@@ -1,6 +1,6 @@
 *
 * definitions general broken line fit
-      PARAMETER (MXPAR=200)  ! max. #parameters
+      PARAMETER (MXPAR=250)  ! max. #parameters
       PARAMETER (MXPAR2=(MXPAR*MXPAR+MXPAR)/2)
       PARAMETER (MXBND=20)   ! max. band size
       PARAMETER (MXBDR=10)   ! max. border size
