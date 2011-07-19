@@ -21,7 +21,7 @@
 *
       MRANK=0
       NP=0
-      NDF=0
+      NDF=-1
       CHI2=0.
       WLS=0.
       LCDW=LEN_TRIM(CDW)
@@ -86,10 +86,18 @@
       NDFSD=0
       IF (IXSD.NE.0) THEN     ! contribution of seed to linear equation system
 *
-         CALL GBLJAC(IXSD,1)  ! get transposed jacobian broken lines -> local
-         CALL DBAVAT(DPSD,DJAC,CMATSD,5+NLOC,NPAR)
+         NB=NCRV+NLOC
+         NPSD=NB+2*NDIM
+         CALL GBLJAC(IXSD,1,IOFF1)  ! get transposed jacobian broken lines -> local
+         CALL DBAVAT(DPSD,DJAC,CMATSD,5+NLOC,NPSD)
 *
-         DO I=1,NPAR
+         IP0=(IOFF1-1)*NDIM
+         DO I=1,NPSD
+            IF (I.GT.NB)THEN
+               IPSD(I)=I+IP0
+            ELSE
+               IPSD(I)=I
+            ENDIF
             DO J=1,I
                IJ=IJSYM(I,J)
                IF (CMATSD(IJ).NE.0.0D0.AND.MIN(I,J).GT.NCRV+NLOC) 
@@ -98,11 +106,6 @@
             IF (CMATSD(IJ).GT.0.0D0) NDFSD=NDFSD+1
          ENDDO
 *
-      ELSE                    ! no seed
-         NPAR2=(NPAR*NPAR+NPAR)/2
-         DO I=1,NPAR2
-            CMATSD(I)=0.0D0
-         ENDDO
       ENDIF
 *
       NLVL=3 ! prepared
@@ -151,6 +154,7 @@
       NKNK=0
       MDAT=MXDAT
       IXSD=0  ! external seed parameter offset
+      NPSD=0   ! external seed number of parameters
 *
       IF (IFIRST.EQ.1) THEN
         IFIRST=0
@@ -561,9 +565,8 @@
 *
       DOUBLE PRECISION TC2L(2,2),
      &    WP(2,2),WN(2,2),WJP(2,2),WJN(2,2),
-     &    DWP(2),DWN(2),WJS(2,2),WJI(2,2),
-     &    WIP(2,2),WIN(2,2),DIP(2),DIN(2),
-     &    WPP(2,2),WPN(2,2),DPP(2),DPN(2)
+     &    DWP(2),DWN(2),WJS(2,2),WJI(2,2),PN(2,2),
+     &    WPP(2,2),WPN(2,2),DWS(2),DPS(2),DET
 *
       L0=ICRD0
 *
@@ -583,6 +586,7 @@
             CALL GBLDER(JPNT,-1,WP,WJP,DWP)
             CALL GBLDER(JPNT, 2,WN,WJN,DWN)
             DO J=1,2
+               DWS(J)=DWP(J)+DWN(J)          !  W- * d- + W+ * d+
                DO K=1,2
                   WJS(J,K)=WJP(J,K)+WJN(J,K) !  W- * J- + W+ * J+
                ENDDO
@@ -604,17 +608,20 @@
                LDAT=LDAT+3
 *
                IDAT(KDAT+1)= 1
-               ADAT(KDAT+1)= SNGL(-DWP(M)-DWN(M))
+               ADAT(KDAT+1)= -SNGL(DWS(M))
                KDAT=KDAT+NCRV
                DO L=1,NDIM
-                  IDAT(KDAT+1)= IPAR0+L-NDIM
-                  ADAT(KDAT+1)= SNGL(  WP(M,L+L0))
-                  IDAT(KDAT+2)= IPAR0+L
-                  ADAT(KDAT+2)= SNGL(-WJS(M,L+L0))
-                  IDAT(KDAT+3)= IPAR0+L+NDIM
-                  ADAT(KDAT+3)= SNGL(  WN(M,L+L0))
-                  KDAT=KDAT+3
+                  IDX=KDAT+L
+                  IDAT(IDX)= IPAR0+L-NDIM
+                  ADAT(IDX)= SNGL(  WP(M,L+L0))
+                  IDX=IDX+NDIM
+                  IDAT(IDX)= IPAR0+L
+                  ADAT(IDX)= SNGL(-WJS(M,L+L0))
+                  IDX=IDX+NDIM
+                  IDAT(IDX)= IPAR0+L+NDIM
+                  ADAT(IDX)= SNGL(  WN(M,L+L0))
                ENDDO
+               KDAT=KDAT+3*NDIM
 *
                DO K=KDAT0+1,KDAT
                   IF (ADAT(K).NE.0.0) THEN ! copy non zero derivatives
@@ -645,19 +652,36 @@
                CALL GBLDER(JPNT,-1,WP,WJP,DWP)
                CALL GBLDER(JPNT, 2,WN,WJN,DWN)
                DO J=1,2
+                  DWS(J)=DWP(J)+DWN(J)          !  W- * d- + W+ * d+
                   DO K=1,2
                      WJS(J,K)=WJP(J,K)+WJN(J,K) !  W- * J- + W+ * J+
                   ENDDO
                ENDDO
-               CALL GBLINV(2,WJS,WJI)           ! (W- * J- + W+ * J+)^-1 (=N)
-               CALL GBLMLT(2,2,WJI,WP,WIP)      !  N * W-
-               CALL GBLMLT(2,2,WJI,WN,WIN)      !  N * W+
-               CALL GBLMLT(2,1,WJI,DWP,DIP)     !  N * W- * d-
-               CALL GBLMLT(2,1,WJI,DWN,DIN)     !  N * W+ * d+
-               CALL GBLMLT(2,2,TC2L,WIP,WPP)    !  P * N * W-
-               CALL GBLMLT(2,2,TC2L,WIN,WPN)    !  P * N * W+
-               CALL GBLMLT(2,1,TC2L,DIP,DPP)    !  P * N * W- * d-
-               CALL GBLMLT(2,1,TC2L,DIN,DPN)    !  P * N * W+ * d+
+*                                               ! (W- * J- + W+ * J+)^-1 (=N)
+               DET=WJS(1,1)*WJS(2,2)-WJS(1,2)*WJS(2,1)
+               WJI(1,1)= WJS(2,2)/DET
+               WJI(1,2)=-WJS(1,2)/DET
+               WJI(2,1)=-WJS(2,1)/DET
+               WJI(2,2)= WJS(1,1)/DET
+*                                               !  P * N
+               PN(1,1)=TC2L(1,1)*WJI(1,1)+TC2L(1,2)*WJI(2,1)
+               PN(1,2)=TC2L(1,1)*WJI(1,2)+TC2L(1,2)*WJI(2,2)
+               PN(2,1)=TC2L(2,1)*WJI(1,1)+TC2L(2,2)*WJI(2,1)
+               PN(2,2)=TC2L(2,1)*WJI(1,2)+TC2L(2,2)*WJI(2,2)
+*                                               !  P * N * W-
+               WPP(1,1)=PN(1,1)*WP(1,1)+PN(1,2)*WP(2,1)
+               WPP(1,2)=PN(1,1)*WP(1,2)+PN(1,2)*WP(2,2)
+               WPP(2,1)=PN(2,1)*WP(1,1)+PN(2,2)*WP(2,1)
+               WPP(2,2)=PN(2,1)*WP(1,2)+PN(2,2)*WP(2,2)
+*                                               !  P * N * W+
+               WPN(1,1)=PN(1,1)*WN(1,1)+PN(1,2)*WN(2,1)
+               WPN(1,2)=PN(1,1)*WN(1,2)+PN(1,2)*WN(2,2)
+               WPN(2,1)=PN(2,1)*WN(1,1)+PN(2,2)*WN(2,1)
+               WPN(2,2)=PN(2,1)*WN(1,2)+PN(2,2)*WN(2,2)
+*                                               !  P * N * (W+ * d+ + W- * d-)
+               DPS(1)=DWS(1)*PN(1,1)+DWS(2)*PN(1,2)
+               DPS(2)=DWS(1)*PN(2,1)+DWS(2)*PN(2,2)
+*
             ENDIF
 *
             DO M=1,2
@@ -685,15 +709,17 @@
                ELSE                         ! interpolation between offsets
 *
                   IDAT(KDAT+1)= 1
-                  ADAT(KDAT+1)= SNGL(-DPP(M)-DPN(M))
+                  ADAT(KDAT+1)= -SNGL(DPS(M))
                   KDAT=KDAT+NCRV
                   DO L=1,NDIM
-                     IDAT(KDAT+1)= IPAR0+L
-                     IDAT(KDAT+2)= IPAR0+L+NDIM
-                     ADAT(KDAT+1)= SNGL(WPP(M,L+L0))
-                     ADAT(KDAT+2)= SNGL(WPN(M,L+L0))
-                     KDAT=KDAT+2
+                     IDX=KDAT+L
+                     IDAT(IDX)= IPAR0+L
+                     ADAT(IDX)= SNGL(WPP(M,L+L0))
+                     IDX=IDX+NDIM
+                     IDAT(IDX)= IPAR0+L+NDIM
+                     ADAT(IDX)= SNGL(WPN(M,L+L0))
                   ENDDO
+                  KDAT=KDAT+2*NDIM
                ENDIF
                DO K=KDAT0+1,KDAT
                   IF (ADAT(K).NE.0.0) THEN ! copy non zero derivatives
@@ -762,26 +788,36 @@
 #include "gbldef.inc"
 #include "gblcom.inc"
 *
-      DOUBLE PRECISION JM(2,2),SM(2,2),DV(2),W(2,2),WJ(2,2),DW(2),SGN
+      DOUBLE PRECISION JM(2,2),SM(2,2),DV(2),W(2,2),WJ(2,2),DW(2),DET
 * 
 * (parts of) jacobians to previous/next offset
-      SGN=1.0D0
-      IF (IDIR.LT.0) SGN=-1.0D0
       JP=(IABS(IDIR)-1)*2
       IP=JP*2
       DO J=1,2
          DO K=1,2
             IP=IP+1
             JM(J,K)=JMAT(IP  ,IPOINT)     ! J
-            SM(J,K)=SMAT(IP  ,IPOINT)*SGN ! S
+            SM(J,K)=SMAT(IP  ,IPOINT)     ! S
          ENDDO
          JP=JP+1
          DV(J)=DVEC(JP,IPOINT)            ! d
       ENDDO
 *
-      CALL GBLINV(2,SM,W)                 ! W
-      CALL GBLMLT(2,2,W,JM,WJ)            ! W*J
-      CALL GBLMLT(2,1,W,DV,DW)            ! W*d
+      DET=SM(1,1)*SM(2,2)-SM(1,2)*SM(2,1)
+      IF (IDIR.LT.0) DET=-DET
+*                                         ! W
+      W(1,1)= SM(2,2)/DET
+      W(1,2)=-SM(1,2)/DET
+      W(2,1)=-SM(2,1)/DET
+      W(2,2)= SM(1,1)/DET
+*                                         ! W*J
+      WJ(1,1)=W(1,1)*JM(1,1)+W(1,2)*JM(2,1)
+      WJ(1,2)=W(2,1)*JM(1,1)+W(2,2)*JM(2,1)
+      WJ(2,1)=W(1,1)*JM(1,2)+W(1,2)*JM(2,2)
+      WJ(2,2)=W(2,1)*JM(1,2)+W(2,2)*JM(2,2)
+*                                         ! W*d
+      DW(1)=DV(1)*W(1,1)+DV(2)*W(1,2)
+      DW(2)=DV(1)*W(2,1)+DV(2)*W(2,2)
 *
       RETURN
       END
@@ -794,22 +830,54 @@
 #include "gblcom.inc"
 *
       DOUBLE PRECISION DVAL,DWGH
-* index in symmetric matrix     
-      IJSYM(I,J)=MIN(I,J)+(MAX(I,J)*MAX(I,J)-MAX(I,J))/2
+*
+      DATA MPAR / 0 /, LPAR / 0 /, LBDR / 0 /, LBND / 0 /
+* index in symmetric matrix
+      IJSYM(I,J)=(I*I-I)/2+J
 *
       DO I=1,NPAR
         BVEC(I)=0.0D0
       ENDDO
-      NPAR2=(NPAR*NPAR+NPAR)/2
-      DO I=1,NPAR2
-        CMAT(I)=CMATSD(I)
-      ENDDO
+*     'smart' clear
+      IF (NPAR.GT.MPAR) THEN
+        MPAR2=(MPAR*MPAR+MPAR)/2
+        DO I=MPAR2+1,NPAR2
+          CMAT(I)=0.0D0
+        ENDDO
+        MPAR=NPAR 
+      ENDIF
+*
+      IF (LPAR.GT.0) THEN
+        DO I=1,LPAR
+          IJ0=(I*I-I)/2
+          DO J=1,MIN(LBDR,I) ! clear border
+            CMAT(IJ0+J)=0.0D0
+          ENDDO
+          DO J=1,MAX(I-LBND,1),I ! clear band
+            CMAT(IJ0+J)=0.0D0
+          ENDDO
+        ENDDO
+      ENDIF
+*
+      IF (IXSD.NE.0) THEN     ! contribution of seed to linear equation system
+*
+        K=0
+        DO IP=1,NPSD
+          I=IPSD(IP)
+          II=(I*I-I)/2
+          DO JP=1,IP
+            K=K+1
+            J=IPSD(JP)
+            CMAT(II+J)=CMAT(II+J)+CMATSD(K)
+          ENDDO
+        ENDDO
+*
+      ENDIF
+*
       NBND=NBNDSD ! band size
 *
       LDAT=0
-      NS=0
-      NZ=0
-      NT=0
+      NBDR=NCRV+NLOC
       DO I=1,NDAT
         LTEM=IDAT(LDAT+1)
         DVAL=DBLE(ADAT(LDAT+1))              ! value
@@ -817,18 +885,19 @@
         DO J=LDAT+4,LDAT+LTEM ! update matrix
           IJ=IDAT(J)
           BVEC(IJ)=BVEC(IJ)+DBLE(ADAT(J))*DVAL*DWGH
-          NT=NT+1
-          IF (ADAT(J).NE.0.0) NZ=NZ+1
           DO K=LDAT+4,J
             IK=IDAT(K)
-            JK=IJSYM(IJ,IK)
+            JK=IJSYM(IJ,IK) ! parameter labels must be sorted: IK<=IJ !
             CMAT(JK)=CMAT(JK)+DBLE(ADAT(J))*DBLE(ADAT(K))*DWGH
-            IF (MIN(IJ,IK).GT.NCRV+NLOC) NBND=MAX(NBND,IABS(IJ-IK)) ! update band width
-            NS=NS+1
+            IF (IK.GT.NBDR) NBND=MAX(NBND,IJ-IK) ! update band width
           ENDDO
         ENDDO
         LDAT=LDAT+LTEM
       ENDDO
+*
+      LPAR=NPAR
+      LBDR=NBDR
+      LBND=NBND
 *
       RETURN
       END
@@ -837,11 +906,10 @@
 *
 *     calculate Chi2
 *
-      DOUBLE PRECISION DCHI2
-*
 #include "gbldef.inc"
 #include "gblcom.inc"
 *
+      DOUBLE PRECISION DCHI2,BAUX(MXAUX)
       DIMENSION DWINT(0:3) ! Integral(weight*normal_distribution)
       DATA DWINT / 1.0, 0.8737, 0.9326, 0.8228 /
 *
@@ -885,8 +953,14 @@
       LDWM=IDWM
 *
       IF (IXSD.NE.0) THEN
-         CALL DBAVAT(CMATSD,BVEC,DCHI2,NPAR,1)
-         CHI2=CHI2+SNGL(DCHI2)
+* 
+        DO IP=1,NPSD  ! border
+          I=IPSD(IP)
+          BAUX(IP)=BVEC(I)
+        ENDDO
+*
+        CALL DBAVAT(CMATSD,BAUX,DCHI2,NPSD,1)
+        CHI2=CHI2+SNGL(DCHI2)
       ENDIF
 *
       RETURN
@@ -910,14 +984,20 @@
 *
       NSD=0
       IF (IXSD.NE.0) THEN
-         NPAR2=(NPAR*NPAR+NPAR)/2
-         DO I=1,NPAR2
-            IF (CMATSD(I).NE.0.0D0) THEN
-               NSD=NSD+1
-               LABSD(NSD)=I
-               DERSD(NSD)=SNGL(CMATSD(I))
+        K=0
+        DO IP=1,NPSD
+          I=IPSD(IP)
+          II=(I*I-I)/2
+          DO JP=1,IP
+            K=K+1
+            IF (CMATSD(K).NE.0.0D0) THEN
+              J=IPSD(JP)
+              NSD=NSD+1
+              LABSD(NSD)=II+J
+              DERSD(NSD)=SNGL(CMATSD(K))
             ENDIF
-         ENDDO
+          ENDDO
+        ENDDO
       ENDIF
 *
       LDAT=0
@@ -952,7 +1032,7 @@
       RETURN
       END
 *
-      SUBROUTINE GBLJAC(IPOINT,ITRANS)
+      SUBROUTINE GBLJAC(IPOINT,ITRANS,IOFF1)
 *
 * get jacobian (transposed): broken lines parameter (q/p,..,u_i,..)
 *     to local parameter (q/p,alpha,u)
@@ -961,6 +1041,9 @@
 *    IPOINT    : (signed) point 
 *    ITRANS   =0 not transposed
 *             =1 transpoded
+* Output
+*    IOFF1     : offsets IOFF1,IOFF1+1 needed 
+*                to define offset and slope at IPOINT
 *
 #include "gbldef.inc"
 #include "gblcom.inc"
@@ -972,14 +1055,15 @@
      &   WIP(2,2),WIN(2,2),DIP(2),DIN(2),
      &   WPP(2,2),WPN(2,2),DPP(2),DPN(2)
 *
-      INDX(I,J)=((I-1)*NPAR+J)*(1-ITRANS)+((J-1)*MP+I)*ITRANS
+      INDX(I,J)=((I-1)*NP+J)*(1-ITRANS)+((J-1)*MP+I)*ITRANS
 *
+      NP=NCRV+NLOC+2*NDIM
       MP=5+NLOC
       JPNT=IABS(IPOINT)
 *
       JOFF=IOFF(JPNT)
 *
-      DO K=1,MP*NPAR
+      DO K=1,MP*NP
          DJAC(K)=0.0D0 ! reset Jacobi matrix
       ENDDO
 *
@@ -996,8 +1080,10 @@
          KOFF=JOFF+2*IDIR-3 ! 2nd offset for slope measurement
          CALL GBLDER(JPNT,IDIR,W,WJ,DW)
 *
-         IP1=NCRV+NLOC+NDIM*(JOFF-1)
-         IP2=NCRV+NLOC+NDIM*(KOFF-1)
+         IOFF1=MIN(JOFF,KOFF)
+         IOFF2=MAX(JOFF,KOFF)
+         IP1=NCRV+NLOC
+         IP2=NCRV+NLOC+NDIM
 *
          DO L=1,NDIM
             DJAC(INDX(2  ,IP1+L))=-WJ(1,L+L0)
@@ -1015,8 +1101,11 @@
 * between offsets
          CALL GBLDER(JPNT,-1,WP,WJP,DWP)
          CALL GBLDER(JPNT, 2,WN,WJN,DWN)
-         IP1=NDIM*(-JOFF-2)+NCRV+NLOC
-         IP2=IP1+NDIM
+         IOFF1=-JOFF-1
+         IOFF2=-JOFF
+         IP1=NCRV+NLOC
+         IP2=NCRV+NLOC+NDIM
+*
          DO J=1,2
             DO K=1,2
                WJS(J,K)=WJP(J,K)+WJN(J,K) !  W- * J- + W+ * J+
@@ -1090,29 +1179,56 @@
 #include "gbldef.inc"
 #include "gblcom.inc"
 *
-      DOUBLE PRECISION DPAR(*),DCOV(*)
+      DOUBLE PRECISION DPAR(*),DCOV(*),
+     &                 CAUX(MXAUX2),BAUX(MXAUX)
 *
+      NB=NCRV+NLOC
+      NB2=(NB*NB+NB)/2
+      NP=NB+2*NDIM
       MP=5+NLOC
       MP2=(MP*MP+MP)/2
-      DO K=1,MP
-         DPAR(K)=0.0D0
-      ENDDO
-      DO K=1,MP2
-         DCOV(K)=0.0D0
-      ENDDO
 *
       JPNT=IABS(IPOINT)
       IF (JPNT.LT.1.OR.JPNT.GT.NPNT) THEN
         IF (LPR.GT.0) PRINT *, ' GBLRES invalid point ', IPOINT
+        DO K=1,MP
+          DPAR(K)=0.0D0
+        ENDDO
+        DO K=1,MP2
+          DCOV(K)=0.0D0
+        ENDDO
         RETURN
       ENDIF
 *
       IF (NLVL.LT.4) RETURN ! fit not yet performed or failed
 *
-      CALL GBLJAC(IPOINT,0) ! get jacobian broken lines -> local
+      CALL GBLJAC(IPOINT,0,IOFF1) ! get jacobian broken lines -> local
+*     get compressed covariance matrix, result vector
+      DO I=1,NB  ! border
+        BAUX(I)=BVEC(I)
+      ENDDO
+      DO I=1,NB2 ! border
+        CAUX(I)=CMAT(I)
+      ENDDO
+      IP0=(IOFF1-1)*NDIM
+      K=NB2
+      DO I=NB+1,NP
+        IO=I+IP0
+        KO=(IO*IO-IO)/2
+        BAUX(I)=BVEC(IO) ! band part
+        DO J=1,NB        ! mixed part
+          K=K+1
+          CAUX(K)=CMAT(KO+J)
+        ENDDO
+        KO=KO+IP0
+        DO J=NB+1,I      ! band part
+          K=K+1
+          CAUX(K)=CMAT(KO+J)
+        ENDDO
+      ENDDO
 *
-      CALL DBGAX(DJAC,BVEC,DPAR,MP,NPAR)
-      CALL DBAVAT(CMAT,DJAC,DCOV,NPAR,MP)
+      CALL DBGAX(DJAC,BAUX,DPAR,MP,NP)
+      CALL DBAVAT(CAUX,DJAC,DCOV,NP,MP)
 *
       RETURN
       END
@@ -1183,4 +1299,3 @@
       ENDDO
       RETURN 
       END
-
