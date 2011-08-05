@@ -1,0 +1,125 @@
+\begin{theindex}
+
+  \item gblfit \textit{(module)}, \hyperpage{2--13}
+    \subitem gblfit.GblData \textit{(class)}, \hyperpage{6--9}
+      \subsubitem gblfit.GblData.addDerivatives \textit{(method)}, 
+		\hyperpage{6}
+      \subsubitem gblfit.GblData.analyzeData \textit{(method)}, 
+		\hyperpage{8}
+      \subsubitem gblfit.GblData.fromRecord \textit{(method)}, 
+		\hyperpage{8}
+      \subsubitem gblfit.GblData.getChi2 \textit{(method)}, 
+		\hyperpage{8}
+      \subsubitem gblfit.GblData.getMatrices \textit{(method)}, 
+		\hyperpage{7}
+      \subsubitem gblfit.GblData.printData \textit{(method)}, 
+		\hyperpage{9}
+      \subsubitem gblfit.GblData.setDownWeighting \textit{(method)}, 
+		\hyperpage{8}
+      \subsubitem gblfit.GblData.setPrediction \textit{(method)}, 
+		\hyperpage{7}
+      \subsubitem gblfit.GblData.toRecord \textit{(method)}, 
+		\hyperpage{8}
+    \subitem gblfit.GblPoint \textit{(class)}, \hyperpage{2--6}
+      \subsubitem gblfit.GblPoint.addGlobals \textit{(method)}, 
+		\hyperpage{3}
+      \subsubitem gblfit.GblPoint.addJacobians \textit{(method)}, 
+		\hyperpage{5}
+      \subsubitem gblfit.GblPoint.addLocals \textit{(method)}, 
+		\hyperpage{3}
+      \subsubitem gblfit.GblPoint.addMeasurement \textit{(method)}, 
+		\hyperpage{2}
+      \subsubitem gblfit.GblPoint.addScatterer \textit{(method)}, 
+		\hyperpage{3}
+      \subsubitem gblfit.GblPoint.getDerivatives \textit{(method)}, 
+		\hyperpage{5}
+      \subsubitem gblfit.GblPoint.getGlobalDerivatives \textit{(method)}, 
+		\hyperpage{4}
+      \subsubitem gblfit.GblPoint.getGlobalLabels \textit{(method)}, 
+		\hyperpage{4}
+      \subsubitem gblfit.GblPoint.getLabel \textit{(method)}, 
+		\hyperpage{4}
+      \subsubitem gblfit.GblPoint.getLocalDerivatives \textit{(method)}, 
+		\hyperpage{4}
+      \subsubitem gblfit.GblPoint.getMeasurement \textit{(method)}, 
+		\hyperpage{3}
+      \subsubitem gblfit.GblPoint.getNumLocals \textit{(method)}, 
+		\hyperpage{3}
+      \subsubitem gblfit.GblPoint.getOffset \textit{(method)}, 
+		\hyperpage{5}
+      \subsubitem gblfit.GblPoint.getScatterer \textit{(method)}, 
+		\hyperpage{3}
+      \subsubitem gblfit.GblPoint.hasMeasurement \textit{(method)}, 
+		\hyperpage{2}
+      \subsubitem gblfit.GblPoint.hasScatterer \textit{(method)}, 
+		\hyperpage{3}
+      \subsubitem gblfit.GblPoint.printPoint \textit{(method)}, 
+		\hyperpage{5}
+      \subsubitem gblfit.GblPoint.queryJacobians \textit{(method)}, 
+		\hyperpage{5}
+      \subsubitem gblfit.GblPoint.setLabel \textit{(method)}, 
+		\hyperpage{4}
+      \subsubitem gblfit.GblPoint.setOffset \textit{(method)}, 
+		\hyperpage{4}
+    \subitem gblfit.GblTrajectory \textit{(class)}, \hyperpage{9--13}
+      \subsubitem gblfit.GblTrajectory.addExternalSeed \textit{(method)}, 
+		\hyperpage{11}
+      \subsubitem gblfit.GblTrajectory.addJacobians \textit{(method)}, 
+		\hyperpage{12}
+      \subsubitem gblfit.GblTrajectory.addPoint \textit{(method)}, 
+		\hyperpage{11}
+      \subsubitem gblfit.GblTrajectory.defineOffsets \textit{(method)}, 
+		\hyperpage{12}
+      \subsubitem gblfit.GblTrajectory.dump \textit{(method)}, 
+		\hyperpage{12}
+      \subsubitem gblfit.GblTrajectory.fit \textit{(method)}, 
+		\hyperpage{13}
+      \subsubitem gblfit.GblTrajectory.getNumPoints \textit{(method)}, 
+		\hyperpage{11}
+      \subsubitem gblfit.GblTrajectory.getResults \textit{(method)}, 
+		\hyperpage{12}
+      \subsubitem gblfit.GblTrajectory.milleIn \textit{(method)}, 
+		\hyperpage{12}
+      \subsubitem gblfit.GblTrajectory.milleOut \textit{(method)}, 
+		\hyperpage{12}
+      \subsubitem gblfit.GblTrajectory.queryJacobians \textit{(method)}, 
+		\hyperpage{11}
+  \item gblnum \textit{(module)}, \hyperpage{14--16}
+    \subitem gblnum.BorderedBandMatrix \textit{(class)}, 
+		\hyperpage{14--16}
+      \subsubitem gblnum.BorderedBandMatrix.addBlockMatrix \textit{(method)}, 
+		\hyperpage{15}
+      \subsubitem gblnum.BorderedBandMatrix.getBlockMatrix \textit{(method)}, 
+		\hyperpage{15}
+      \subsubitem gblnum.BorderedBandMatrix.printMatrix \textit{(method)}, 
+		\hyperpage{16}
+      \subsubitem gblnum.BorderedBandMatrix.solveAndInvertBorderedBand \textit{(method)}, 
+		\hyperpage{16}
+  \item gbltst \textit{(module)}, \hyperpage{17}
+    \subitem gbltst.example1 \textit{(function)}, \hyperpage{17}
+    \subitem gbltst.example2 \textit{(function)}, \hyperpage{17}
+
+  \indexspace
+
+  \item mille \textit{(module)}, \hyperpage{18--21}
+    \subitem mille.MilleRecord \textit{(class)}, \hyperpage{18--21}
+      \subsubitem mille.MilleRecord.addData \textit{(method)}, 
+		\hyperpage{19}
+      \subsubitem mille.MilleRecord.addSpecial \textit{(method)}, 
+		\hyperpage{19}
+      \subsubitem mille.MilleRecord.getData \textit{(method)}, 
+		\hyperpage{19}
+      \subsubitem mille.MilleRecord.getSpecial \textit{(method)}, 
+		\hyperpage{19}
+      \subsubitem mille.MilleRecord.moreData \textit{(method)}, 
+		\hyperpage{20}
+      \subsubitem mille.MilleRecord.printRecord \textit{(method)}, 
+		\hyperpage{20}
+      \subsubitem mille.MilleRecord.readRecord \textit{(method)}, 
+		\hyperpage{20}
+      \subsubitem mille.MilleRecord.specialDataTag \textit{(method)}, 
+		\hyperpage{20}
+      \subsubitem mille.MilleRecord.writeRecord \textit{(method)}, 
+		\hyperpage{20}
+
+\end{theindex}
