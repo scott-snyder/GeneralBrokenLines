@@ -1072,12 +1072,12 @@
 * at offset
          IF (IPOINT.GT.0) THEN ! forward
             IDIR=2
-            IF (JOFF.EQ.NOFF) IDIR=1
+            IF (JOFF.EQ.NOFF) IDIR=-1
          ELSE                  ! backward
-            IDIR=1
+            IDIR=-1
             IF (JOFF.EQ.1) IDIR=2
          ENDIF
-         KOFF=JOFF+2*IDIR-3 ! 2nd offset for slope measurement
+         KOFF=JOFF+2*IABS(IDIR)-3 ! 2nd offset for slope measurement
          CALL GBLDER(JPNT,IDIR,W,WJ,DW)
 *
          IOFF1=MIN(JOFF,KOFF)

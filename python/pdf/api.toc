@@ -1,0 +1,26 @@
+\contentsline {section}{Contents}{1}{section*.1}
+\contentsline {section}{\numberline {1}Module gblfit}{2}{section.1}
+\contentsline {subsection}{\numberline {1.1}Variables}{2}{subsection.1.1}
+\contentsline {subsection}{\numberline {1.2}Class GblPoint}{2}{subsection.1.2}
+\contentsline {subsubsection}{\numberline {1.2.1}Methods}{2}{subsubsection.1.2.1}
+\contentsline {subsubsection}{\numberline {1.2.2}Properties}{6}{subsubsection.1.2.2}
+\contentsline {subsection}{\numberline {1.3}Class GblData}{6}{subsection.1.3}
+\contentsline {subsubsection}{\numberline {1.3.1}Methods}{6}{subsubsection.1.3.1}
+\contentsline {subsubsection}{\numberline {1.3.2}Properties}{9}{subsubsection.1.3.2}
+\contentsline {subsection}{\numberline {1.4}Class GblTrajectory}{9}{subsection.1.4}
+\contentsline {subsubsection}{\numberline {1.4.1}Methods}{11}{subsubsection.1.4.1}
+\contentsline {subsubsection}{\numberline {1.4.2}Properties}{13}{subsubsection.1.4.2}
+\contentsline {section}{\numberline {2}Module gblnum}{14}{section.2}
+\contentsline {subsection}{\numberline {2.1}Variables}{14}{subsection.2.1}
+\contentsline {subsection}{\numberline {2.2}Class BorderedBandMatrix}{14}{subsection.2.2}
+\contentsline {subsubsection}{\numberline {2.2.1}Methods}{15}{subsubsection.2.2.1}
+\contentsline {subsubsection}{\numberline {2.2.2}Properties}{16}{subsubsection.2.2.2}
+\contentsline {section}{\numberline {3}Module gbltst}{17}{section.3}
+\contentsline {subsection}{\numberline {3.1}Functions}{17}{subsection.3.1}
+\contentsline {subsection}{\numberline {3.2}Variables}{17}{subsection.3.2}
+\contentsline {section}{\numberline {4}Module mille}{18}{section.4}
+\contentsline {subsection}{\numberline {4.1}Variables}{18}{subsection.4.1}
+\contentsline {subsection}{\numberline {4.2}Class MilleRecord}{18}{subsection.4.2}
+\contentsline {subsubsection}{\numberline {4.2.1}Methods}{19}{subsubsection.4.2.1}
+\contentsline {subsubsection}{\numberline {4.2.2}Properties}{21}{subsubsection.4.2.2}
+\contentsline {section}{Index}{22}{section*.2}
