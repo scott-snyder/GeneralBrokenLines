@@ -6,6 +6,7 @@
  */
 
 #include "BorderedBandMatrix.h"
+#include <cstdlib>
 
 /// Create bordered band matrix.
 BorderedBandMatrix::BorderedBandMatrix() {
