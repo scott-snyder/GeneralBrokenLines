@@ -74,7 +74,7 @@
  *      Fast alignment of a complex tracking detector using advanced track models,
  *      Computer Phys. Communications (2011), doi:10.1016/j.cpc.2011.03.017
  *    - C. Kleinwort, General Broken Lines as advanced track fitting method,
- *      NIM A (2012), doi:10.1016/j.nima.2012.01.024
+ *      NIM A, 673 (2012), 107-110, doi:10.1016/j.nima.2012.01.024
  */
 
 #include "GblTrajectory.h"
