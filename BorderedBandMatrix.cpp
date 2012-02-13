@@ -100,7 +100,26 @@ TMatrixDSym BorderedBandMatrix::getBlockMatrix(
 /**
  * Solve linear equation A*x=b system with bordered band matrix A,
  * calculate bordered band part of inverse of A. Use decomposition
- * in border and band part for block matrix algebra.
+ * in border and band part for block matrix algebra:
+ *
+ *   | A  Ct |   | x1 |   | b1 |        , A  is the border part
+ *   |       | * |    | = |    |        , Ct is the mixed part
+ *   | C  D  |   | x2 |   | b2 |        , D  is the band part
+ *
+ *  Explicit inversion of D is avoided by using solution X of D*X=C (X=D^-1*C,
+ *  obtained from Cholesky decomposition and forward/backward substitution)
+ *
+ *   | x1 |   | E*b1 - E*Xt*b2 |        , E^-1 = A-Ct*D^-1*C = A-Ct*X
+ *   |    | = |                |
+ *   | x2 |   |  x   - X*x1    |        , x is solution of D*x=b2 (x=D^-1*b2)
+ *
+ *  Inverse matrix is:
+ *
+ *   |  E   -E*Xt          |
+ *   |                     |
+ *   | -X*E  D^-1 + X*E*Xt |            , only band part of (D^-1 + X*E*Xt)
+ *                                        is calculated
+ *
  * \param [in] aRightHandSide Right hand side (vector) 'b' of A*x=b
  * \param [out] aSolution Solution (vector) x of A*x=b
  */
@@ -113,29 +132,31 @@ void BorderedBandMatrix::solveAndInvertBorderedBand(
 	decomposeBand(); // TODO: check for positive definiteness
 	// invert band
 	TMatrixD inverseBand(invertBand());
-	if (nBorder > 0) {
+	if (nBorder > 0) { // need to use block matrix decomposition to solve
 		// solve for mixed part
-		TMatrixD auxMat = solveBand(theMixed);
+		TMatrixD auxMat = solveBand(theMixed); // = Xt
+		TMatrixD auxMatT(auxMat.GetNcols(), auxMat.GetNrows());
+		auxMatT.Transpose(auxMat); // = X
 		// solve for border part
 		TMatrixDSym inverseBorder(nBorder);
 		TMatrixD auxBorder(nBorder, nBorder), auxBorderT(nBorder, nBorder);
 		TVectorD auxVec = aRightHandSide.GetSub(0, nBorder - 1)
-				- auxMat * aRightHandSide.GetSub(nBorder, nSize - 1);
-		auxBorder = (theBorder - theMixed * auxMat.T()) * 0.5;
+				- auxMat * aRightHandSide.GetSub(nBorder, nSize - 1); // = b1 - Xt*b2
+		auxBorder = (theBorder - theMixed * auxMatT) * 0.5;
 		auxBorderT.Transpose(auxBorder);
 		inverseBorder.SetSub(0, auxBorder + auxBorderT);
-		inverseBorder.Invert();
-		TVectorD borderSolution = inverseBorder * auxVec;
+		inverseBorder.Invert(); // = E
+		TVectorD borderSolution = inverseBorder * auxVec; // = x1
 		// solve for band part
 		TVectorD bandSolution = solveBand(
-				aRightHandSide.GetSub(nBorder, nSize - 1));
+				aRightHandSide.GetSub(nBorder, nSize - 1)); // = x
 		aSolution.SetSub(0, borderSolution);
-		aSolution.SetSub(nBorder, bandSolution - auxMat * borderSolution);
+		aSolution.SetSub(nBorder, bandSolution - auxMatT * borderSolution); // = x2
 		// parts of inverse
 		theBorder = inverseBorder;
-		theMixed = (inverseBorder * auxMat.T()) * -1.;
+		theMixed = (inverseBorder * auxMat) * -1.;
 		theBand.SetSub(0, 0,
-				inverseBand + bandOfAVAT(auxMat.T(), inverseBorder));
+				inverseBand + bandOfAVAT(auxMatT, inverseBorder));
 	} else {
 		aSolution = solveBand(aRightHandSide);
 		theBand.SetSub(0, 0, inverseBand);
