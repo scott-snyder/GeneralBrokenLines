@@ -56,6 +56,7 @@ void BorderedBandMatrix::addBlockMatrix(double aWeight,
 			if (iIndex < nBorder) {
 				theBorder(iIndex, jIndex) += (*aVector)[i] * aWeight
 						* (*aVector)[j];
+                                theBorder(jIndex,iIndex) = theBorder(iIndex, jIndex);
 			} else if (jIndex < nBorder) {
 				theMixed(jIndex, iIndex - nBorder) += (*aVector)[i] * aWeight
 						* (*aVector)[j];
@@ -91,6 +92,7 @@ TMatrixDSym BorderedBandMatrix::getBlockMatrix(
 				unsigned int nBand = iIndex - jIndex;
 				aMatrix(i, j) = theBand(nBand, jIndex - nBorder);
 			}
+                        aMatrix(j,i) = aMatrix(i,j);
 		}
 	}
 	return aMatrix;
