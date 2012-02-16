@@ -133,6 +133,7 @@ void GblPoint::getScatterer(SVector2 &aResiduals, SVector2 &aPrecision) {
  */
 void GblPoint::addLocals(const TMatrixD &aDerivatives) {
 	if (measDim) {
+        	localDerivatives.ResizeTo(aDerivatives);
 		if (transFlag) {
 			localDerivatives = measTransformation * aDerivatives;
 		} else {
@@ -161,12 +162,12 @@ void GblPoint::addGlobals(const std::vector<int> &aLabels,
 		const TMatrixD &aDerivatives) {
 	if (measDim) {
 		globalLabels = aLabels;
+		globalDerivatives.ResizeTo(aDerivatives);
 		if (transFlag) {
 			globalDerivatives = measTransformation * aDerivatives;
 		} else {
 			globalDerivatives = aDerivatives;
 		}
-
 	}
 }
 
