@@ -51,12 +51,13 @@
  *           - <tt>point.addScatterer(..)</tt>
  *           - <tt>point.addLocals(..)</tt>
  *           - <tt>point.addGlobals(..)</tt>
- *        - Add point (ordered by arc length) to trajectory, get label of point:\n
+ *        - Add point (ordered by arc length) to trajectory, return label of point:\n
  *            <tt>label = traj.addPoint(point)</tt>
  *    -# Optionally add external seed:\n
  *            <tt>traj.addExternalSeed(..)</tt>
- *    -# Construct and fit trajectory, get Chi2, Ndf (and weight lost by M-estimators):\n
- *            <tt>[..] = traj.fit()</tt>
+ *    -# Construct and fit trajectory, return error code,
+ *       get Chi2, Ndf (and weight lost by M-estimators):\n
+ *            <tt>ierr = traj.fit(..)</tt>
  *    -# For any point on initial trajectory:
  *        - Get corrections and covariance matrix for track parameters:\n
  *            <tt>[..] = traj.getResults(label)</tt>
@@ -66,15 +67,15 @@
  *  \section impl_sec Implementation
  *
  *  Matrices are implemented with ROOT (root.cern.ch). User input or output is in the
- *  form of TMatrices. Internally SMatrices are used for fixes sized and TMatrices for
- *  variable sized matrices.
+ *  form of TMatrices. Internally SMatrices are used for fixes sized and simple matrices
+ *  based on std::vector<> for variable sized matrices.
  *
  *  \section ref_sec References
  *    - V. Blobel, C. Kleinwort, F. Meier,
  *      Fast alignment of a complex tracking detector using advanced track models,
  *      Computer Phys. Communications (2011), doi:10.1016/j.cpc.2011.03.017
  *    - C. Kleinwort, General Broken Lines as advanced track fitting method,
- *      NIM A (2012), doi:10.1016/j.nima.2012.01.024
+ *      NIM A, 673 (2012), 107-110, doi:10.1016/j.nima.2012.01.024
  */
 
 #include "GblTrajectory.h"
@@ -90,7 +91,7 @@
 GblTrajectory::GblTrajectory(bool flagCurv, bool flagU1dir, bool flagU2dir) :
 		numPoints(0), numOffsets(0), numCurvature(flagCurv ? 1 : 0), numParameters(
 				0), numLocals(0), externalPoint(0), theDimension(0), thePoints(), theData(), externalIndex(), externalSeed() {
-	// TODO Auto-generated constructor stub
+
 	if (flagU1dir)
 		theDimension.push_back(0);
 	if (flagU2dir)
@@ -99,7 +100,6 @@ GblTrajectory::GblTrajectory(bool flagCurv, bool flagU1dir, bool flagU2dir) :
 }
 
 GblTrajectory::~GblTrajectory() {
-	// TODO Auto-generated destructor stub
 }
 
 /// Add point to trajectory.
@@ -116,7 +116,7 @@ unsigned int GblTrajectory::addPoint(GblPoint aPoint) {
 }
 
 /// Retrieve number of point from trajectory
-unsigned int GblTrajectory::getNumPoints() {
+unsigned int GblTrajectory::getNumPoints() const {
 	return numPoints;
 }
 
@@ -207,7 +207,7 @@ void GblTrajectory::calcJacobians() {
  * corresponding transformation matrix
  */
 std::pair<std::vector<unsigned int>, TMatrixD> GblTrajectory::getJacobian(
-		int aSignedLabel) {
+		int aSignedLabel) const {
 
 	unsigned int nDim = theDimension.size();
 	unsigned int nCurv = numCurvature;
@@ -272,7 +272,7 @@ std::pair<std::vector<unsigned int>, TMatrixD> GblTrajectory::getJacobian(
  */
 void GblTrajectory::getFitToLocalJacobian(std::vector<unsigned int> &anIndex,
 		SMatrix55 &aJacobian, GblPoint &aPoint, unsigned int measDim,
-		unsigned int nJacobian) {
+		unsigned int nJacobian) const {
 
 	unsigned int nDim = theDimension.size();
 	unsigned int nCurv = numCurvature;
@@ -363,7 +363,7 @@ void GblTrajectory::getFitToLocalJacobian(std::vector<unsigned int> &anIndex,
  * \param [in] aPoint Point to use
  */
 void GblTrajectory::getFitToKinkJacobian(std::vector<unsigned int> &anIndex,
-		SMatrix27 &aJacobian, GblPoint &aPoint) {
+		SMatrix27 &aJacobian, GblPoint &aPoint) const {
 
 	unsigned int nDim = theDimension.size();
 	unsigned int nCurv = numCurvature;
@@ -405,13 +405,13 @@ void GblTrajectory::getFitToKinkJacobian(std::vector<unsigned int> &anIndex,
  * \param [out] localCov Covariance for local parameters
  */
 void GblTrajectory::getResults(int aSignedLabel, TVectorD &localPar,
-		TMatrixDSym &localCov) {
+		TMatrixDSym &localCov) const {
 	std::pair<std::vector<unsigned int>, TMatrixD> indexAndJacobian =
 			getJacobian(aSignedLabel);
 	unsigned int nParBrl = indexAndJacobian.first.size();
 	TVectorD aVec(nParBrl); // compressed vector
 	for (unsigned int i = 0; i < nParBrl; i++) {
-		aVec[i] = theVector[indexAndJacobian.first[i] - 1];
+		aVec[i] = theVector(indexAndJacobian.first[i] - 1);
 	}
 	TMatrixDSym aMat = theMatrix.getBlockMatrix(indexAndJacobian.first); // compressed matrix
 	localPar = indexAndJacobian.second * aVec;
@@ -421,8 +421,7 @@ void GblTrajectory::getResults(int aSignedLabel, TVectorD &localPar,
 /// Build linear equation system from data (blocks).
 void GblTrajectory::buildLinearEquationSystem() {
 	unsigned int nBorder = numCurvature + numLocals;
-	theVector.ResizeTo(numParameters);
-	theVector.Zero();
+	theVector.resize(numParameters);
 	theMatrix.resize(numParameters, nBorder);
 	double aValue, aWeight;
 	std::vector<unsigned int>* indLocal;
@@ -431,7 +430,7 @@ void GblTrajectory::buildLinearEquationSystem() {
 	for (itData = theData.begin(); itData < theData.end(); itData++) {
 		itData->getLocalData(aValue, aWeight, indLocal, derLocal);
 		for (unsigned int j = 0; j < indLocal->size(); j++) {
-			theVector[(*indLocal)[j] - 1] += (*derLocal)[j] * aWeight * aValue;
+			theVector((*indLocal)[j] - 1) += (*derLocal)[j] * aWeight * aValue;
 		}
 		theMatrix.addBlockMatrix(aWeight, indLocal, derLocal);
 	}
@@ -552,8 +551,9 @@ double GblTrajectory::downWeight(unsigned int aMethod) {
  * \param [out] lostWeight Sum of weights lost due to down-weighting
  * \param [in] optionList Iterations for down-weighting
  * (One character per iteration: t,h,c (or T,H,C) for Tukey, Huber or Cauchy function)
+ * \return Error code (non zero value indicates failure of fit)
  */
-void GblTrajectory::fit(double &Chi2, int &Ndf, double &lostWeight,
+unsigned int GblTrajectory::fit(double &Chi2, int &Ndf, double &lostWeight,
 		std::string optionList) {
 	const double normChi2[4] = { 1.0, 0.8737, 0.9326, 0.8228 };
 	const std::string methodList = "TtHhCc";
@@ -565,26 +565,38 @@ void GblTrajectory::fit(double &Chi2, int &Ndf, double &lostWeight,
 	prepare();
 	buildLinearEquationSystem();
 	lostWeight = 0.;
-	theMatrix.solveAndInvertBorderedBand(theVector, theVector);
-	predict();
+	unsigned int ierr = 0;
+	try {
 
-	for (unsigned int i = 0; i < optionList.size(); i++) // down weighting iterations
-			{
-		size_t aPosition = methodList.find(optionList[i]);
-		if (aPosition != std::string::npos) {
-			aMethod = aPosition / 2 + 1;
-			lostWeight = downWeight(aMethod);
-			buildLinearEquationSystem();
-			theMatrix.solveAndInvertBorderedBand(theVector, theVector);
-			predict();
+		theMatrix.solveAndInvertBorderedBand(theVector, theVector);
+		predict();
+
+		for (unsigned int i = 0; i < optionList.size(); i++) // down weighting iterations
+				{
+			size_t aPosition = methodList.find(optionList[i]);
+			if (aPosition != std::string::npos) {
+				aMethod = aPosition / 2 + 1;
+				lostWeight = downWeight(aMethod);
+				buildLinearEquationSystem();
+				theMatrix.solveAndInvertBorderedBand(theVector, theVector);
+				predict();
+			}
 		}
+		Ndf = theData.size() - numParameters;
+		Chi2 = 0.;
+		for (unsigned int i = 0; i < theData.size(); i++) {
+			Chi2 += theData[i].getChi2();
+		}
+		Chi2 /= normChi2[aMethod];
+
+	} catch (int e) {
+		std::cout << " GblTrajectory::fit exception " << e << std::endl;
+		Chi2 = 0.;
+		Ndf = -1;
+		lostWeight = 0.;
+		ierr = e;
 	}
-	Ndf = theData.size() - numParameters;
-	Chi2 = 0.;
-	for (unsigned int i = 0; i < theData.size(); i++) {
-		Chi2 += theData[i].getChi2();
-	}
-	Chi2 /= normChi2[aMethod];
+	return ierr;
 }
 
 /// Write trajectory to Millepede-II binary file.

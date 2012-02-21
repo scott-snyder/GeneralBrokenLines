@@ -10,11 +10,9 @@
 
 /// Create bordered band matrix.
 BorderedBandMatrix::BorderedBandMatrix() {
-
 }
 
 BorderedBandMatrix::~BorderedBandMatrix() {
-	// TODO Auto-generated destructor stub
 }
 
 /// Resize bordered band matrix.
@@ -29,12 +27,9 @@ void BorderedBandMatrix::resize(unsigned int nSize, unsigned int nBorder,
 	numBorder = nBorder;
 	numCol = nSize - nBorder;
 	numBand = 0;
-	theBorder.ResizeTo(nBorder, nBorder);
-	theBorder.Zero();
-	theMixed.ResizeTo(nBorder, nSize - nBorder);
-	theMixed.Zero();
-	theBand.ResizeTo(nBand + 1, nSize - nBorder);
-	theBand.Zero();
+	theBorder.resize(numBorder);
+	theMixed.resize(numBorder, numCol);
+	theBand.resize((nBand + 1), numCol);
 }
 
 /// Add symmetric block matrix.
@@ -76,7 +71,7 @@ void BorderedBandMatrix::addBlockMatrix(double aWeight,
  * \param anIndex [in] List of rows/colums to be used
  */
 TMatrixDSym BorderedBandMatrix::getBlockMatrix(
-		std::vector<unsigned int> anIndex) {
+		std::vector<unsigned int> anIndex) const {
 
 	TMatrixDSym aMatrix(anIndex.size());
 	int nBorder = numBorder;
@@ -85,13 +80,14 @@ TMatrixDSym BorderedBandMatrix::getBlockMatrix(
 		for (unsigned int j = 0; j <= i; j++) {
 			int jIndex = anIndex[j] - 1;
 			if (iIndex < nBorder) {
-				aMatrix(i, j) = theBorder(iIndex, jIndex);
+				aMatrix(i, j) = theBorder(iIndex, jIndex); // border part of inverse
 			} else if (jIndex < nBorder) {
-				aMatrix(i, j) = theMixed(jIndex, iIndex - nBorder);
+				aMatrix(i, j) = -theMixed(jIndex, iIndex - nBorder); // mixed part of inverse
 			} else {
 				unsigned int nBand = iIndex - jIndex;
-				aMatrix(i, j) = theBand(nBand, jIndex - nBorder);
+				aMatrix(i, j) = theBand(nBand, jIndex - nBorder); // band part of inverse
 			}
+			aMatrix(j, i) = aMatrix(i, j);
 		}
 	}
 	return aMatrix;
@@ -101,58 +97,69 @@ TMatrixDSym BorderedBandMatrix::getBlockMatrix(
 /**
  * Solve linear equation A*x=b system with bordered band matrix A,
  * calculate bordered band part of inverse of A. Use decomposition
- * in border and band part for block matrix algebra.
+ * in border and band part for block matrix algebra:
+ *
+ *   | A  Ct |   | x1 |   | b1 |        , A  is the border part
+ *   |       | * |    | = |    |        , Ct is the mixed part
+ *   | C  D  |   | x2 |   | b2 |        , D  is the band part
+ *
+ *  Explicit inversion of D is avoided by using solution X of D*X=C (X=D^-1*C,
+ *  obtained from Cholesky decomposition and forward/backward substitution)
+ *
+ *   | x1 |   | E*b1 - E*Xt*b2 |        , E^-1 = A-Ct*D^-1*C = A-Ct*X
+ *   |    | = |                |
+ *   | x2 |   |  x   - X*x1    |        , x is solution of D*x=b2 (x=D^-1*b2)
+ *
+ *  Inverse matrix is:
+ *
+ *   |  E   -E*Xt          |
+ *   |                     |
+ *   | -X*E  D^-1 + X*E*Xt |            , only band part of (D^-1 + X*E*Xt)
+ *                                        is calculated
+ *
  * \param [in] aRightHandSide Right hand side (vector) 'b' of A*x=b
  * \param [out] aSolution Solution (vector) x of A*x=b
  */
 void BorderedBandMatrix::solveAndInvertBorderedBand(
-		const TVectorD &aRightHandSide, TVectorD &aSolution) {
+		const VVector &aRightHandSide, VVector &aSolution) {
 
-	int nBorder = numBorder;
-	int nSize = numSize;
 	// decompose band
-	decomposeBand(); // TODO: check for positive definiteness
+	decomposeBand();
 	// invert band
-	TMatrixD inverseBand(invertBand());
-	if (nBorder > 0) {
+	VMatrix inverseBand = invertBand();
+	if (numBorder > 0) { // need to use block matrix decomposition to solve
 		// solve for mixed part
-		TMatrixD auxMat = solveBand(theMixed);
+		VMatrix auxMat = solveBand(theMixed); // = Xt
+		VMatrix auxMatT = auxMat.transpose(); // = X
 		// solve for border part
-		TMatrixDSym inverseBorder(nBorder);
-		TMatrixD auxBorder(nBorder, nBorder), auxBorderT(nBorder, nBorder);
-		TVectorD auxVec = aRightHandSide.GetSub(0, nBorder - 1)
-				- auxMat * aRightHandSide.GetSub(nBorder, nSize - 1);
-		auxBorder = (theBorder - theMixed * auxMat.T()) * 0.5;
-		auxBorderT.Transpose(auxBorder);
-		inverseBorder.SetSub(0, auxBorder + auxBorderT);
-		inverseBorder.Invert();
-		TVectorD borderSolution = inverseBorder * auxVec;
+		VVector auxVec = aRightHandSide.getVec(numBorder)
+				- auxMat * aRightHandSide.getVec(numCol, numBorder); // = b1 - Xt*b2
+		VSymMatrix inverseBorder = theBorder - theMixed * auxMatT;
+		inverseBorder.invert(); // = E
+		VVector borderSolution = inverseBorder * auxVec; // = x1
 		// solve for band part
-		TVectorD bandSolution = solveBand(
-				aRightHandSide.GetSub(nBorder, nSize - 1));
-		aSolution.SetSub(0, borderSolution);
-		aSolution.SetSub(nBorder, bandSolution - auxMat * borderSolution);
+		VVector bandSolution = solveBand(
+				aRightHandSide.getVec(numCol, numBorder)); // = x
+		aSolution.putVec(borderSolution);
+		aSolution.putVec(bandSolution - auxMatT * borderSolution, numBorder); // = x2
 		// parts of inverse
-		theBorder = inverseBorder;
-		theMixed = (inverseBorder * auxMat.T()) * -1.;
-		theBand.SetSub(0, 0,
-				inverseBand + bandOfAVAT(auxMat.T(), inverseBorder));
+		theBorder = inverseBorder; // E
+		theMixed = inverseBorder * auxMat; // E*Xt (-mixed part of inverse) !!!
+		theBand = inverseBand + bandOfAVAT(auxMatT, inverseBorder); // band(D^-1 + X*E*Xt)
 	} else {
-		aSolution = solveBand(aRightHandSide);
-		theBand.SetSub(0, 0, inverseBand);
+		aSolution.putVec(solveBand(aRightHandSide));
+		theBand = inverseBand;
 	}
 }
 
 /// Print bordered band matrix.
-void BorderedBandMatrix::printMatrix() {
-	std::cout << "Border part: " << theBorder.GetNrows() << std::endl;
-	theBorder.Print();
-	std::cout << "Mixed  part: " << theMixed.GetNrows() << ","
-			<< theMixed.GetNcols() << std::endl;
-	theMixed.Print();
-	std::cout << "Band   part: " << theBand.GetNrows() << ","
-			<< theBand.GetNcols() << std::endl;
-	theBand.Print();
+void BorderedBandMatrix::printMatrix() const {
+	std::cout << "Border part " << std::endl;
+	theBorder.print();
+	std::cout << "Mixed  part " << std::endl;
+	theMixed.print();
+	std::cout << "Band   part " << std::endl;
+	theBand.print();
 }
 
 /*============================================================================
@@ -162,20 +169,26 @@ void BorderedBandMatrix::printMatrix() {
 /**
  * Decompose band matrix into diagonal matrix D and lower triangular band matrix
  * L (diagonal=1). Overwrite band matrix with D and off-diagonal part of L.
+ *  \exception 2 : matrix is singular.
+ *  \exception 3 : matrix is not positive definite.
  */
 void BorderedBandMatrix::decomposeBand() {
 
 	int nRow = numBand + 1;
 	int nCol = numCol;
-	TVectorD auxVec(nCol);
+	VVector auxVec(nCol);
 	for (int i = 0; i < nCol; i++) {
 		auxVec(i) = theBand(0, i) * 16.0; // save diagonal elements
 	}
 	for (int i = 0; i < nCol; i++) {
 		if ((theBand(0, i) + auxVec(i)) != theBand(0, i)) {
 			theBand(0, i) = 1.0 / theBand(0, i);
+			if (theBand(0, i) < 0.) {
+				throw 3; // not positive definite
+			}
 		} else {
 			theBand(0, i) = 0.0;
+			throw 2; // singular
 		}
 		for (int j = 1; j < std::min(nRow, nCol - i); j++) {
 			double rxw = theBand(j, i) * theBand(0, i);
@@ -194,11 +207,11 @@ void BorderedBandMatrix::decomposeBand() {
  * \param [in] aRightHandSide Right hand side (vector) 'b' of C*x=b
  * \return Solution (vector) 'x' of C*x=b
  */
-TVectorD BorderedBandMatrix::solveBand(const TVectorD &aRightHandSide) {
+VVector BorderedBandMatrix::solveBand(const VVector &aRightHandSide) const {
 
-	int nRow = numBand + 1;
-	int nCol = numCol;
-	TVectorD aSolution(aRightHandSide);
+	int nRow = theBand.getNumRows();
+	int nCol = theBand.getNumCols();
+	VVector aSolution(aRightHandSide);
 	for (int i = 0; i < nCol; i++) // forward substitution
 			{
 		for (int j = 1; j < std::min(nRow, nCol - i); j++) {
@@ -223,11 +236,11 @@ TVectorD BorderedBandMatrix::solveBand(const TVectorD &aRightHandSide) {
  * \param [in] aRightHandSide Right hand side (matrix) 'B' of C*X=B
  * \return Solution (matrix) 'X' of C*X=B
  */
-TMatrixD BorderedBandMatrix::solveBand(const TMatrixD &aRightHandSide) {
+VMatrix BorderedBandMatrix::solveBand(const VMatrix &aRightHandSide) const {
 
-	int nRow = numBand + 1;
-	int nCol = numCol;
-	TMatrixD aSolution(aRightHandSide);
+	int nRow = theBand.getNumRows();
+	int nCol = theBand.getNumCols();
+	VMatrix aSolution(aRightHandSide);
 	for (unsigned int iBorder = 0; iBorder < numBorder; iBorder++) {
 		for (int i = 0; i < nCol; i++) // forward substitution
 				{
@@ -252,12 +265,11 @@ TMatrixD BorderedBandMatrix::solveBand(const TMatrixD &aRightHandSide) {
 /**
  * \return Inverted band
  */
-TMatrixD BorderedBandMatrix::invertBand() {
+VMatrix BorderedBandMatrix::invertBand() {
 
 	int nRow = numBand + 1;
 	int nCol = numCol;
-	TMatrixD inverseBand(nRow, nCol);
-	inverseBand.Zero();
+	VMatrix inverseBand(nRow, nCol);
 
 	for (int i = nCol - 1; i >= 0; i--) {
 		double rxw = theBand(0, i);
@@ -277,30 +289,25 @@ TMatrixD BorderedBandMatrix::invertBand() {
 /**
  * \return Band part of product
  */
-TMatrixD BorderedBandMatrix::bandOfAVAT(const TMatrixD &anArray,
-		const TMatrixDSym &aSymArray)
-
-		{
+VMatrix BorderedBandMatrix::bandOfAVAT(const VMatrix &anArray,
+		const VSymMatrix &aSymArray) const {
 	int nBand = numBand;
 	int nCol = numCol;
 	int nBorder = numBorder;
 	double sum;
-	TMatrixD aBand(nBand + 1, nCol);
-	aBand.Zero();
+	VMatrix aBand((nBand + 1), nCol);
 	for (int i = 0; i < nCol; i++) {
 		for (int j = std::max(0, i - nBand); j <= i; j++) {
 			sum = 0.;
-			for (int l = 0; l < nBorder; l++) {
-				for (int k = 0; k < nBorder; k++) {
-					sum += anArray[i][l] * aSymArray[l][k] * anArray[j][k];
+			for (int l = 0; l < nBorder; l++) { // diagonal
+				sum += anArray(i, l) * aSymArray(l, l) * anArray(j, l);
+				for (int k = 0; k < l; k++) { // off diagonal
+					sum += anArray(i, l) * aSymArray(l, k) * anArray(j, k)
+							+ anArray(i, k) * aSymArray(l, k) * anArray(j, l);
 				}
 			}
-			aBand[i - j][j] = sum;
-			/*			aBand[i - j][j] =
-			 ((anArray.GetSub(i, i, 0, nBorder - 1) * aSymArray)
-			 * anArray.GetSub(j, j, 0, nBorder - 1))[0][0];*/
+			aBand(i - j, j) = sum;
 		}
 	}
 	return aBand;
 }
-
