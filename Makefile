@@ -18,7 +18,7 @@ L_FLAGS = -Wall -O3 $(ROOTLDFLAGS)
 #
 # objects for this project
 #
-USER_OBJ_GBL = GBLpp.o BorderedBandMatrix.o GblData.o GblPoint.o GblTrajectory.o MilleBinary.o example1.o
+USER_OBJ_GBL = GBLpp.o BorderedBandMatrix.o GblData.o GblPoint.o GblTrajectory.o MilleBinary.o VMatrix.o example1.o
 #
 EXECUTABLES = GBLpp
 #

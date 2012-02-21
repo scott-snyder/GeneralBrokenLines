@@ -15,7 +15,7 @@
 GblPoint::GblPoint(const TMatrixD &aJacobian) :
 		theLabel(0), theOffset(0), measDim(0), transFlag(false), measTransformation(), scatFlag(
 				false), localDerivatives(), globalLabels(), globalDerivatives() {
-	// TODO Auto-generated constructor stub
+
 	for (unsigned int i = 0; i < 5; i++) {
 		for (unsigned int j = 0; j < 5; j++) {
 			p2pJacobian(i, j) = aJacobian(i, j);
@@ -24,7 +24,6 @@ GblPoint::GblPoint(const TMatrixD &aJacobian) :
 }
 
 GblPoint::~GblPoint() {
-	// TODO Auto-generated destructor stub
 }
 
 /// Add a mesurement to a point.
@@ -80,7 +79,7 @@ void GblPoint::addMeasurement(const TVectorD &aResiduals,
  * Get dimension of measurement (0 = none).
  * \return measurement dimension
  */
-unsigned int GblPoint::hasMeasurement() {
+unsigned int GblPoint::hasMeasurement() const {
 	return measDim;
 }
 
@@ -91,7 +90,7 @@ unsigned int GblPoint::hasMeasurement() {
  * \param [out] aPrecision Measurement precision (diagonal)
  */
 void GblPoint::getMeasurement(SMatrix55 &aProjection, SVector5 &aResiduals,
-		SVector5 &aPrecision) {
+		SVector5 &aPrecision) const {
 	aProjection = measProjection;
 	aResiduals = measResiduals;
 	aPrecision = measPrecision;
@@ -112,7 +111,7 @@ void GblPoint::addScatterer(const TVectorD &aResiduals,
 }
 
 /// Check for scatterer at a point.
-bool GblPoint::hasScatterer() {
+bool GblPoint::hasScatterer() const {
 	return scatFlag;
 }
 
@@ -121,7 +120,7 @@ bool GblPoint::hasScatterer() {
  * \param [out] aResiduals Scatterer residuals
  * \param [out] aPrecision Scatterer precision (diagonal)
  */
-void GblPoint::getScatterer(SVector2 &aResiduals, SVector2 &aPrecision) {
+void GblPoint::getScatterer(SVector2 &aResiduals, SVector2 &aPrecision) const {
 	aResiduals = scatResiduals;
 	aPrecision = scatPrecision;
 }
@@ -133,7 +132,7 @@ void GblPoint::getScatterer(SVector2 &aResiduals, SVector2 &aPrecision) {
  */
 void GblPoint::addLocals(const TMatrixD &aDerivatives) {
 	if (measDim) {
-        	localDerivatives.ResizeTo(aDerivatives);
+		localDerivatives.ResizeTo(aDerivatives);
 		if (transFlag) {
 			localDerivatives = measTransformation * aDerivatives;
 		} else {
@@ -143,12 +142,12 @@ void GblPoint::addLocals(const TMatrixD &aDerivatives) {
 }
 
 /// Retrieve number of local derivatives from a point.
-unsigned int GblPoint::getNumLocals() {
+unsigned int GblPoint::getNumLocals() const {
 	return localDerivatives.GetNcols();
 }
 
 /// Retrieve local derivatives from a point.
-TMatrixD GblPoint::getLocalDerivatives() {
+TMatrixD GblPoint::getLocalDerivatives() const {
 	return localDerivatives;
 }
 
@@ -168,21 +167,22 @@ void GblPoint::addGlobals(const std::vector<int> &aLabels,
 		} else {
 			globalDerivatives = aDerivatives;
 		}
+
 	}
 }
 
 /// Retrieve number of global derivatives from a point.
-unsigned int GblPoint::getNumGlobals() {
+unsigned int GblPoint::getNumGlobals() const {
 	return globalDerivatives.GetNcols();
 }
 
 /// Retrieve global derivatives labels from a point.
-std::vector<int> GblPoint::getGlobalLabels() {
+std::vector<int> GblPoint::getGlobalLabels() const {
 	return globalLabels;
 }
 
 /// Retrieve global derivatives from a point.
-TMatrixD GblPoint::getGlobalDerivatives() {
+TMatrixD GblPoint::getGlobalDerivatives() const {
 	return globalDerivatives;
 }
 
@@ -195,7 +195,7 @@ void GblPoint::setLabel(unsigned int aLabel) {
 }
 
 /// Retrieve label of point
-unsigned int GblPoint::getLabel() {
+unsigned int GblPoint::getLabel() const {
 	return theLabel;
 }
 
@@ -208,12 +208,12 @@ void GblPoint::setOffset(int anOffset) {
 }
 
 /// Retrieve offset for point
-int GblPoint::getOffset() {
+int GblPoint::getOffset() const {
 	return theOffset;
 }
 
 /// Retrieve point-to-(previous)point jacobian
-SMatrix55 GblPoint::getP2pJacobian() {
+SMatrix55 GblPoint::getP2pJacobian() const {
 	return p2pJacobian;
 }
 
@@ -224,7 +224,14 @@ SMatrix55 GblPoint::getP2pJacobian() {
 void GblPoint::addPrevJacobian(const SMatrix55 aJac) {
 	int ifail = 0;
 // to optimize: need only two last rows of inverse
-	prevJacobian = aJac.Inverse(ifail);
+//	prevJacobian = aJac.InverseFast(ifail);
+//  block matrix algebra
+	SMatrix23 CA = aJac.Sub<SMatrix23>(3, 0)
+			* aJac.Sub<SMatrix33>(0, 0).InverseFast(ifail); // C*A^-1
+	SMatrix22 DCAB = aJac.Sub<SMatrix22>(3, 3) - CA * aJac.Sub<SMatrix32>(0, 3); // D - C*A^-1 *B
+	DCAB.InvertFast();
+	prevJacobian.Place_at(DCAB, 3, 3);
+	prevJacobian.Place_at(-DCAB * CA, 3, 0);
 }
 
 /// Define jacobian to next scatterer
@@ -245,7 +252,7 @@ void GblPoint::addNextJacobian(const SMatrix55 aJac) {
  * \param [out] vecWd W*d
  */
 void GblPoint::getDerivatives(int aDirection, SMatrix22 &matW, SMatrix22 &matWJ,
-		SVector2 &vecWd) {
+		SVector2 &vecWd) const {
 
 	if (aDirection < 1) {
 		matWJ = prevJacobian.Sub<SMatrix22>(3, 3);
@@ -256,7 +263,7 @@ void GblPoint::getDerivatives(int aDirection, SMatrix22 &matW, SMatrix22 &matWJ,
 		matW = nextJacobian.Sub<SMatrix22>(3, 1);
 		vecWd = nextJacobian.SubCol<SVector2>(0, 3);
 	}
-	matW.Invert();
+	matW.InvertFast();
 	matWJ = matW * matWJ;
 	vecWd = matW * vecWd;
 }

@@ -19,8 +19,11 @@
 #include "Math/SMatrix.h"
 #include "Math/SVector.h"
 typedef ROOT::Math::SMatrix<double, 2> SMatrix22;
+typedef ROOT::Math::SMatrix<double, 2, 3> SMatrix23;
 typedef ROOT::Math::SMatrix<double, 2, 5> SMatrix25;
 typedef ROOT::Math::SMatrix<double, 2, 7> SMatrix27;
+typedef ROOT::Math::SMatrix<double, 3, 2> SMatrix32;
+typedef ROOT::Math::SMatrix<double, 3> SMatrix33;
 typedef ROOT::Math::SMatrix<double, 5> SMatrix55;
 typedef ROOT::Math::SVector<double, 2> SVector2;
 typedef ROOT::Math::SVector<double, 5> SVector5;
@@ -45,29 +48,29 @@ public:
 			const TVectorD &aPrecision);
 	void addMeasurement(const TVectorD &aResiduals,
 			const TMatrixDSym &aPrecision);
-	unsigned int hasMeasurement();
+	unsigned int hasMeasurement() const;
 	void getMeasurement(SMatrix55 &aProjection, SVector5 &aResiduals,
-			SVector5 &aPrecision);
+			SVector5 &aPrecision) const;
 	void addScatterer(const TVectorD &aResiduals, const TVectorD &aPrecision);
-	bool hasScatterer();
-	void getScatterer(SVector2 &aResiduals, SVector2 &aPrecision);
+	bool hasScatterer() const;
+	void getScatterer(SVector2 &aResiduals, SVector2 &aPrecision) const;
 	void addLocals(const TMatrixD &aDerivatives);
-	unsigned int getNumLocals();
-	TMatrixD getLocalDerivatives();
+	unsigned int getNumLocals() const;
+	TMatrixD getLocalDerivatives() const;
 	void addGlobals(const std::vector<int> &aLabels,
 			const TMatrixD &aDerivatives);
-	unsigned int getNumGlobals();
-	std::vector<int> getGlobalLabels();
-	TMatrixD getGlobalDerivatives();
+	unsigned int getNumGlobals() const;
+	std::vector<int> getGlobalLabels() const;
+	TMatrixD getGlobalDerivatives() const;
 	void setLabel(unsigned int aLabel);
-	unsigned int getLabel();
+	unsigned int getLabel() const;
 	void setOffset(int anOffset);
-	int getOffset();
-	SMatrix55 getP2pJacobian();
+	int getOffset() const;
+	SMatrix55 getP2pJacobian() const;
 	void addPrevJacobian(const SMatrix55 aJac);
 	void addNextJacobian(const SMatrix55 aJac);
 	void getDerivatives(int aDirection, SMatrix22 &matW, SMatrix22 &matWJ,
-			SVector2 &vecWd);
+			SVector2 &vecWd) const;
 
 private:
 	unsigned int theLabel; ///< Label identifying point

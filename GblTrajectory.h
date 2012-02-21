@@ -25,11 +25,11 @@ public:
 			true);
 	virtual ~GblTrajectory();
 	unsigned int addPoint(GblPoint aPoint);
-	unsigned int getNumPoints();
+	unsigned int getNumPoints() const;
 	void addExternalSeed(unsigned int aLabel, const TMatrixDSym &aSeed);
 	void getResults(int aSignedLabel, TVectorD &localPar,
-			TMatrixDSym &localCov);
-	void fit(double &Chi2, int &Ndf, double &lostWeight,
+			TMatrixDSym &localCov) const;
+	unsigned int fit(double &Chi2, int &Ndf, double &lostWeight,
 			std::string optionList = "");
 	void milleOut(MilleBinary &aMille);
 
@@ -45,16 +45,16 @@ private:
 	std::vector<GblData> theData; ///< List of data blocks
 	std::vector<unsigned int> externalIndex; ///< List of fit parameters used by external seed
 	TMatrixDSym externalSeed; ///< Precision (inverse covariance matrix) of external seed
-	TVectorD theVector; ///< Vector of linear equation system
+	VVector::VVector theVector; ///< Vector of linear equation system
 	BorderedBandMatrix theMatrix; ///< (Bordered band) matrix of linear equation system
 
 	std::pair<std::vector<unsigned int>, TMatrixD> getJacobian(
-			int aSignedLabel);
+			int aSignedLabel) const;
 	void getFitToLocalJacobian(std::vector<unsigned int> &anIndex,
 			SMatrix55 &aJacobian, GblPoint &aPoint, unsigned int measDim,
-			unsigned int nJacobian = 1);
+			unsigned int nJacobian = 1) const;
 	void getFitToKinkJacobian(std::vector<unsigned int> &anIndex,
-			SMatrix27 &aJacobian, GblPoint &aPoint);
+			SMatrix27 &aJacobian, GblPoint &aPoint) const;
 	void defineOffsets();
 	void calcJacobians();
 	void buildLinearEquationSystem();
