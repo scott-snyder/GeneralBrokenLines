@@ -5,6 +5,7 @@
  *      Author: kleinwrt
  */
 
+#include <cstring>
 #include "VMatrix.h"
 
 /*********** simple Matrix based on std::vector<double> **********/
