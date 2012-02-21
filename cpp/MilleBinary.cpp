@@ -18,12 +18,10 @@ MilleBinary::MilleBinary(std::string fileName, unsigned int aSize) :
 	floatBuffer.reserve(aSize);
 	intBuffer.push_back(0); // first word is error counter
 	floatBuffer.push_back(0.);
-	// TODO Auto-generated constructor stub
 }
 
 MilleBinary::~MilleBinary() {
 	binaryFile.close();
-	// TODO Auto-generated destructor stub
 }
 
 /// Add data block to (end of) record.

@@ -16,11 +16,10 @@
 GblData::GblData(unsigned int aLabel, double aValue, double aPrec) :
 		theLabel(aLabel), theValue(aValue), thePrecision(aPrec), theDownWeight(
 				1.), thePrediction(0.), theParameters(), theDerivatives(), globalLabels(), globalDerivatives() {
-	// TODO Auto-generated constructor stub
+
 }
 
 GblData::~GblData() {
-	// TODO Auto-generated destructor stub
 }
 
 /// Add derivatives from measurement.
@@ -104,30 +103,8 @@ void GblData::addDerivatives(const std::vector<unsigned int> &index,
 	}
 }
 
-/// Calculate compressed block matrix and right hand side from data.
-/**
- * \param [out] anIndex List of labels of used fit parameters
- * \param [out] aVector Derivatives * Precision * Down-weighting
- * \param [out] aMatrix Derivatives * Precision * Down-weighting * Derivatives.T
- */
-void GblData::getMatrices(std::vector<unsigned int> &anIndex, TVectorD &aVector,
-		TMatrixDSym &aMatrix) {
-
-	anIndex = theParameters;
-	aVector.ResizeTo(theDerivatives.size());
-	aMatrix.ResizeTo(theDerivatives.size(), theDerivatives.size());
-	double aWeight = thePrecision * theDownWeight;
-	for (unsigned int i = 0; i < theDerivatives.size(); i++) {
-		aVector(i) = theDerivatives[i];
-		for (unsigned int j = 0; j <= i; j++) {
-			aMatrix(i, j) = aVector(i) * aVector(j) * aWeight;
-		}
-	}
-	aVector *= (theValue * aWeight);
-}
-
 /// Calculate prediction for data from fit.
-void GblData::setPrediction(const TVectorD &aVector) {
+void GblData::setPrediction(const VVector &aVector) {
 
 	thePrediction = 0.;
 	for (unsigned int i = 0; i < theDerivatives.size(); i++) {
@@ -168,13 +145,13 @@ double GblData::setDownWeighting(unsigned int aMethod) {
 /**
  * \return (down-weighted) Chi2
  */
-double GblData::getChi2() {
+double GblData::getChi2() const {
 	double aDiff = theValue - thePrediction;
 	return aDiff * aDiff * thePrecision * theDownWeight;
 }
 
 /// Print data block.
-void GblData::printData() {
+void GblData::printData() const {
 
 	std::cout << " meas. " << theLabel << "," << theValue << "," << thePrecision
 			<< std::endl;
