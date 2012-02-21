@@ -11,6 +11,7 @@
 #include<iostream>
 #include<vector>
 #include<math.h>
+#include "VMatrix.h"
 #include "TVectorD.h"
 #include "TMatrixD.h"
 #include "TMatrixDSym.h"
@@ -39,13 +40,11 @@ public:
 			const std::vector<unsigned int> &labDer, const SMatrix27 &matDer);
 	void addDerivatives(const std::vector<unsigned int> &index,
 			const std::vector<double> &derivatives);
-	void getMatrices(std::vector<unsigned int> &anIndex, TVectorD &aVector,
-			TMatrixDSym &aMatrix);
 
-	void setPrediction(const TVectorD &aVector);
+	void setPrediction(const VVector &aVector);
 	double setDownWeighting(unsigned int aMethod);
-	double getChi2();
-	void printData();
+	double getChi2() const;
+	void printData() const;
 	void getLocalData(double &aValue, double &aWeight,
 			std::vector<unsigned int>* &indLocal,
 			std::vector<double>* &derLocal);

@@ -10,13 +10,15 @@
 
 #include<iostream>
 #include<vector>
+#include<math.h>
 #include "TVectorD.h"
 #include "TMatrixD.h"
 #include "TMatrixDSym.h"
+#include "VMatrix.h"
 
 /// (Symmetric) Bordered Band Matrix.
 /**
- *  Separate storage of border, mixed and band parts.
+ *  Separate storage of border, mixed and band parts (as vector<double>).
  *
  *\verbatim
  *  Example for matrix size=8 with border size and band width of two
@@ -53,28 +55,29 @@ public:
 	virtual ~BorderedBandMatrix();
 	void resize(unsigned int nSize, unsigned int nBorder = 1,
 			unsigned int nBand = 5);
-	void solveAndInvertBorderedBand(const TVectorD &aRightHandSide,
-			TVectorD &aSolution);
+	void solveAndInvertBorderedBand(const VVector &aRightHandSide,
+			VVector &aSolution);
 	void addBlockMatrix(double aWeight,
 			const std::vector<unsigned int>* anIndex,
 			const std::vector<double>* aVector);
-	TMatrixDSym getBlockMatrix(std::vector<unsigned int> anIndex);
-	void printMatrix();
+	TMatrixDSym getBlockMatrix(std::vector<unsigned int> anIndex) const;
+	void printMatrix() const;
 
 private:
 	unsigned int numSize; ///< Matrix size
 	unsigned int numBorder; ///< Border size
 	unsigned int numBand; ///< Band width
 	unsigned int numCol; ///< Band matrix size
-	TMatrixDSym theBorder; ///< Border part
-	TMatrixD theMixed; ///< Mixed part
-	TMatrixD theBand; ///< Band part
+	VSymMatrix theBorder; ///< Border part
+	VMatrix theMixed; ///< Mixed part
+	VMatrix theBand; ///< Band part
 
 	void decomposeBand();
-	TVectorD solveBand(const TVectorD &aRightHandSide);
-	TMatrixD solveBand(const TMatrixD &aRightHandSide);
-	TMatrixD invertBand();
-	TMatrixD bandOfAVAT(const TMatrixD &anArray, const TMatrixDSym &aSymArray);
+	VVector solveBand(const VVector &aRightHandSide) const;
+	VMatrix solveBand(const VMatrix &aRightHandSide) const;
+	VMatrix invertBand();
+	VMatrix bandOfAVAT(const VMatrix &anArray,
+			const VSymMatrix &aSymArray) const;
 };
 
 #endif /* BORDEREDBANDMATRIX_H_ */

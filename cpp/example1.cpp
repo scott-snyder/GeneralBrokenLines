@@ -23,14 +23,15 @@ TMatrixD gblSimpleJacobian(double ds, double cosl, double bfac) {
 
 void example1() {
 	/*
-	 Create points on initial trajectory, create trajectory from points,
-	 fit and write trajectory to MP-II binary file,
-	 get track parameter corrections and covariance matrix at points.
-
-	 Equidistant measurement layers and thin scatterers, propagation
-	 with simple jacobian (quadratic in arc length differences).
+	 * Create points on initial trajectory, create trajectory from points,
+	 * fit and write trajectory to MP-II binary file,
+	 * get track parameter corrections and covariance matrix at points.
+	 *
+	 * Equidistant measurement layers and thin scatterers, propagation
+	 * with simple jacobian (quadratic in arc length differences).
 	 */
-//	MilleBinary mille;
+
+//MP	MilleBinary mille; // for producing MillePede-II binary file
 	unsigned int nTry = 10000; //: number of tries
 	unsigned int nLayer = 10; //: number of detector layers
 	std::cout << " Gbltst $Rev$ " << nTry << ", " << nLayer << std::endl;
@@ -80,6 +81,14 @@ void example1() {
 	clErr[4] = 0.25;
 	TMatrixDSym clCov(5), clSeed(5);
 	unsigned int seedLabel = 0;
+// additional parameters
+	TVectorD addPar(2);
+	addPar[0] = 0.0025;
+	addPar[1] = -0.005;
+// global labels for MP
+	/*MP	std::vector<int> globalLabels(2);
+	 globalLabels[0] = 11;
+	 globalLabels[1] = 12; */
 
 	double bfac = 0.2998; // Bz*c for Bz=1
 	double step = 1.5 / cosLambda; // constant steps in RPhi
@@ -98,10 +107,11 @@ void example1() {
 			clCov[i][i] = 1.0 * (clErr[i] * clErr[i]);
 		}
 //		std::cout << " Try " << iTry << ":" << clPar << std::endl;
-		TMatrixD addDer(2, 1);
+		TMatrixD addDer(2, 2);
 		addDer.Zero();
 		addDer[0][0] = 1.;
-// arclenght
+		addDer[1][1] = 1.;
+// arclength
 		double s = 0.;
 		std::vector<double> sPoint;
 		TMatrixD jacPointToPoint(5, 5);
@@ -128,6 +138,7 @@ void example1() {
 			GblPoint point(jacPointToPoint);
 // measurement - prediction in measurement system with error
 			TVectorD meas = proL2m * clPar.GetSub(3, 4);
+//MP			meas += addDer * addPar; // additional parameters
 			for (unsigned int i = 0; i < 2; i++) {
 				meas[i] += measErr[i] * r->Gaus();
 			}
@@ -146,6 +157,7 @@ void example1() {
 
 			 // additional local parameters? */
 //			point.addLocals(addDer);
+//MP			point.addGlobals(globalLabels, addDer);
 			addDer *= -1.; // Der flips sign every measurement
 // add point to trajectory
 			unsigned int iLabel = traj.addPoint(point);
@@ -190,15 +202,15 @@ void example1() {
 		double lostWeight;
 		traj.fit(Chi2, Ndf, lostWeight);
 //		std::cout << " Fit: " << Chi2 << ", " << Ndf << ", " << lostWeight << std::endl;
-		/*		TVectorD aCorrection(6);
-		 TMatrixDSym aCovariance(6);
-		 traj.getResults(3, aCorrection, aCovariance);
+		/*		 TVectorD aCorrection(5);
+		 TMatrixDSym aCovariance(5);
+		 traj.getResults(1, aCorrection, aCovariance);
 		 std::cout << " cor " << std::endl;
 		 aCorrection.Print();
 		 std::cout << " cov " << std::endl;
 		 aCovariance.Print(); */
 // write to MP binary file
-//        traj.milleOut(mille);
+//MP		traj.milleOut(mille);
 		Chi2Sum += Chi2;
 		NdfSum += Ndf;
 		LostSum += lostWeight;
