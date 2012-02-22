@@ -56,17 +56,17 @@ public:
 	void getScatterer(SVector2 &aResiduals, SVector2 &aPrecision) const;
 	void addLocals(const TMatrixD &aDerivatives);
 	unsigned int getNumLocals() const;
-	TMatrixD getLocalDerivatives() const;
+	const TMatrixD& getLocalDerivatives() const;
 	void addGlobals(const std::vector<int> &aLabels,
 			const TMatrixD &aDerivatives);
 	unsigned int getNumGlobals() const;
 	std::vector<int> getGlobalLabels() const;
-	TMatrixD getGlobalDerivatives() const;
+	const TMatrixD& getGlobalDerivatives() const;
 	void setLabel(unsigned int aLabel);
 	unsigned int getLabel() const;
 	void setOffset(int anOffset);
 	int getOffset() const;
-	SMatrix55 getP2pJacobian() const;
+	const SMatrix55& getP2pJacobian() const;
 	void addPrevJacobian(const SMatrix55 aJac);
 	void addNextJacobian(const SMatrix55 aJac);
 	void getDerivatives(int aDirection, SMatrix22 &matW, SMatrix22 &matWJ,

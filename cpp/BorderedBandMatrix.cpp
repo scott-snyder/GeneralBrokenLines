@@ -44,9 +44,9 @@ void BorderedBandMatrix::addBlockMatrix(double aWeight,
 		const std::vector<unsigned int>* anIndex,
 		const std::vector<double>* aVector) {
 	int nBorder = numBorder;
-	for (unsigned int i = 0; i < anIndex->size(); i++) {
+	for (unsigned int i = 0; i < anIndex->size(); ++i) {
 		int iIndex = (*anIndex)[i] - 1; // anIndex has to be sorted
-		for (unsigned int j = 0; j <= i; j++) {
+		for (unsigned int j = 0; j <= i; ++j) {
 			int jIndex = (*anIndex)[j] - 1;
 			if (iIndex < nBorder) {
 				theBorder(iIndex, jIndex) += (*aVector)[i] * aWeight
@@ -70,13 +70,13 @@ void BorderedBandMatrix::addBlockMatrix(double aWeight,
  * \param anIndex [in] List of rows/colums to be used
  */
 TMatrixDSym BorderedBandMatrix::getBlockMatrix(
-		std::vector<unsigned int> anIndex) const {
+		const std::vector<unsigned int> anIndex) const {
 
 	TMatrixDSym aMatrix(anIndex.size());
 	int nBorder = numBorder;
-	for (unsigned int i = 0; i < anIndex.size(); i++) {
+	for (unsigned int i = 0; i < anIndex.size(); ++i) {
 		int iIndex = anIndex[i] - 1; // anIndex has to be sorted
-		for (unsigned int j = 0; j <= i; j++) {
+		for (unsigned int j = 0; j <= i; ++j) {
 			int jIndex = anIndex[j] - 1;
 			if (iIndex < nBorder) {
 				aMatrix(i, j) = theBorder(iIndex, jIndex); // border part of inverse
@@ -128,16 +128,16 @@ void BorderedBandMatrix::solveAndInvertBorderedBand(
 	VMatrix inverseBand = invertBand();
 	if (numBorder > 0) { // need to use block matrix decomposition to solve
 		// solve for mixed part
-		VMatrix auxMat = solveBand(theMixed); // = Xt
-		VMatrix auxMatT = auxMat.transpose(); // = X
+		const VMatrix auxMat = solveBand(theMixed); // = Xt
+		const VMatrix auxMatT = auxMat.transpose(); // = X
 		// solve for border part
-		VVector auxVec = aRightHandSide.getVec(numBorder)
+		const VVector auxVec = aRightHandSide.getVec(numBorder)
 				- auxMat * aRightHandSide.getVec(numCol, numBorder); // = b1 - Xt*b2
 		VSymMatrix inverseBorder = theBorder - theMixed * auxMatT;
 		inverseBorder.invert(); // = E
-		VVector borderSolution = inverseBorder * auxVec; // = x1
+		const VVector borderSolution = inverseBorder * auxVec; // = x1
 		// solve for band part
-		VVector bandSolution = solveBand(
+		const VVector bandSolution = solveBand(
 				aRightHandSide.getVec(numCol, numBorder)); // = x
 		aSolution.putVec(borderSolution);
 		aSolution.putVec(bandSolution - auxMatT * borderSolution, numBorder); // = x2
@@ -176,10 +176,10 @@ void BorderedBandMatrix::decomposeBand() {
 	int nRow = numBand + 1;
 	int nCol = numCol;
 	VVector auxVec(nCol);
-	for (int i = 0; i < nCol; i++) {
+	for (int i = 0; i < nCol; ++i) {
 		auxVec(i) = theBand(0, i) * 16.0; // save diagonal elements
 	}
-	for (int i = 0; i < nCol; i++) {
+	for (int i = 0; i < nCol; ++i) {
 		if ((theBand(0, i) + auxVec(i)) != theBand(0, i)) {
 			theBand(0, i) = 1.0 / theBand(0, i);
 			if (theBand(0, i) < 0.) {
@@ -189,9 +189,9 @@ void BorderedBandMatrix::decomposeBand() {
 			theBand(0, i) = 0.0;
 			throw 2; // singular
 		}
-		for (int j = 1; j < std::min(nRow, nCol - i); j++) {
+		for (int j = 1; j < std::min(nRow, nCol - i); ++j) {
 			double rxw = theBand(j, i) * theBand(0, i);
-			for (int k = 0; k < std::min(nRow, nCol - i) - j; k++) {
+			for (int k = 0; k < std::min(nRow, nCol - i) - j; ++k) {
 				theBand(k, i + j) -= theBand(k + j, i) * rxw;
 			}
 			theBand(j, i) = rxw;
@@ -211,16 +211,16 @@ VVector BorderedBandMatrix::solveBand(const VVector &aRightHandSide) const {
 	int nRow = theBand.getNumRows();
 	int nCol = theBand.getNumCols();
 	VVector aSolution(aRightHandSide);
-	for (int i = 0; i < nCol; i++) // forward substitution
+	for (int i = 0; i < nCol; ++i) // forward substitution
 			{
-		for (int j = 1; j < std::min(nRow, nCol - i); j++) {
+		for (int j = 1; j < std::min(nRow, nCol - i); ++j) {
 			aSolution(j + i) -= theBand(j, i) * aSolution(i);
 		}
 	}
 	for (int i = nCol - 1; i >= 0; i--) // backward substitution
 			{
 		double rxw = theBand(0, i) * aSolution(i);
-		for (int j = 1; j < std::min(nRow, nCol - i); j++) {
+		for (int j = 1; j < std::min(nRow, nCol - i); ++j) {
 			rxw -= theBand(j, i) * aSolution(j + i);
 		}
 		aSolution(i) = rxw;
@@ -241,9 +241,9 @@ VMatrix BorderedBandMatrix::solveBand(const VMatrix &aRightHandSide) const {
 	int nCol = theBand.getNumCols();
 	VMatrix aSolution(aRightHandSide);
 	for (unsigned int iBorder = 0; iBorder < numBorder; iBorder++) {
-		for (int i = 0; i < nCol; i++) // forward substitution
+		for (int i = 0; i < nCol; ++i) // forward substitution
 				{
-			for (int j = 1; j < std::min(nRow, nCol - i); j++) {
+			for (int j = 1; j < std::min(nRow, nCol - i); ++j) {
 				aSolution(iBorder, j + i) -= theBand(j, i)
 						* aSolution(iBorder, i);
 			}
@@ -251,7 +251,7 @@ VMatrix BorderedBandMatrix::solveBand(const VMatrix &aRightHandSide) const {
 		for (int i = nCol - 1; i >= 0; i--) // backward substitution
 				{
 			double rxw = theBand(0, i) * aSolution(iBorder, i);
-			for (int j = 1; j < std::min(nRow, nCol - i); j++) {
+			for (int j = 1; j < std::min(nRow, nCol - i); ++j) {
 				rxw -= theBand(j, i) * aSolution(iBorder, j + i);
 			}
 			aSolution(iBorder, i) = rxw;
@@ -273,7 +273,7 @@ VMatrix BorderedBandMatrix::invertBand() {
 	for (int i = nCol - 1; i >= 0; i--) {
 		double rxw = theBand(0, i);
 		for (int j = i; j >= std::max(0, i - nRow + 1); j--) {
-			for (int k = j + 1; k < std::min(nCol, j + nRow); k++) {
+			for (int k = j + 1; k < std::min(nCol, j + nRow); ++k) {
 				rxw -= inverseBand(abs(i - k), std::min(i, k))
 						* theBand(k - j, j);
 			}
@@ -295,12 +295,12 @@ VMatrix BorderedBandMatrix::bandOfAVAT(const VMatrix &anArray,
 	int nBorder = numBorder;
 	double sum;
 	VMatrix aBand((nBand + 1), nCol);
-	for (int i = 0; i < nCol; i++) {
-		for (int j = std::max(0, i - nBand); j <= i; j++) {
+	for (int i = 0; i < nCol; ++i) {
+		for (int j = std::max(0, i - nBand); j <= i; ++j) {
 			sum = 0.;
-			for (int l = 0; l < nBorder; l++) { // diagonal
+			for (int l = 0; l < nBorder; ++l) { // diagonal
 				sum += anArray(i, l) * aSymArray(l, l) * anArray(j, l);
-				for (int k = 0; k < l; k++) { // off diagonal
+				for (int k = 0; k < l; ++k) { // off diagonal
 					sum += anArray(i, l) * aSymArray(l, k) * anArray(j, k)
 							+ anArray(i, k) * aSymArray(l, k) * anArray(j, l);
 				}
