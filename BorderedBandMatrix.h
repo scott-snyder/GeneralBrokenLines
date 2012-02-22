@@ -11,6 +11,7 @@
 #include<iostream>
 #include<vector>
 #include<math.h>
+#include<cstdlib>
 #include "TVectorD.h"
 #include "TMatrixD.h"
 #include "TMatrixDSym.h"
@@ -60,7 +61,7 @@ public:
 	void addBlockMatrix(double aWeight,
 			const std::vector<unsigned int>* anIndex,
 			const std::vector<double>* aVector);
-	TMatrixDSym getBlockMatrix(std::vector<unsigned int> anIndex) const;
+	TMatrixDSym getBlockMatrix(const std::vector<unsigned int> anIndex) const;
 	void printMatrix() const;
 
 private:

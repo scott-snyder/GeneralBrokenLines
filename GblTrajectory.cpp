@@ -143,7 +143,7 @@ void GblTrajectory::defineOffsets() {
 	thePoints[0].setOffset(0);
 	int nOffsets = 1;
 //   intermediate scatterers are offsets
-	for (unsigned int i = 1; i < numPoints - 1; i++) {
+	for (unsigned int i = 1; i < numPoints - 1; ++i) {
 		if (thePoints[i].hasScatterer()) {
 			thePoints[i].setOffset(nOffsets);
 			nOffsets++;
@@ -181,7 +181,7 @@ void GblTrajectory::calcJacobians() {
 // backward propagation (without scatterers)
 	numStep = 0;
 	unsigned iPoint = numPoints - 1;
-	for (unsigned int i = 1; i < numPoints - 1; i++) {
+	for (unsigned int i = 1; i < numPoints - 1; ++i) {
 		iPoint--;
 		if (thePoints[iPoint].getOffset() >= 0) {
 			numStep = 0;
@@ -236,25 +236,25 @@ std::pair<std::vector<unsigned int>, TMatrixD> GblTrajectory::getJacobian(
 			nJacobian = 1;
 		}
 	}
-	GblPoint aPoint = thePoints[aLabel - 1];
+	const GblPoint aPoint = thePoints[aLabel - 1];
 	std::vector<unsigned int> labDer(5);
 	SMatrix55 matDer;
 	getFitToLocalJacobian(labDer, matDer, aPoint, 5, nJacobian);
 
 	// from local parameters
-	for (unsigned int i = 0; i < nLocals; i++) {
+	for (unsigned int i = 0; i < nLocals; ++i) {
 		aJacobian(i + 5, i) = 1.0;
 		anIndex.push_back(i + 1);
 	}
 	// from trajectory parameters
 	unsigned int iCol = nLocals;
-	for (unsigned int i = 0; i < 5; i++) {
+	for (unsigned int i = 0; i < 5; ++i) {
 		if (labDer[i] > 0) {
 			anIndex.push_back(labDer[i]);
-			for (unsigned int j = 0; j < 5; j++) {
+			for (unsigned int j = 0; j < 5; ++j) {
 				aJacobian(j, iCol) = matDer(j, i);
 			}
-			iCol++;
+			++iCol;
 		}
 	}
 	return std::make_pair(anIndex, aJacobian);
@@ -271,7 +271,7 @@ std::pair<std::vector<unsigned int>, TMatrixD> GblTrajectory::getJacobian(
  * \param [in] nJacobian Direction (0: to previous offset, 1: to next offset)
  */
 void GblTrajectory::getFitToLocalJacobian(std::vector<unsigned int> &anIndex,
-		SMatrix55 &aJacobian, GblPoint &aPoint, unsigned int measDim,
+		SMatrix55 &aJacobian, const GblPoint &aPoint, unsigned int measDim,
 		unsigned int nJacobian) const {
 
 	unsigned int nDim = theDimension.size();
@@ -282,18 +282,18 @@ void GblTrajectory::getFitToLocalJacobian(std::vector<unsigned int> &anIndex,
 
 	if (nOffset < 0) // need interpolation
 			{
-		SMatrix22 prevW, prevWJ, nextW, nextWJ, sumWJ, matN, prevNW, nextNW;
-		SVector2 prevWd, nextWd, prevNd, nextNd;
+		SMatrix22 prevW, prevWJ, nextW, nextWJ, matN;
+		SVector2 prevWd, nextWd;
 		int ierr;
 		aPoint.getDerivatives(0, prevW, prevWJ, prevWd); // W-, W- * J-, W- * d-
 		aPoint.getDerivatives(1, nextW, nextWJ, nextWd); // W-, W- * J-, W- * d-
-		sumWJ = prevWJ + nextWJ;
+		const SMatrix22 sumWJ(prevWJ + nextWJ);
 		matN = sumWJ.Inverse(ierr); // N = (W- * J- + W+ * J+)^-1
 		// derivatives for u_int
-		prevNW = matN * prevW; // N * W-
-		nextNW = matN * nextW; // N * W+
-		prevNd = matN * prevWd; // N * W- * d-
-		nextNd = matN * nextWd; // N * W+ * d+
+		const SMatrix22 prevNW(matN * prevW); // N * W-
+		const SMatrix22 nextNW(matN * nextW); // N * W+
+		const SVector2 prevNd(matN * prevWd); // N * W- * d-
+		const SVector2 nextNd(matN * nextWd); // N * W+ * d+
 
 		unsigned int iOff = nDim * (-nOffset - 1) + nLocals + nCurv + 1; // first offset ('i' in u_i)
 
@@ -304,20 +304,18 @@ void GblTrajectory::getFitToLocalJacobian(std::vector<unsigned int> &anIndex,
 		}
 		aJacobian.Place_at(prevNW, 3, 1); // from 1st Offset
 		aJacobian.Place_at(nextNW, 3, 3); // from 2nd Offset
-		for (unsigned int i = 0; i < nDim; i++) {
+		for (unsigned int i = 0; i < nDim; ++i) {
 			anIndex[1 + theDimension[i]] = iOff + i;
 			anIndex[3 + theDimension[i]] = iOff + nDim + i;
 		}
 
 		// local slope and curvature
 		if (measDim > 2) {
-			SMatrix22 prevWPN, nextWPN;
-			SVector2 prevWNd, nextWNd;
 			// derivatives for u'_int
-			prevWPN = nextWJ * prevNW; // W+ * J+ * N * W-
-			nextWPN = prevWJ * nextNW; // W- * J- * N * W+
-			prevWNd = nextWJ * prevNd; // W+ * J+ * N * W- * d-
-			nextWNd = prevWJ * nextNd; // W- * J- * N * W+ * d+
+			const SMatrix22 prevWPN(nextWJ * prevNW); // W+ * J+ * N * W-
+			const SMatrix22 nextWPN(prevWJ * nextNW); // W- * J- * N * W+
+			const SVector2 prevWNd(nextWJ * prevNd); // W+ * J+ * N * W- * d-
+			const SVector2 nextWNd(prevWJ * nextNd); // W- * J- * N * W+ * d+
 			if (nCurv > 0) {
 				aJacobian(0, 0) = 1.0;
 				aJacobian.Place_in_col(prevWNd - nextWNd, 1, 0); // from curvature
@@ -332,7 +330,7 @@ void GblTrajectory::getFitToLocalJacobian(std::vector<unsigned int> &anIndex,
 		// local offset
 		aJacobian(3, 1) = 1.0; // from 1st Offset
 		aJacobian(4, 2) = 1.0;
-		for (unsigned int i = 0; i < nDim; i++) {
+		for (unsigned int i = 0; i < nDim; ++i) {
 			anIndex[1 + theDimension[i]] = iOff + i;
 		}
 
@@ -348,7 +346,7 @@ void GblTrajectory::getFitToLocalJacobian(std::vector<unsigned int> &anIndex,
 			}
 			aJacobian.Place_at(-matWJ, 1, 1); // from 1st Offset
 			aJacobian.Place_at(matW, 1, 3); // from 2nd Offset
-			for (unsigned int i = 0; i < nDim; i++) {
+			for (unsigned int i = 0; i < nDim; ++i) {
 				anIndex[3 + theDimension[i]] = iOff + nDim + i;
 			}
 		}
@@ -363,7 +361,7 @@ void GblTrajectory::getFitToLocalJacobian(std::vector<unsigned int> &anIndex,
  * \param [in] aPoint Point to use
  */
 void GblTrajectory::getFitToKinkJacobian(std::vector<unsigned int> &anIndex,
-		SMatrix27 &aJacobian, GblPoint &aPoint) const {
+		SMatrix27 &aJacobian, const GblPoint &aPoint) const {
 
 	unsigned int nDim = theDimension.size();
 	unsigned int nCurv = numCurvature;
@@ -371,12 +369,12 @@ void GblTrajectory::getFitToKinkJacobian(std::vector<unsigned int> &anIndex,
 
 	int nOffset = aPoint.getOffset();
 
-	SMatrix22 prevW, prevWJ, nextW, nextWJ, sumWJ;
-	SVector2 prevWd, nextWd, sumWd;
+	SMatrix22 prevW, prevWJ, nextW, nextWJ;
+	SVector2 prevWd, nextWd;
 	aPoint.getDerivatives(0, prevW, prevWJ, prevWd); // W-, W- * J-, W- * d-
 	aPoint.getDerivatives(1, nextW, nextWJ, nextWd); // W-, W- * J-, W- * d-
-	sumWJ = prevWJ + nextWJ; // W- * J- + W+ * J+
-	sumWd = prevWd + nextWd; // W+ * d+ + W- * d-
+	const SMatrix22 sumWJ(prevWJ + nextWJ); // W- * J- + W+ * J+
+	const SVector2 sumWd(prevWd + nextWd); // W+ * d+ + W- * d-
 
 	unsigned int iOff = (nOffset - 1) * nDim + nCurv + nLocals + 1; // first offset ('i' in u_i)
 
@@ -388,7 +386,7 @@ void GblTrajectory::getFitToKinkJacobian(std::vector<unsigned int> &anIndex,
 	aJacobian.Place_at(prevW, 0, 1); // from 1st Offset
 	aJacobian.Place_at(-sumWJ, 0, 3); // from 2nd Offset
 	aJacobian.Place_at(nextW, 0, 5); // from 1st Offset
-	for (unsigned int i = 0; i < nDim; i++) {
+	for (unsigned int i = 0; i < nDim; ++i) {
 		anIndex[1 + theDimension[i]] = iOff + i;
 		anIndex[3 + theDimension[i]] = iOff + nDim + i;
 		anIndex[5 + theDimension[i]] = iOff + nDim * 2 + i;
@@ -410,7 +408,7 @@ void GblTrajectory::getResults(int aSignedLabel, TVectorD &localPar,
 			getJacobian(aSignedLabel);
 	unsigned int nParBrl = indexAndJacobian.first.size();
 	TVectorD aVec(nParBrl); // compressed vector
-	for (unsigned int i = 0; i < nParBrl; i++) {
+	for (unsigned int i = 0; i < nParBrl; ++i) {
 		aVec[i] = theVector(indexAndJacobian.first[i] - 1);
 	}
 	TMatrixDSym aMat = theMatrix.getBlockMatrix(indexAndJacobian.first); // compressed matrix
@@ -427,9 +425,9 @@ void GblTrajectory::buildLinearEquationSystem() {
 	std::vector<unsigned int>* indLocal;
 	std::vector<double>* derLocal;
 	std::vector<GblData>::iterator itData;
-	for (itData = theData.begin(); itData < theData.end(); itData++) {
+	for (itData = theData.begin(); itData < theData.end(); ++itData) {
 		itData->getLocalData(aValue, aWeight, indLocal, derLocal);
-		for (unsigned int j = 0; j < indLocal->size(); j++) {
+		for (unsigned int j = 0; j < indLocal->size(); ++j) {
 			theVector((*indLocal)[j] - 1) += (*derLocal)[j] * aWeight * aValue;
 		}
 		theMatrix.addBlockMatrix(aWeight, indLocal, derLocal);
@@ -447,14 +445,14 @@ void GblTrajectory::prepare() {
 	// measurements
 	SMatrix55 matP;
 	std::vector<GblPoint>::iterator itPoint;
-	for (itPoint = thePoints.begin(); itPoint < thePoints.end(); itPoint++) {
+	for (itPoint = thePoints.begin(); itPoint < thePoints.end(); ++itPoint) {
 		SVector5 aMeas, aPrec;
 		unsigned int measDim = itPoint->hasMeasurement();
 		if (measDim) {
 			unsigned int nLabel = itPoint->getLabel();
-			TMatrixD localDer = itPoint->getLocalDerivatives();
-			std::vector<int> globalLab = itPoint->getGlobalLabels();
-			TMatrixD globalDer = itPoint->getGlobalDerivatives();
+			const TMatrixD localDer = itPoint->getLocalDerivatives();
+			const std::vector<int> globalLab = itPoint->getGlobalLabels();
+			const TMatrixD globalDer = itPoint->getGlobalDerivatives();
 			itPoint->getMeasurement(matP, aMeas, aPrec);
 			unsigned int iOff = 5 - measDim; // first active component
 			std::vector<unsigned int> labDer(5);
@@ -468,7 +466,7 @@ void GblTrajectory::prepare() {
 						3, 0);
 			}
 
-			for (unsigned int i = iOff; i < 5; i++) {
+			for (unsigned int i = iOff; i < 5; ++i) {
 				if (aPrec(i) > 0.) {
 					GblData aData(nLabel, aMeas(i), aPrec(i));
 					aData.addDerivatives(i, labDer, matPDer, iOff, localDer,
@@ -489,7 +487,7 @@ void GblTrajectory::prepare() {
 			std::vector<unsigned int> labDer(7);
 			SMatrix27 matDer;
 			getFitToKinkJacobian(labDer, matDer, *itPoint);
-			for (unsigned int i = 0; i < nDim; i++) {
+			for (unsigned int i = 0; i < nDim; ++i) {
 				unsigned int iDim = theDimension[i];
 				if (aPrec(iDim) > 0.) {
 					GblData aData(nLabel, aMeas(iDim), aPrec(iDim));
@@ -505,13 +503,13 @@ void GblTrajectory::prepare() {
 				getJacobian(externalPoint);
 		externalIndex = indexAndJacobian.first;
 		std::vector<double> externalDerivatives(externalIndex.size());
-		TMatrixDSymEigen externalEigen(externalSeed);
-		TVectorD valEigen = externalEigen.GetEigenValues();
+		const TMatrixDSymEigen externalEigen(externalSeed);
+		const TVectorD valEigen = externalEigen.GetEigenValues();
 		TMatrixD vecEigen = externalEigen.GetEigenVectors();
 		vecEigen = vecEigen.T() * indexAndJacobian.second;
-		for (int i = 0; i < externalSeed.GetNrows(); i++) {
+		for (int i = 0; i < externalSeed.GetNrows(); ++i) {
 			if (valEigen(i) > 0.) {
-				for (int j = 0; j < externalSeed.GetNcols(); j++) {
+				for (int j = 0; j < externalSeed.GetNcols(); ++j) {
 					externalDerivatives[j] = vecEigen(i, j);
 				}
 				GblData aData(externalPoint, 0., valEigen(i));
@@ -525,7 +523,7 @@ void GblTrajectory::prepare() {
 /// Calculate predictions for all points.
 void GblTrajectory::predict() {
 	std::vector<GblData>::iterator itData;
-	for (itData = theData.begin(); itData < theData.end(); itData++) {
+	for (itData = theData.begin(); itData < theData.end(); ++itData) {
 		itData->setPrediction(theVector);
 	}
 }
@@ -537,7 +535,7 @@ void GblTrajectory::predict() {
 double GblTrajectory::downWeight(unsigned int aMethod) {
 	double aLoss = 0.;
 	std::vector<GblData>::iterator itData;
-	for (itData = theData.begin(); itData < theData.end(); itData++) {
+	for (itData = theData.begin(); itData < theData.end(); ++itData) {
 		aLoss += (1. - itData->setDownWeighting(aMethod));
 	}
 	return aLoss;
@@ -571,7 +569,7 @@ unsigned int GblTrajectory::fit(double &Chi2, int &Ndf, double &lostWeight,
 		theMatrix.solveAndInvertBorderedBand(theVector, theVector);
 		predict();
 
-		for (unsigned int i = 0; i < optionList.size(); i++) // down weighting iterations
+		for (unsigned int i = 0; i < optionList.size(); ++i) // down weighting iterations
 				{
 			size_t aPosition = methodList.find(optionList[i]);
 			if (aPosition != std::string::npos) {
@@ -584,7 +582,7 @@ unsigned int GblTrajectory::fit(double &Chi2, int &Ndf, double &lostWeight,
 		}
 		Ndf = theData.size() - numParameters;
 		Chi2 = 0.;
-		for (unsigned int i = 0; i < theData.size(); i++) {
+		for (unsigned int i = 0; i < theData.size(); ++i) {
 			Chi2 += theData[i].getChi2();
 		}
 		Chi2 /= normChi2[aMethod];
@@ -610,7 +608,7 @@ void GblTrajectory::milleOut(MilleBinary &aMille) {
 
 //   data: measurements, kinks and external seed
 	std::vector<GblData>::iterator itData;
-	for (itData = theData.begin(); itData < theData.end(); itData++) {
+	for (itData = theData.begin(); itData < theData.end(); ++itData) {
 		itData->getAllData(fValue, fErr, indLocal, derLocal, labGlobal,
 				derGlobal);
 		aMille.addData(fValue, fErr, *indLocal, *derLocal, *labGlobal,
