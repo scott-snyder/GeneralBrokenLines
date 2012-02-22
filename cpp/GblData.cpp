@@ -42,7 +42,7 @@ void GblData::addDerivatives(unsigned int iRow,
 	theParameters.reserve(nParMax); // have to be sorted
 	theDerivatives.reserve(nParMax);
 
-	for (int i = 0; i < derLocal.GetNcols(); i++) // local derivatives
+	for (int i = 0; i < derLocal.GetNcols(); ++i) // local derivatives
 			{
 		if (derLocal(iRow - iOff, i)) {
 			theParameters.push_back(i + 1);
@@ -50,7 +50,7 @@ void GblData::addDerivatives(unsigned int iRow,
 		}
 	}
 
-	for (unsigned int i = 0; i < 5; i++) // curvature, offset derivatives
+	for (unsigned int i = 0; i < 5; ++i) // curvature, offset derivatives
 			{
 		if (labDer[i] and matDer(iRow, i)) {
 			theParameters.push_back(labDer[i]);
@@ -59,7 +59,7 @@ void GblData::addDerivatives(unsigned int iRow,
 	}
 
 	globalLabels = labGlobal;
-	for (int i = 0; i < derGlobal.GetNcols(); i++) // global derivatives
+	for (int i = 0; i < derGlobal.GetNcols(); ++i) // global derivatives
 		globalDerivatives.push_back(derGlobal(iRow - iOff, i));
 }
 
@@ -77,7 +77,7 @@ void GblData::addDerivatives(unsigned int iRow,
 	theParameters.reserve(nParMax); // have to be sorted
 	theDerivatives.reserve(nParMax);
 
-	for (unsigned int i = 0; i < 7; i++) // curvature, offset derivatives
+	for (unsigned int i = 0; i < 7; ++i) // curvature, offset derivatives
 			{
 		if (labDer[i] and matDer(iRow, i)) {
 			theParameters.push_back(labDer[i]);
@@ -94,7 +94,7 @@ void GblData::addDerivatives(unsigned int iRow,
  */
 void GblData::addDerivatives(const std::vector<unsigned int> &index,
 		const std::vector<double> &derivatives) {
-	for (unsigned int i = 0; i < derivatives.size(); i++) // any derivatives
+	for (unsigned int i = 0; i < derivatives.size(); ++i) // any derivatives
 			{
 		if (derivatives[i]) {
 			theParameters.push_back(index[i]);
@@ -107,7 +107,7 @@ void GblData::addDerivatives(const std::vector<unsigned int> &index,
 void GblData::setPrediction(const VVector &aVector) {
 
 	thePrediction = 0.;
-	for (unsigned int i = 0; i < theDerivatives.size(); i++) {
+	for (unsigned int i = 0; i < theDerivatives.size(); ++i) {
 		thePrediction += theDerivatives[i] * aVector(theParameters[i] - 1);
 	}
 }
@@ -156,12 +156,12 @@ void GblData::printData() const {
 	std::cout << " meas. " << theLabel << "," << theValue << "," << thePrecision
 			<< std::endl;
 	std::cout << " param " << theParameters.size() << ":";
-	for (unsigned int i = 0; i < theParameters.size(); i++) {
+	for (unsigned int i = 0; i < theParameters.size(); ++i) {
 		std::cout << " " << theParameters[i];
 	}
 	std::cout << std::endl;
 	std::cout << " deriv " << theDerivatives.size() << ":";
-	for (unsigned int i = 0; i < theDerivatives.size(); i++) {
+	for (unsigned int i = 0; i < theDerivatives.size(); ++i) {
 		std::cout << " " << theDerivatives[i];
 	}
 	std::cout << std::endl;

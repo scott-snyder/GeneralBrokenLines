@@ -10,6 +10,7 @@
 
 #include "GblPoint.h"
 #include "GblData.h"
+#include "GblPoint.h"
 #include "BorderedBandMatrix.h"
 #include "MilleBinary.h"
 #include "TMatrixDSymEigen.h"
@@ -51,10 +52,10 @@ private:
 	std::pair<std::vector<unsigned int>, TMatrixD> getJacobian(
 			int aSignedLabel) const;
 	void getFitToLocalJacobian(std::vector<unsigned int> &anIndex,
-			SMatrix55 &aJacobian, GblPoint &aPoint, unsigned int measDim,
+			SMatrix55 &aJacobian, const GblPoint &aPoint, unsigned int measDim,
 			unsigned int nJacobian = 1) const;
 	void getFitToKinkJacobian(std::vector<unsigned int> &anIndex,
-			SMatrix27 &aJacobian, GblPoint &aPoint) const;
+			SMatrix27 &aJacobian, const GblPoint &aPoint) const;
 	void defineOffsets();
 	void calcJacobians();
 	void buildLinearEquationSystem();

@@ -40,7 +40,7 @@
  */
 class MilleBinary {
 public:
-	MilleBinary(std::string fileName = "milleBinaryISN.dat",
+	MilleBinary(const std::string fileName = "milleBinaryISN.dat",
 			unsigned int aSize = 2000);
 	virtual ~MilleBinary();
 	void addData(float aMeas, float aPrec,
