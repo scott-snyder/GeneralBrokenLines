@@ -9,8 +9,9 @@
 #define VMATRIX_H_
 
 #include<iostream>
-#include <iomanip>
+#include<iomanip>
 #include<vector>
+#include<cstring>
 #include<math.h>
 
 /// Simple Vector based on std::vector<double>

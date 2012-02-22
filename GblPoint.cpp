@@ -16,8 +16,8 @@ GblPoint::GblPoint(const TMatrixD &aJacobian) :
 		theLabel(0), theOffset(0), measDim(0), transFlag(false), measTransformation(), scatFlag(
 				false), localDerivatives(), globalLabels(), globalDerivatives() {
 
-	for (unsigned int i = 0; i < 5; i++) {
-		for (unsigned int j = 0; j < 5; j++) {
+	for (unsigned int i = 0; i < 5; ++i) {
+		for (unsigned int j = 0; j < 5; ++j) {
 			p2pJacobian(i, j) = aJacobian(i, j);
 		}
 	}
@@ -38,10 +38,10 @@ void GblPoint::addMeasurement(const TMatrixD &aProjection,
 		const TVectorD &aResiduals, const TVectorD &aPrecision) {
 	measDim = aResiduals.GetNrows();
 	unsigned int iOff = 5 - measDim;
-	for (unsigned int i = 0; i < measDim; i++) {
+	for (unsigned int i = 0; i < measDim; ++i) {
 		measResiduals(iOff + i) = aResiduals[i];
 		measPrecision(iOff + i) = aPrecision[i];
-		for (unsigned int j = 0; j < measDim; j++) {
+		for (unsigned int j = 0; j < measDim; ++j) {
 			measProjection(iOff + i, iOff + j) = aProjection(i, j);
 		}
 	}
@@ -65,10 +65,10 @@ void GblPoint::addMeasurement(const TVectorD &aResiduals,
 	TVectorD transResiduals = measTransformation * aResiduals;
 	TVectorD transPrecision = measEigen.GetEigenValues();
 	unsigned int iOff = 5 - measDim;
-	for (unsigned int i = 0; i < measDim; i++) {
+	for (unsigned int i = 0; i < measDim; ++i) {
 		measResiduals(iOff + i) = transResiduals[i];
 		measPrecision(iOff + i) = transPrecision[i];
-		for (unsigned int j = 0; j < measDim; j++) {
+		for (unsigned int j = 0; j < measDim; ++j) {
 			measProjection(iOff + i, iOff + j) = measTransformation(i, j);
 		}
 	}
@@ -147,7 +147,7 @@ unsigned int GblPoint::getNumLocals() const {
 }
 
 /// Retrieve local derivatives from a point.
-TMatrixD GblPoint::getLocalDerivatives() const {
+const TMatrixD& GblPoint::getLocalDerivatives() const {
 	return localDerivatives;
 }
 
@@ -182,7 +182,7 @@ std::vector<int> GblPoint::getGlobalLabels() const {
 }
 
 /// Retrieve global derivatives from a point.
-TMatrixD GblPoint::getGlobalDerivatives() const {
+const TMatrixD& GblPoint::getGlobalDerivatives() const {
 	return globalDerivatives;
 }
 
@@ -213,7 +213,7 @@ int GblPoint::getOffset() const {
 }
 
 /// Retrieve point-to-(previous)point jacobian
-SMatrix55 GblPoint::getP2pJacobian() const {
+const SMatrix55& GblPoint::getP2pJacobian() const {
 	return p2pJacobian;
 }
 

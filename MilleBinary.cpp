@@ -12,7 +12,7 @@
  * \param [in] fileName File name
  * \param [in] aSize Buffer size
  */
-MilleBinary::MilleBinary(std::string fileName, unsigned int aSize) :
+MilleBinary::MilleBinary(const std::string fileName, unsigned int aSize) :
 		binaryFile(fileName.c_str(), std::ios::binary | std::ios::out), intBuffer(), floatBuffer() {
 	intBuffer.reserve(aSize);
 	floatBuffer.reserve(aSize);
@@ -40,13 +40,13 @@ void MilleBinary::addData(float aMeas, float aErr,
 
 	intBuffer.push_back(0);
 	floatBuffer.push_back(aMeas);
-	for (unsigned int i = 0; i < indLocal.size(); i++) {
+	for (unsigned int i = 0; i < indLocal.size(); ++i) {
 		intBuffer.push_back(indLocal[i]);
 		floatBuffer.push_back(derLocal[i]);
 	}
 	intBuffer.push_back(0);
 	floatBuffer.push_back(aErr);
-	for (unsigned int i = 0; i < labGlobal.size(); i++) {
+	for (unsigned int i = 0; i < labGlobal.size(); ++i) {
 		intBuffer.push_back(labGlobal[i]);
 		floatBuffer.push_back(derGlobal[i]);
 	}

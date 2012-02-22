@@ -40,8 +40,8 @@ void VMatrix::resize(const unsigned int nRows, const unsigned int nCols) {
  */
 VMatrix VMatrix::transpose() const {
 	VMatrix aResult(numCols, numRows);
-	for (unsigned int i = 0; i < numRows; i++) {
-		for (unsigned int j = 0; j < numCols; j++) {
+	for (unsigned int i = 0; i < numRows; ++i) {
+		for (unsigned int j = 0; j < numCols; ++j) {
 			aResult(j, i) = theVec[numCols * i + j];
 		}
 	}
@@ -67,8 +67,8 @@ unsigned int VMatrix::getNumCols() const {
 /// Print matrix.
 void VMatrix::print() const {
 	std::cout << " VMatrix: " << numRows << "*" << numCols << std::endl;
-	for (unsigned int i = 0; i < numRows; i++) {
-		for (unsigned int j = 0; j < numCols; j++) {
+	for (unsigned int i = 0; i < numRows; ++i) {
+		for (unsigned int j = 0; j < numCols; ++j) {
 			if (j % 5 == 0) {
 				std::cout << std::endl << std::setw(4) << i << ","
 						<< std::setw(4) << j << "-" << std::setw(4)
@@ -83,9 +83,9 @@ void VMatrix::print() const {
 /// Multiplication Matrix*Vector.
 VVector VMatrix::operator*(const VVector &aVector) const {
 	VVector aResult(numRows);
-	for (unsigned int i = 0; i < this->numRows; i++) {
+	for (unsigned int i = 0; i < this->numRows; ++i) {
 		double sum = 0.0;
-		for (unsigned int j = 0; j < this->numCols; j++) {
+		for (unsigned int j = 0; j < this->numCols; ++j) {
 			sum += theVec[numCols * i + j] * aVector(j);
 		}
 		aResult(i) = sum;
@@ -97,10 +97,10 @@ VVector VMatrix::operator*(const VVector &aVector) const {
 VMatrix VMatrix::operator*(const VMatrix &aMatrix) const {
 
 	VMatrix aResult(numRows, aMatrix.numCols);
-	for (unsigned int i = 0; i < numRows; i++) {
-		for (unsigned int j = 0; j < aMatrix.numCols; j++) {
+	for (unsigned int i = 0; i < numRows; ++i) {
+		for (unsigned int j = 0; j < aMatrix.numCols; ++j) {
 			double sum = 0.0;
-			for (unsigned int k = 0; k < numCols; k++) {
+			for (unsigned int k = 0; k < numCols; ++k) {
 				sum += theVec[numCols * i + k] * aMatrix(k, j);
 			}
 			aResult(i, j) = sum;
@@ -112,8 +112,8 @@ VMatrix VMatrix::operator*(const VMatrix &aMatrix) const {
 /// Addition Matrix+Matrix.
 VMatrix VMatrix::operator+(const VMatrix &aMatrix) const {
 	VMatrix aResult(numRows, numCols);
-	for (unsigned int i = 0; i < numRows; i++) {
-		for (unsigned int j = 0; j < numCols; j++) {
+	for (unsigned int i = 0; i < numRows; ++i) {
+		for (unsigned int j = 0; j < numCols; ++j) {
 			aResult(i, j) = theVec[numCols * i + j] + aMatrix(i, j);
 		}
 	}
@@ -149,8 +149,8 @@ unsigned int VSymMatrix::getNumRows() const {
 /// Print matrix.
 void VSymMatrix::print() const {
 	std::cout << " VSymMatrix: " << numRows << "*" << numRows << std::endl;
-	for (unsigned int i = 0; i < numRows; i++) {
-		for (unsigned int j = 0; j <= i; j++) {
+	for (unsigned int i = 0; i < numRows; ++i) {
+		for (unsigned int j = 0; j <= i; ++j) {
 			if (j % 5 == 0) {
 				std::cout << std::endl << std::setw(4) << i << ","
 						<< std::setw(4) << j << "-" << std::setw(4)
@@ -165,8 +165,8 @@ void VSymMatrix::print() const {
 /// Subtraction SymMatrix-(sym)Matrix.
 VSymMatrix VSymMatrix::operator-(const VMatrix &aMatrix) const {
 	VSymMatrix aResult(numRows);
-	for (unsigned int i = 0; i < numRows; i++) {
-		for (unsigned int j = 0; j <= i; j++) {
+	for (unsigned int i = 0; i < numRows; ++i) {
+		for (unsigned int j = 0; j <= i; ++j) {
 			aResult(i, j) = theVec[(i * i + i) / 2 + j] - aMatrix(i, j);
 		}
 	}
@@ -176,9 +176,9 @@ VSymMatrix VSymMatrix::operator-(const VMatrix &aMatrix) const {
 /// Multiplication SymMatrix*Vector.
 VVector VSymMatrix::operator*(const VVector &aVector) const {
 	VVector aResult(numRows);
-	for (unsigned int i = 0; i < numRows; i++) {
+	for (unsigned int i = 0; i < numRows; ++i) {
 		aResult(i) = theVec[(i * i + i) / 2 + i] * aVector(i);
-		for (unsigned int j = 0; j < i; j++) {
+		for (unsigned int j = 0; j < i; ++j) {
 			aResult(j) += theVec[(i * i + i) / 2 + j] * aVector(i);
 			aResult(i) += theVec[(i * i + i) / 2 + j] * aVector(j);
 		}
@@ -190,10 +190,10 @@ VVector VSymMatrix::operator*(const VVector &aVector) const {
 VMatrix VSymMatrix::operator*(const VMatrix &aMatrix) const {
 	unsigned int nCol = aMatrix.getNumCols();
 	VMatrix aResult(numRows, nCol);
-	for (unsigned int l = 0; l < nCol; l++) {
-		for (unsigned int i = 0; i < numRows; i++) {
+	for (unsigned int l = 0; l < nCol; ++l) {
+		for (unsigned int i = 0; i < numRows; ++i) {
 			aResult(i, l) = theVec[(i * i + i) / 2 + i] * aMatrix(i, l);
-			for (unsigned int j = 0; j < i; j++) {
+			for (unsigned int j = 0; j < i; ++j) {
 				aResult(j, l) += theVec[(i * i + i) / 2 + j] * aMatrix(i, l);
 				aResult(i, l) += theVec[(i * i + i) / 2 + j] * aMatrix(j, l);
 			}
@@ -258,7 +258,7 @@ unsigned int VVector::getNumRows() const {
 /// Print vector.
 void VVector::print() const {
 	std::cout << " VVector: " << numRows << std::endl;
-	for (unsigned int i = 0; i < numRows; i++) {
+	for (unsigned int i = 0; i < numRows; ++i) {
 
 		if (i % 5 == 0) {
 			std::cout << std::endl << std::setw(4) << i << "-" << std::setw(4)
@@ -272,7 +272,7 @@ void VVector::print() const {
 /// Subtraction Vector-Vector.
 VVector VVector::operator-(const VVector &aVector) const {
 	VVector aResult(numRows);
-	for (unsigned int i = 0; i < numRows; i++) {
+	for (unsigned int i = 0; i < numRows; ++i) {
 		aResult(i) = theVec[i] - aVector(i);
 	}
 	return aResult;
@@ -303,14 +303,14 @@ unsigned int VSymMatrix::invert() {
 	int nSize = aSize;
 
 	int first = 1;
-	for (int i = 1; i <= nSize; i++) {
+	for (int i = 1; i <= nSize; ++i) {
 		next[i - 1] = i + 1; // set "next" pointer
 		diag[i - 1] = fabs(theVec[(i * i + i) / 2 - 1]); // save abs of diagonal elements
 	}
 	next[aSize - 1] = -1; // end flag
 
 	unsigned int nrank = 0;
-	for (int i = 1; i <= nSize; i++) { // start of loop
+	for (int i = 1; i <= nSize; ++i) { // start of loop
 		int k = 0;
 		double vkk = 0.0;
 
@@ -343,13 +343,13 @@ unsigned int VSymMatrix::invert() {
 			theVec[kk] = -vkk;
 			int jk = kk - k;
 			int jl = -1;
-			for (int j = 1; j <= nSize; j++) { // elimination
+			for (int j = 1; j <= nSize; ++j) { // elimination
 				if (j == k) {
 					jk = kk;
 					jl += j;
 				} else {
 					if (j < k) {
-						jk++;
+						++jk;
 					} else {
 						jk += j - 1;
 					}
@@ -358,32 +358,32 @@ unsigned int VSymMatrix::invert() {
 					theVec[jk] = vkk * vjk;
 					int lk = kk - k;
 					if (j >= k) {
-						for (int l = 1; l <= k - 1; l++) {
-							jl++;
-							lk++;
+						for (int l = 1; l <= k - 1; ++l) {
+							++jl;
+							++lk;
 							theVec[jl] -= theVec[lk] * vjk;
 						}
-						jl++;
+						++jl;
 						lk = kk;
-						for (int l = k + 1; l <= j; l++) {
-							jl++;
+						for (int l = k + 1; l <= j; ++l) {
+							++jl;
 							lk += l - 1;
 							theVec[jl] -= theVec[lk] * vjk;
 						}
 					} else {
-						for (int l = 1; l <= j; l++) {
-							jl++;
-							lk++;
+						for (int l = 1; l <= j; ++l) {
+							++jl;
+							++lk;
 							theVec[jl] -= theVec[lk] * vjk;
 						}
 					}
 				}
 			}
 		} else {
-			for (int k = 1; k <= nSize; k++) {
+			for (int k = 1; k <= nSize; ++k) {
 				if (next[k - 1] >= 0) {
 					int kk = (k * k - k) / 2 - 1;
-					for (int j = 1; j <= nSize; j++) {
+					for (int j = 1; j <= nSize; ++j) {
 						if (next[j - 1] >= 0) {
 							theVec[kk + j] = 0.0; // clear matrix row/col
 						}
@@ -393,7 +393,7 @@ unsigned int VSymMatrix::invert() {
 			throw 1; // singular
 		}
 	}
-	for (int ij = 0; ij < (nSize * nSize + nSize) / 2; ij++) {
+	for (int ij = 0; ij < (nSize * nSize + nSize) / 2; ++ij) {
 		theVec[ij] = -theVec[ij]; // finally reverse sign of all matrix elements
 	}
 	return nrank;

@@ -97,13 +97,13 @@ void example1() {
 	int NdfSum = 0;
 	double LostSum = 0.;
 
-	for (unsigned int iTry = 1; iTry <= nTry; iTry++) {
+	for (unsigned int iTry = 1; iTry <= nTry; ++iTry) {
 		// curvilinear track parameters
-		for (unsigned int i = 0; i < 5; i++) {
+		for (unsigned int i = 0; i < 5; ++i) {
 			clPar[i] = clErr[i] * r->Gaus();
 		}
 		clCov.Zero();
-		for (unsigned int i = 0; i < 5; i++) {
+		for (unsigned int i = 0; i < 5; ++i) {
 			clCov[i][i] = 1.0 * (clErr[i] * clErr[i]);
 		}
 //		std::cout << " Try " << iTry << ":" << clPar << std::endl;
@@ -119,7 +119,7 @@ void example1() {
 // create trajectory
 		GblTrajectory traj;
 
-		for (unsigned int iLayer = 0; iLayer < nLayer; iLayer++) {
+		for (unsigned int iLayer = 0; iLayer < nLayer; ++iLayer) {
 //			std::cout << " Layer " << iLayer << ", " << s << std::endl;
 //     measurement directions
 			double sinStereo = (iLayer % 2 == 0) ? 0. : 0.5;
@@ -139,7 +139,7 @@ void example1() {
 // measurement - prediction in measurement system with error
 			TVectorD meas = proL2m * clPar.GetSub(3, 4);
 //MP			meas += addDer * addPar; // additional parameters
-			for (unsigned int i = 0; i < 2; i++) {
+			for (unsigned int i = 0; i < 2; ++i) {
 				meas[i] += measErr[i] * r->Gaus();
 			}
 			point.addMeasurement(proL2m, meas, measPrec);
@@ -147,7 +147,7 @@ void example1() {
 			 GblPoint point(jacPointToPoint);
 			 // measurement - prediction in local system with error
 			 TVectorD meas(2);
-			 for (unsigned int i = 0; i < 2; i++) {
+			 for (unsigned int i = 0; i < 2; ++i) {
 			 meas[i] = measErr[i] * r->Gaus() + addDer(i,0) * 0.0075;
 			 }
 			 meas = proM2l * meas + clPar.GetSub(3, 4);
@@ -182,7 +182,7 @@ void example1() {
 					clSeed = clCov.Invert();
 				}
 				// scatter a little
-				for (unsigned int i = 0; i < 2; i++) {
+				for (unsigned int i = 0; i < 2; ++i) {
 					clPar[i + 1] += scatErr[i] * r->Gaus();
 					clCov[i + 1] += scatErr[i] * scatErr[i];
 				}
