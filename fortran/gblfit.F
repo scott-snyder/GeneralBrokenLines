@@ -1080,10 +1080,17 @@
          KOFF=JOFF+2*IABS(IDIR)-3 ! 2nd offset for slope measurement
          CALL GBLDER(JPNT,IDIR,W,WJ,DW)
 *
-         IOFF1=MIN(JOFF,KOFF)
-         IOFF2=MAX(JOFF,KOFF)
-         IP1=NCRV+NLOC
-         IP2=NCRV+NLOC+NDIM
+         IF (IDIR.GT.0) THEN
+            IOFF1=JOFF
+            IOFF2=KOFF
+            IP1=NCRV+NLOC
+            IP2=NCRV+NLOC+NDIM
+         ELSE
+            IOFF2=JOFF
+            IOFF1=KOFF
+            IP2=NCRV+NLOC
+            IP1=NCRV+NLOC+NDIM
+         ENDIF
 *
          DO L=1,NDIM
             DJAC(INDX(2  ,IP1+L))=-WJ(1,L+L0)

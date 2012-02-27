@@ -46,7 +46,7 @@ private:
 	std::vector<GblData> theData; ///< List of data blocks
 	std::vector<unsigned int> externalIndex; ///< List of fit parameters used by external seed
 	TMatrixDSym externalSeed; ///< Precision (inverse covariance matrix) of external seed
-	VVector::VVector theVector; ///< Vector of linear equation system
+	VVector theVector; ///< Vector of linear equation system
 	BorderedBandMatrix theMatrix; ///< (Bordered band) matrix of linear equation system
 
 	std::pair<std::vector<unsigned int>, TMatrixD> getJacobian(
