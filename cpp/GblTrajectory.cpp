@@ -323,15 +323,20 @@ void GblTrajectory::getFitToLocalJacobian(std::vector<unsigned int> &anIndex,
 			aJacobian.Place_at(-prevWPN, 1, 1); // from 1st Offset
 			aJacobian.Place_at(nextWPN, 1, 3); // from 2nd Offset
 		}
-	} else {
-		unsigned int iOff = nDim * (nOffset + nJacobian - 1) + nCurv + nLocals
-				+ 1; // first offset ('i' in u_i)
+	} else { // at point
+		// anIndex must be sorted
+		// forward : iOff2 = iOff1 + nDim, index1 = 1, index2 = 3
+		// backward: iOff2 = iOff1 - nDim, index1 = 3, index2 = 1
+		unsigned int iOff1 = nDim * nOffset + nCurv + nLocals + 1; // first offset ('i' in u_i)
+		unsigned int index1 = 3 - 2 * nJacobian; // index of first offset
+		unsigned int iOff2 = iOff1 + nDim * (nJacobian * 2 - 1); // second offset ('i' in u_i)
+		unsigned int index2 = 1 + 2 * nJacobian; // index of second offset
 
 		// local offset
-		aJacobian(3, 1) = 1.0; // from 1st Offset
-		aJacobian(4, 2) = 1.0;
+		aJacobian(3, index1) = 1.0; // from 1st Offset
+		aJacobian(4, index1 + 1) = 1.0;
 		for (unsigned int i = 0; i < nDim; ++i) {
-			anIndex[1 + theDimension[i]] = iOff + i;
+			anIndex[index1 + theDimension[i]] = iOff1 + i;
 		}
 
 		// local slope and curvature
@@ -344,10 +349,10 @@ void GblTrajectory::getFitToLocalJacobian(std::vector<unsigned int> &anIndex,
 				aJacobian.Place_in_col(-vecWd, 1, 0); // from curvature
 				anIndex[0] = nLocals + 1;
 			}
-			aJacobian.Place_at(-matWJ, 1, 1); // from 1st Offset
-			aJacobian.Place_at(matW, 1, 3); // from 2nd Offset
+			aJacobian.Place_at(-matWJ, 1, index1); // from 1st Offset
+			aJacobian.Place_at(matW, 1, index2); // from 2nd Offset
 			for (unsigned int i = 0; i < nDim; ++i) {
-				anIndex[3 + theDimension[i]] = iOff + nDim + i;
+				anIndex[index2 + theDimension[i]] = iOff2 + i;
 			}
 		}
 	}

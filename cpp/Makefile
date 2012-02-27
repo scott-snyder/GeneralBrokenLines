@@ -27,8 +27,7 @@ all:	$(EXECUTABLES)
 
 # The single special one:
 GBLpp: ${USER_OBJ_GBL} Makefile
-	$(LOADER) $(L_FLAGS) $(C_LIBS) \
-		-o $@ ${USER_OBJ_GBL} 
+	$(LOADER) $(L_FLAGS) -o $@ ${USER_OBJ_GBL} $(C_LIBS)
 #  
 clean:
 	rm -f *.o *~ */*.o */*~

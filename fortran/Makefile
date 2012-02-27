@@ -1,10 +1,11 @@
 # #################################################################
 # Makefile for GBLTST (test general broken lines)
 # #################################################################
+# for gprof use -pg
 #
 FCOMP = gcc
 F_FLAGS = -Wall -fno-automatic -fno-backslash -O3
-#
+# profiling: -pg
 # gcc3: 
 #F_LIBS = -lg2c -lfrtbegin
 # gcc4: 
@@ -25,8 +26,7 @@ all:	$(EXECUTABLES)
 
 # The single special one:
 gbltst: ${USER_OBJ_GBL} Makefile
-	$(LOADER) $(L_FLAGS) $(F_LIBS) \
-		-o $@ ${USER_OBJ_GBL} 
+	$(LOADER) $(L_FLAGS) -o $@ ${USER_OBJ_GBL} $(F_LIBS)
 #  
 clean:
 	rm -f *.o *~ */*.o */*~
