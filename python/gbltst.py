@@ -1,5 +1,6 @@
 '''
 Simple Test Program for General Broken Lines.
+=============================================
 
 Created on Jul 27, 2011
 
@@ -42,7 +43,7 @@ def example1():
 #
   nTry = 10#00 #: number of tries
   nLayer = 5   #: number of detector layers
-  print " Gbltst ", nTry, nLayer
+  print " Gbltst $Rev: 135 $ ", nTry, nLayer
   start = time.clock()
 # track direction
   sinLambda = 0.3
@@ -81,8 +82,11 @@ def example1():
 # arclength
     s = 0.
     sPoint = []
+# point-to-point jacobian (from previous point)    
+    jacPointToPoint = np.eye(5)
 # additional (local or global) derivatives    
     addDer = np.array([[1.0], [0.0]])
+    labGlobal = np.array([[4711], [4711]])
 # create trajectory
     traj = GblTrajectory(bfac != 0.)
     
@@ -97,24 +101,24 @@ def example1():
       measNorm = np.random.normal(0., 1., 2)  
       meas = np.dot(proL2m, clPar[3:5]) + measErr * measNorm
 # point with measurement
-      point = GblPoint()
+      point = GblPoint(jacPointToPoint)
       point.addMeasurement([proL2m, meas, measPrec])
 # additional local parameters?
-#      point.addLocals([addDer])
+#      point.addLocals(addDer)
 # additional global parameters?
-      point.addGlobals([[[4711], [4711]]], [addDer])
+      point.addGlobals(labGlobal, addDer)
       addDer = -addDer # locDer flips sign every measurement      
 # add point to trajectory      
       iLabel = traj.addPoint(point)
       sPoint.append(s)
 # propagate to scatterer
-      jac = gblSimpleJacobian(step, cosLambda, bfac)
-      clPar = np.dot(jac, clPar)
+      jacPointToPoint = gblSimpleJacobian(step, cosLambda, bfac)
+      clPar = np.dot(jacPointToPoint, clPar)
       s += step
       if (iLayer < nLayer - 1):
         scat = np.array([0., 0.])
 # point with scatterer
-        point = GblPoint()
+        point = GblPoint(jacPointToPoint)
         point.addScatterer([scat, scatPrec])
         iLabel = traj.addPoint(point)
         sPoint.append(s)
@@ -122,27 +126,16 @@ def example1():
         scatNorm = np.random.normal(0., 1., 2)  
         clPar[1:3] = clPar[1:3] + scatErr * scatNorm
 # propagate to next measurement layer    
-        clPar = np.dot(jac, clPar)
+        clPar = np.dot(jacPointToPoint, clPar)
         s += step
  
-# define offsets (first/last point, points with scatterer) 
-    traj.defineOffsets()
 # add external seed    
-    traj.addExternalSeed(1, [clSeed])
+    traj.addExternalSeed(1, clSeed)
 # dump trajectory
 #    traj.dump()
   
-# jacobians: query and add
-    for aLabel in range(1, traj.getNumPoints() + 1):
-      twoLabels = traj.queryJacobians(aLabel)
-      twoJacobians = []
-      for iLabel in twoLabels:
-        sDiff = sPoint[iLabel - 1] - sPoint[aLabel - 1]
-        twoJacobians.append(gblSimpleJacobian(sDiff, cosLambda, bfac))
-      traj.addJacobians(aLabel, twoJacobians)
-
 # fit trajectory
-    [Chi2, Ndf, Lost] = traj.fit()
+    Chi2, Ndf, Lost = traj.fit()
     print " Record, Chi2, Ndf, Lost", iTry, Chi2, Ndf, Lost
 # write to MP binary file    
     traj.milleOut(binaryFile)
@@ -151,15 +144,16 @@ def example1():
     NdfSum += Ndf
     LostSum += Lost
 # get corrections and covariance matrix at points 
-    for i in range(1, 1):      
-      [locPar, locCov ] = traj.getResults(i)
-      print " Point< ", i
-      print " locPar ", locPar
-      print " locCov ", locCov      
-      traj.getResults(-i)
-      print " Point> ", i
-      print " locPar ", locPar
-      print " locCov ", locCov  
+    if (iTry == 0):
+      for i in range(1, 1):      
+        locPar, locCov = traj.getResults(i)
+        print " Point< ", i
+        print " locPar ", locPar
+        print " locCov ", locCov      
+        traj.getResults(-i)
+        print " Point> ", i
+        print " locPar ", locPar
+        print " locCov ", locCov  
 #
   end = time.clock()
   print " Time [s] ", end - start
@@ -184,10 +178,10 @@ def example2():
 # create trajectory
       traj = GblTrajectory(0)
 # read from file      
-      traj.milleIn(binaryFile)
+      traj.milleIn(binaryFile) # get data blocks from file
       nRec += 1
 # fit trajectory      
-      [Chi2, Ndf, Lost] = traj.fit()
+      Chi2, Ndf, Lost = traj.fit()
       print " Record, Chi2, Ndf, Lost", nRec, Chi2, Ndf, Lost
 # sum up      
       Chi2Sum += Chi2

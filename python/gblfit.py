@@ -24,40 +24,46 @@ class GblPoint(object):
     4. Additional global parameters (with labels and derivatives). Not fitted, only passed
        on to (binary) file for fitting with Millepede-II. 
   '''
-  def __init__(self):
+  def __init__(self, aJacobian):
     '''
     Create new point.
+    
+    @param aJacobian: jacobian from previous point
+    @type matrix(float)
     '''
     self.__label = 0
     '''@ivar: label for referencing point (0,1,..,number(points)-1)
        @type: int'''
-    self.__prev = 0
-    '''@ivar: label of previous point with offset
-       @type: int'''
     self.__offset = 0
     '''@ivar: >=0: offset number at point, <0: offset number at next point with offset
        @type: int'''
-    self.__next = 0
-    '''@ivar: label of next point with offset
-       @type: int'''  
-    self.__jacobians = []
+    self.__p2pJacobian = aJacobian
+    '''@ivar: Point-to-point jacobian from previous point
+       @type: matrix(float)'''
+    self.__jacobians = [ [], [] ]
     '''@ivar: jacobians for propagation to previous or next point with offsets
-       @type: list(matrix(float))'''
-    self.__measurement = []
+       @type: pair(matrix(float))'''
+    self.__measurement = None
     '''@ivar: measurement at point: projection (dm/du), residuals (to initial trajectory), precision
        @type: list(matrix(float))'''
-    self.__scatterer = []
+    self.__measDim = 0
+    '''@ivar: dimension of measurement (2D, 4D or 5D)
+       @type: int''' 
+    self.__measTransformation = None    
+    '''@ivar: transformation (to eigen-vectors of precision matrix)
+       @type: matrix(float))''' 
+    self.__scatterer = None
     '''@ivar: scatterer at point: initial kinks, precision (inverse covariance matrix)
-       @type: list(matrix(float))'''
-    self.__localDerivatives = []
+       @type: matrix(float)'''
+    self.__localDerivatives = None
     '''@ivar: local derivatives
-       @type: list(matrix(float))'''    
-    self.__globalLabels = []
+       @type: matrix(float))'''    
+    self.__globalLabels = None
     '''@ivar: global labels
-       @type: list(matrix(int))'''  
-    self.__localDerivatives = []
+       @type: matrix(int)'''  
+    self.__globalDerivatives = None
     '''@ivar: global derivatives
-       @type: list(matrix(float))'''      
+       @type: matrix(float)'''  
       
 # for extension to retrieval of residuals, pulls    
 #    self.__dataMeas = [0, 0]
@@ -68,10 +74,22 @@ class GblPoint(object):
     '''
     Add a mesurement to a point.
    
-    @param aMeasurement: measurement (projection residuals, precision)
+    @param aMeasurement: measurement (projection (or None), residuals, precision
+                         (diagonal of or full matrix))
     @type aMeasurement: list(matrix(float))
     '''
     self.__measurement = aMeasurement
+    self.__measDim = aMeasurement[1].shape[0]
+    if (aMeasurement[2].ndim == 2): # full precision matrix, need to diagonalize
+      eigenVal, eigenVec = np.linalg.eigh(aMeasurement[2])
+      self.__measTransformation = eigenVec.T
+#     transform measurement
+      if (aMeasurement[0] is None):
+        self.__measurement[0] = self.__measTransformation
+      else:
+        self.__measurement[0] = np.dot(self.__measTransformation, aMeasurement[0])
+      self.__measurement[1] = np.dot(self.__measTransformation, aMeasurement[1])
+      self.__measurement[2] = eigenVal
 
   def hasMeasurement(self):
     '''
@@ -79,7 +97,7 @@ class GblPoint(object):
     
     @rtype: bool 
     '''
-    return (self.__measurement != [])
+    return (self.__measurement is not None)
 
   def getMeasurement(self):
     '''
@@ -89,9 +107,19 @@ class GblPoint(object):
     @rtype: list(matrix(float))
     '''
     return self.__measurement
+ 
+  def getMeasDim(self):
+    '''
+    Retrieve dimension of measurement of a point.
     
+    @return: measurement dimension (2, 4 or 5)
+    @rtype: int
+    '''
+    return self.__measDim
+     
   def addScatterer(self, aScatterer):
-    '''Add a (thin) scatterer to a point.
+    '''
+    Add a (thin) scatterer to a point.
     
     @param aScatterer: scatterer (kinks, precision)
     @type aScatterer: list(matrix(float))
@@ -104,7 +132,7 @@ class GblPoint(object):
     
     @rtype: bool     
     '''
-    return (self.__scatterer != [])
+    return (self.__scatterer is not None)
 
   def getScatterer(self):
     '''
@@ -120,21 +148,29 @@ class GblPoint(object):
     Add local derivatives.
     
     @param derivatives: local derivatives
-    @type derivatives: list(matrix(float))    
+    @type derivatives: matrix(float)    
     '''
-    self.__localDerivatives = derivatives
+    if (self.__measDim > 0):
+      if (self.__measTransformation is None):
+        self.__localDerivatives = derivatives
+      else:
+        self.__localDerivatives = np.dot(self.__measTransformation, derivatives)        
 
   def addGlobals(self, labels, derivatives):
     '''
     Add global derivatives.
     
     @param labels: global labels
-    @type labels: list(matrix(int))
+    @type labels: matrix(int)
     @param derivatives: global derivatives
-    @type derivatives: list(matrix(float))
+    @type derivatives: matrix(float)
     '''
-    self.__globalLabels = labels
-    self.__globalDerivatives = derivatives
+    if (self.__measDim > 0):
+      self.__globalLabels = labels
+      if (self.__measTransformation is None):
+        self.__globalDerivatives = derivatives
+      else:
+        self.__globalDerivatives = np.dot(self.__measTransformation, derivatives) 
 
   def getNumLocals(self):
     '''
@@ -143,8 +179,8 @@ class GblPoint(object):
     @return: Number of local derivatives at point
     @rtype: int
     '''
-    if (self.__localDerivatives != []):
-      return self.__localDerivatives[0].shape[1]
+    if (self.__localDerivatives is not None):
+      return self.__localDerivatives.shape[1]
     else:
       return 0
   
@@ -155,10 +191,7 @@ class GblPoint(object):
     @return: local derivatives
     @rtype: matrix(float)
     '''
-    if (self.__localDerivatives != []):
-      return self.__localDerivatives[0]
-    else:
-      return [ [], [] ]
+    return self.__localDerivatives
 
   def getGlobalLabels(self):
     '''
@@ -167,10 +200,7 @@ class GblPoint(object):
     @return: lglobal labels
     @rtype: matrix(int)   
     '''
-    if (self.__globalLabels != []):
-      return self.__globalLabels[0]
-    else:
-      return [ [], [] ]
+    return self.__globalLabels
     
   def getGlobalDerivatives(self):
     '''
@@ -179,10 +209,7 @@ class GblPoint(object):
     @return: global derivatives
     @rtype: matrix(float)   
     '''
-    if (self.__globalDerivatives != []):
-      return self.__globalDerivatives[0]
-    else:
-      return [ [], [] ]
+    return self.__globalDerivatives
     
   def setLabel(self, aLabel):
     '''
@@ -202,20 +229,14 @@ class GblPoint(object):
     '''
     return self.__label
  
-  def setOffset(self, anOffset, aPrev, aNext):
+  def setOffset(self, anOffset):
     '''
     Define offset of a point and references to previous and next point with offset.
     
     @param anOffset: offset number (at point (>=0) or at next point with offset (<0))
     @type anOffset: int
-    @param aPrev: label of previous point with offset
-    @type aPrev: int
-    @param aNext: label of next point with offset
-    @type aNext: int
     '''
     self.__offset = anOffset
-    self.__prev = aPrev
-    self.__next = aNext
 
   def getOffset(self):
     '''
@@ -233,24 +254,33 @@ class GblPoint(object):
 #  def setDataScat(self, aIndex, aData):
 # for extension to retrieval of residuals, pulls    
 #    self.__dataScat[aIndex] = aData
-        
-  def queryJacobians(self):
+ 
+  def getP2pJacobian(self):
     '''
-    Query point for labels of enclosing offsets.
+    Retrieve jacobian of a point.
     
-    @return: labels of previous and next point with offsets
-    @rtype: pair(int)
+    @return: point-to-point jacobian (from previous point)
+    @rtype: matrix(float)
     '''
-    return [ self.__prev, self.__next ] 
+    return self.__p2pJacobian         
+ 
+  def addPrevJacobian(self, aJacobian):
+    '''
+    Add jacobian to previous offset.
     
-  def addJacobians(self, twoJacobians):
+    @param aJacobian: jacobian for propagation to previous point with offsets
+    @type aJacobian: matrix(float)
     '''
-    Add jacobians to enclosing offsets.
+    self.__jacobians[0] = np.linalg.inv(aJacobian)
+
+  def addNextJacobian(self, aJacobian):
+    '''
+    Add jacobian to next offset.
     
-    @param twoJacobians: jacobians for propagation to previous and next point with offsets
-    @type twoJacobians: pair(matrix(float))
+    @param aJacobian: jacobian for propagation to next point with offsets
+    @type aJacobian: matrix(float)
     '''
-    self.__jacobians = twoJacobians 
+    self.__jacobians[1] = aJacobian
     
   def getDerivatives(self, index):
     '''
@@ -268,33 +298,41 @@ class GblPoint(object):
     if (index < 1):
       matS = -matS
     matW = np.linalg.inv(matS) # W = +/- S^-1
-    return [ matW, np.dot(matW, matJ), np.dot(matW, vecD) ] # W, W*J, W*d
+    return matW, np.dot(matW, matJ), np.dot(matW, vecD)  # W, W*J, W*d
     
   def printPoint(self):
     '''
     Print point.
     '''
-    print " point ", self.__label, self.__offset, self.__prev, self.__next 
+    print " point ", self.__label, self.__offset 
 
 #------------------------------------------------------------------------------ 
 
 class GblData(object):
   '''
-  Data (block) containing value, precision and derivatives for measurements and kinks.
+  Data (block) containing value, precision and derivatives for measurements, kinks
+  and external seed.
   
   Created from attributes of GblPoints, used to construct linear equation system for track fit.
   '''
-  def __init__(self):
+  def __init__(self, aLabel=0, aValue=0., aPrec=0.):
     '''
     Create new data.
+    
+    @param aLabel: label of corresponding point
+    @type aLabel: int
+    @param aValue: value
+    @type aValue: float
+    @param aPrec: precision
+    @type aPrec: float
     '''
-    self.__label = 0
+    self.__label = aLabel
     '''@ivar: label of corresponding point
        @type: int'''
-    self.__value = 0.
+    self.__value = aValue
     '''@ivar: value (residual or kink)
        @type: float'''
-    self.__precision = 0.
+    self.__precision = aPrec
     '''@ivar: precision (diagonal element of inverse covariance matrix)
        @type: float'''
     self.__downWeight = 1.
@@ -318,55 +356,54 @@ class GblData(object):
 
 #    self.__predictionVar = 0.
                
-  def addDerivatives(self, aLabel, aMeas, aPrec, parCurv, derCurv, \
-               aDim, firstParBand, derBand, firstParLocal=0, \
-               derLocal=[], labGlobal=[], derGlobal=[]):
+  def addDerivatives(self, iRow, labDer, matDer, \
+                     derLocal=None, labGlobal=None, derGlobal=None):
     '''
-    Add derivatives to data (block). Generate lists of labels.
+    Add derivatives to data (block) from measurements and kinks. Generate lists of labels.
     
-    @param aLabel: label of corresponding point
-    @type aLabel: int
-    @param aMeas: value
-    @type aMeas: float
-    @param aPrec: precision
-    @type aPrec: float
-    @param parCurv: label for 'curvature' parameter (with (1) or without (0) 'curvature')
-    @type parCurv: int
-    @param derCurv: derivative vs 'curvature'
-    @type derCurv: list(float)
-    @param firstParBand: label of first band parameter (offset)
-    @type firstParBand: int
-    @param derBand: derivatives vs band parameters (offsets)
-    @type derBand: list(float)
-    @param firstParLocal: label of first local parameter
-    @type firstParLocal: int
+    @param iRow: row of measurement (vector)
+    @type iRow: int
+    @param labDer: labels of derivatives vs curvature and band parameters (offsets)
+    @type labDer: vector(int)
+    @param matDer: derivatives vs curvature and band parameters (offsets)
+    @type matDer: matrix(float)
+    @param derLocal: derivatives vs local parameters
+    @type derLocal: list(float)
     @param labGlobal: labels of global parameters
     @type labGlobal: list(int)
     @param derGlobal: derivatives vs global parameters
     @type derGlobal: list(float)
     '''   
-    self.__label = aLabel
-    self.__value = aMeas
-    self.__precision = aPrec
-    if (parCurv > 0):
-      if (derCurv[0] != 0.):                  # curvature derivatives
-        self.__derivatives.append(derCurv[0])
-        self.__parameters.append(parCurv)
-    for i in range(len(derLocal)):           # local derivatives
-      if (derLocal[i] != 0.):
-        self.__derivatives.append(derLocal[i])
-        self.__parameters.append(firstParLocal + i)
-    iPar = firstParBand
-    for der in derBand:                      # offset derivatives
-      for i in aDim:
-        if (der[i] != 0.):
-          self.__derivatives.append(der[i])
-          self.__parameters.append(iPar)
-        iPar += 1  
-    for i in range(len(labGlobal)):          # global derivatives
-      if (derGlobal[i] != 0.):
-        self.__globalLabels.append(labGlobal[i])
-        self.__globalDerivatives.append(derGlobal[i])
+    if (derLocal is not None):
+      for i in range(derLocal.shape[1]):           # local derivatives
+        if (derLocal[iRow, i] != 0.):
+          self.__derivatives.append(derLocal[iRow, i])
+          self.__parameters.append(i + 1)
+        
+    for i in range(len(labDer)):           # curvature, offset derivatives
+      if (labDer[i] != 0 and matDer[iRow, i] != 0.):
+        self.__derivatives.append(matDer[iRow , i])
+        self.__parameters.append(labDer[i])
+
+    if (derGlobal is not None):  
+      for i in range(derGlobal.shape[1]):          # global derivatives
+        if (derGlobal[iRow, i] != 0.):
+          self.__globalLabels.append(labGlobal[iRow, i])
+          self.__globalDerivatives.append(derGlobal[iRow, i])
+
+  def addExtDerivatives(self, indexExt, derExt):
+    '''
+    Add derivatives to data (block) from external seed. Generate lists of labels.
+    
+    @param indexExt: labels from exteranl seed
+    @type indexExt: list(int)
+    @param derExt: derivatives from exteranl seed
+    @type derExt: list(float)
+    '''       
+    for i in range(len(derExt)):           # external derivatives
+      if (derExt[i] != 0.):
+        self.__derivatives.append(derExt[i])
+        self.__parameters.append(indexExt[i])  
 
   def getMatrices(self):  
     '''
@@ -379,7 +416,7 @@ class GblData(object):
     aMatrix = np.dot(aVector.T, aVector)
     aValue = self.__value
     aWeight = self.__precision * self.__downWeight
-    return [self.__parameters, aValue * aVector * aWeight, aMatrix * aWeight]
+    return self.__parameters, aValue * aVector * aWeight, aMatrix * aWeight
     
   def setPrediction(self, aVector):
     '''
@@ -441,8 +478,8 @@ class GblData(object):
     @return: data components
     @rtype: list
     '''
-    return [self.__value, self.__precision, self.__parameters, self.__derivatives, \
-            self.__globalLabels, self.__globalDerivatives]
+    return self.__value, self.__precision, self.__parameters, self.__derivatives, \
+            self.__globalLabels, self.__globalDerivatives
 
   def fromRecord(self, dataList):
     '''
@@ -451,8 +488,8 @@ class GblData(object):
     @param dataList: data components
     @type dataList: list
     '''
-    [self.__value, self.__precision, self.__parameters, self.__derivatives, \
-            self.__globalLabels, self.__globalDerivatives] = dataList
+    self.__value, self.__precision, self.__parameters, self.__derivatives, \
+            self.__globalLabels, self.__globalDerivatives = dataList
             
   def analyzeData(self, maxBand):
     '''
@@ -469,7 +506,7 @@ class GblData(object):
     for i in self.__parameters:
       if (i < maxPar - maxBand):
         maxBor = i
-    return [maxPar, maxBor]
+    return maxPar, maxBor
          
   def printData(self):
     '''
@@ -487,9 +524,9 @@ class GblTrajectory(object):
   ================================
   
   For a track with an initial trajectory from a prefit of the
-  measurements (internal seed) or an external prediction
-  (external seed) the description of multiple scattering is 
-  added by offsets in a local system. Along the initial
+  (2D, 4D or 5D) measurements (internal seed) or an external 
+  prediction(external seed) the description of multiple scattering
+  is added by offsets in a local system. Along the initial
   trajectory points are defined with can describe a measurement
   or a (thin) scatterer or both. The refit provides corrections
   to the local track parameters (in the local system) and the 
@@ -517,38 +554,48 @@ class GblTrajectory(object):
     1. Create trajectory::
             traj = GblTrajectory()
     2. For all points on initial trajectory 
-        - Create points and add appropiate attributes::
-            point = GblPoint()
+        - Create point (supply jacobian from previous point)::
+            point = GblPoint(jacobian)
+        - Optionally add measurement to point::    
             point.addMeasurement(..)
-            point.addScatterer(..)
+        - Optionally additional local or global parameters for measurement:: 
             point.addLocals(..)
             point.addGlobals(..)
+        - Optionally add scatterer to point::    
+            point.addScatterer(..)
         - Add point (ordered by arc length) to trajectory, get label of point::  
             label = traj.addPoint(point)
-    3. Define (points with) offsets::
-            traj.defineOffsets()
-    4. Optionally add external seed::
+    3. Optionally add external seed::
             traj.addExternalSeed(..)
-    5. For all points on initial trajectory
-        - Query for required jacobians::
-            traj.queryJacobians(label)         
-        - Add requested jacobians::
-            traj.addJacobians(label,..)  
-    6. Optionally write trajectory to MP binary file::
-            traj.milleOut(..)
-    7. Fit trajectory, bet Chi2, Ndf (and weight lost by M-estimators)::
+    4. Fit trajectory, bet Chi2, Ndf (and weight lost by M-estimators)::
             [..] = traj.fit()
-    8. For any point on inital trajectory
+    5. For any point on inital trajectory
         - Get corrections and covariance matrix for track parameters::
             [..] = traj.getResults(label) 
+    6. Optionally write trajectory to MP binary file::
+            traj.milleOut(..)
             
   Alternatively trajectories can by read from MP binary files and fitted. 
   As the points on the initial trajectory are not stored in this files results at
   points (corrections, covariance matrix) are not available.
+  
+  References:
+  ===========  
+    - V. Blobel, C. Kleinwort, F. Meier,
+      Fast alignment of a complex tracking detector using advanced track models,
+      Computer Phys. Communications (2011), doi:10.1016/j.cpc.2011.03.017
+    - C. Kleinwort, General Broken Lines as advanced track fitting method,
+      NIM A, 673 (2012), 107-110, doi:10.1016/j.nima.2012.01.024  
+      
   ''' 
   def __init__(self, hasCurv=True, aDim=[0, 1]):
     '''
     Create new trajectory.
+    
+    @param hasCurv: flag for curvature
+    @type hasCurv: bool
+    @param aDim: active offset components (0:u_1, 1:u_2)
+    @type aDim: list(int)
     '''  
     self.__numPoints = 0
     '''@ivar: number of points on trajectory
@@ -568,11 +615,8 @@ class GblTrajectory(object):
     self.__externalPoint = 0
     '''@ivar: label of point with external seed
        @type: int'''    
-    self.__externalNdf = 0
-    '''@ivar: Ndf from external seed
-       @type: int'''    
     self.__dimensions = aDim
-    '''@ivar: active compoents of offsets (both ([0,1]) or single ([0] or [1])
+    '''@ivar: active components of offsets (both ([0,1]) or single ([0] or [1])
        @type: list(int)'''
     self.__points = [] 
     '''@ivar: points on trajectory
@@ -580,12 +624,9 @@ class GblTrajectory(object):
     self.__data = []
     '''@ivar: data (blocks) of trajectory
        @type: list(GblData)'''
-    self.__externalSeed = []
+    self.__externalSeed = None
     '''@ivar: external seed (for local, fit parameters)
-       @type: list(matrix(float))'''
-    self.__externalIndex = []
-    '''@ivar: labels of fit parameters from external seed
-       @type: list(int)'''
+       @type: matrix(float)'''
 
   def addPoint(self, point):
     '''
@@ -593,7 +634,7 @@ class GblTrajectory(object):
     
     @param point: point to be added
     @type point: GblPoint
-    @return: label of added point
+    @return: label of added point (1..number(points))
     @rtype: int    
     '''
     self.__numPoints += 1
@@ -619,65 +660,11 @@ class GblTrajectory(object):
     @param aLabel: label of point with external seed
     @type aLabel: int 
     @param aSeed: seed (covariance matrix of track parameters at point)
-    @type aSeed: list(matrix(float)) 
+    @type aSeed: matrix(float) 
     '''
     self.__externalPoint = aLabel
     self.__externalSeed = aSeed
-
-
-  def queryJacobians(self, aLabel):
-    '''
-    Query point for adjacent scatterers.
     
-    @param aLabel: label of point
-    @type aLabel: int
-    @return: labels of previous and next point with offset
-    @rtype: pair(int)
-    '''
-    return self.__points[aLabel - 1].queryJacobians() 
-    
-  def addJacobians(self, aLabel, twoJacobians):
-    '''
-    Provide point for jacobians to adjacent scatterers.
-    
-    @param aLabel: label of point
-    @type aLabel: int
-    @param twoJacobians: jacobians for propagation to previous and next point with offset
-    @type twoJacobians: pair(matrix(float))
-    '''
-    self.__points[aLabel - 1].addJacobians(twoJacobians) 
-    
-  def defineOffsets(self):
-    '''
-    Define offsets from list of points.
-    '''
-
-# built list of labels defining offsets
-#   first point is offset    
-    labels = [ self.__points[0].getLabel() ]
-#   intermediate scatterers are offsets    
-    for aPoint in self.__points[1:-1]:
-      if (aPoint.hasScatterer()):
-        labels.append(aPoint.getLabel()) 
-#   last point is offset    
-    labels.append(self.__points[-1].getLabel())
-# set labels for previous/next offsets
-#   first point is offset    
-    self.__points[0].setOffset(0, labels[0], labels[1])
-    nOffsets = 1
-#   intermediate scatterers are offsets    
-    for aPoint in self.__points[1:-1]:
-      if (aPoint.hasScatterer()):
-        aPoint.setOffset(nOffsets, labels[nOffsets - 1], labels[nOffsets + 1])
-        nOffsets += 1
-      else:  
-        aPoint.setOffset(-nOffsets, labels[nOffsets - 1], labels[nOffsets])
-#   last point is offset    
-    self.__points[-1].setOffset(nOffsets, labels[nOffsets - 1], labels[nOffsets])
-    self.__numOffsets = nOffsets + 1
-    self.__numParameters = self.__numOffsets * len(self.__dimensions) \
-                           + self.__numCurvature + self.__numLocals
-
   def dump(self):
     '''
     Dump trajectory.
@@ -696,20 +683,6 @@ class GblTrajectory(object):
 #   data: measurements and kinks        
     for aData in self.__data:       
       rec.addData(aData.toRecord())
-#   (compressed) external seed
-    compressedIndex = []
-    compressedSeed = []
-    if (self.__externalIndex != []):
-      aMatrix = self.__externalSeed[-1]    
-      for i in range(len(self.__externalIndex)):
-        iIndex = self.__externalIndex[i]
-        for j in range(i + 1):
-          jIndex = self.__externalIndex[j] 
-          if (aMatrix[i, j] != 0.):
-            ijIndex = iIndex * (iIndex - 1) / 2 + jIndex
-            compressedIndex.append(ijIndex)
-            compressedSeed.append(aMatrix[i, j])  
-      rec.addSpecial(compressedIndex, compressedSeed, 1) 
                     
     rec.writeRecord(aFile)
 
@@ -732,37 +705,9 @@ class GblTrajectory(object):
         aData = GblData()
         aData.fromRecord(rec.getData())
         self.__data.append(aData)
-        [nPar, nBor] = aData.analyzeData(mBand)
+        nPar, nBor = aData.analyzeData(mBand)
         mPar = max(mPar, nPar)
         mBor = max(mBor, nBor)
-      elif (aTag == 1):
-# get seed        
-        [compressedIndex, compressedSeed ] = rec.getSpecial()  
-# uncompress index
-        iIndex = 0
-        iiIndex = 0
-        rowList = []
-        for ind in compressedIndex:
-          while (ind > iiIndex):
-            iIndex += 1
-            iiIndex += iIndex
-          rowList.append(iIndex)
-          if (self.__externalIndex == []):
-            self.__externalIndex.append(iIndex)
-          elif (self.__externalIndex[-1] != iIndex):
-            self.__externalIndex.append(iIndex)
-# uncompress Matrix              
-        nExtPar = len(self.__externalIndex)
-        aMatrix = np.zeros((nExtPar, nExtPar))
-        for i in range(len(compressedIndex)):
-          iRow = rowList[i] - 1
-          iCol = compressedIndex[i] - (iRow + 1) * iRow / 2 - 1
-          aMatrix[iRow, iCol] = compressedSeed[i]
-          if (iRow != iCol):
-            aMatrix[iCol, iRow] = compressedSeed[i]
-          else:
-            self.__externalNdf += 1
-        self.__externalSeed.append(aMatrix)
         
     self.__numParameters = mPar
     self.__numLocals = mBor - self.__numCurvature
@@ -771,39 +716,11 @@ class GblTrajectory(object):
     '''
     Get jacobian for transformation from fit to track parameters at point.
     
-    @param aLabel: label of point
+    @param aLabel: (signed) label of point
     @type aLabel: int
     @return: labels of required fit parameters and jacobian
     @rtype: list
     '''
-    def addMatrices(indexList, matList):
-      '''
-      Add matrices to jacobian.
-      
-      @param indexList: indices
-      @type indexList: list
-      @param matList: matrices
-      @type matList: list
-      '''
-      for i in range(nDim):
-        vecIndex.append(iPar + iOff + i + 1)
-        for j in range(2):
-          for k in range(len(indexList)):
-            aJacobian[indexList[k] + j, iPar + i] = matList[k][j, aDim[i]] 
-
-    def addVectors(indexList, vecList):
-      '''
-      Add vectors to jacobian.
-      
-      @param indexList: indices
-      @type indexList: list
-      @param vecList: vectors
-      @type vecList: list     
-      '''
-      for j in range(2):
-        for k in range(len(indexList)):
-          aJacobian[indexList[k] + j, iPar] = vecList[k][j]
-
     aDim = self.__dimensions
     nDim = len(aDim)
     anIndex = abs(aLabel) - 1
@@ -820,59 +737,158 @@ class GblTrajectory(object):
         nJacobian = 1
 # Jacobian broken lines (q/p,..,u_i,u_i+1..) to local (q/p,u',u) parameters   
     nCurv = self.__numCurvature
-    nLocals = self.__numLocals     
+    nLocals = self.__numLocals   
     nBorder = nCurv + nLocals
     nParBRL = nBorder + 2 * nDim
     nParLoc = nLocals + 5
     aJacobian = np.zeros((nParLoc, nParBRL))
     aPoint = self.__points[anIndex]
-    nOffset = aPoint.getOffset() 
-    vecIndex = []
-    for i in range(nCurv):
-      aJacobian[i, i] = 1.0
-      vecIndex.append(i + 1)
+    anIndex = []
+    labDer, matDer = self.__getFitToLocalJacobian(aPoint, 5, nJacobian)
+#   from local parameters
     for i in range(nLocals):
-      aJacobian[i + 5, i + nCurv] = 1.0
-      vecIndex.append(i + 1 + nCurv)           
+      aJacobian[i + 5, i] = 1.0;
+      anIndex.append(i + 1);
+  
+#   from trajectory parameters
+    iCol = nLocals;
+    for i in range(5):
+      if (labDer[i] > 0):
+        anIndex.append(labDer[i]);
+        for j in range(5):
+          aJacobian[j, iCol] = matDer[j, i];
+        iCol += 1
+
+    return anIndex, aJacobian
+   
+  def __getFitToLocalJacobian(self, aPoint, measDim, nJacobian=1):
+    '''
+    Get (part of) jacobian for transformation from (trajectory) fit to track parameters at point.
+
+    Jacobian broken lines (q/p,..,u_i,u_i+1..) to local (q/p,u',u) parameters.
+    @param aPoint: point to use
+    @type aPoint: GblPoint
+    @param measDim: dimension of 'measurement' (2, 4 or 5)
+    @type measDim: int
+    @param nJacobian: direction (0: to previous offset, 1: to next offset)
+    @type nJacobian: int
+    @return: labels for fit parameters with non zero derivatives, corresponding transformation matrix
+    @rtype: list(vector(int), matrix(float)) 
+    '''
+    aDim = self.__dimensions
+    nDim = len(aDim)
+    nCurv = self.__numCurvature
+    nLocals = self.__numLocals      
+    nOffset = aPoint.getOffset() 
+    anIndex = [0, 0, 0, 0, 0]
+    aJacobian = np.zeros((measDim, 5))
+    labOffset = measDim - 2
+    labSlope = measDim - 4
+    labCurv = measDim - 5
+    
     if (nOffset < 0): # need interpolation
-      [ prevW, prevWJ, prevWd ] = aPoint.getDerivatives(0) # W-, W- * J-, W- * d-
-      [ nextW, nextWJ, nextWd ] = aPoint.getDerivatives(1) # W+, W+ * J+, W+ * d+
+      prevW, prevWJ, prevWd = aPoint.getDerivatives(0) # W-, W- * J-, W- * d-
+      nextW, nextWJ, nextWd = aPoint.getDerivatives(1) # W+, W+ * J+, W+ * d+
       sumWJ = prevWJ + nextWJ
       matN = np.linalg.inv(sumWJ)      # N = (W- * J- + W+ * J+)^-1 
-#     derivatives for u_int      
-      prevNW = np.dot(matN, prevW)     # N * W-
-      nextNW = np.dot(matN, nextW)     # N * W+
-      prevNd = np.dot(matN, prevWd)    # N * W- * d-
-      nextNd = np.dot(matN, nextWd)    # N * W+ * d+
-#     derivatives for u'_int
-      prevWPN = np.dot(nextWJ, prevNW) # W+ * J+ * N * W-
-      nextWPN = np.dot(prevWJ, nextNW) # W- * J- * N * W+
-      prevWNd = np.dot(nextWJ, prevNd) # W+ * J+ * N * W- * d-
-      nextWNd = np.dot(prevWJ, nextNd) # W- * J- * N * W+ * d+
-      iPar = self.__numCurvature__
-      iOff = nDim * (-nOffset - 1) # first offset ('i' in u_i)     
-      iPar = 0
-      if (self.__numCurvature > 0):
-        addVectors([1, 3], [-nextWNd + prevWNd, -nextNd - prevNd]) # from curvature
-        iPar += 1
-      iPar += nLocals  
-      addMatrices([1, 3], [-prevWPN, prevNW]) # from 1st offset
-      iPar += nDim  
-      addMatrices([1, 3], [ nextWPN, nextNW]) # from 2nd offset
-    else:
-      [ matW, matWJ, vecWd ] = aPoint.getDerivatives(nJacobian) # W, W * J, W * d
-      mat1 = np.eye(2)
-      iOff = nDim * (nOffset + nJacobian - 1) # first offset ('i' in u_i)     
-      iPar = 0
-      if (self.__numCurvature > 0):
-        addVectors([1], [-vecWd])         # from curvature
-        iPar += 1
-      iPar += nLocals  
-      addMatrices([1, 3], [-matWJ, mat1]) # from 1st offset
-      iPar += nDim
-      addMatrices([1], [matW])            # from 2nd offset 
-    return [vecIndex, aJacobian]
- 
+#     local offset
+      if (labOffset >= 0):
+#       derivatives for u_int      
+        prevNW = np.dot(matN, prevW)     # N * W-
+        nextNW = np.dot(matN, nextW)     # N * W+
+        prevNd = np.dot(matN, prevWd)    # N * W- * d-
+        nextNd = np.dot(matN, nextWd)    # N * W+ * d+
+        iOff = nDim * (-nOffset - 1) + nLocals + nCurv + 1 # first offset ('i' in u_i)
+        if (nCurv > 0):
+          aJacobian[labOffset:measDim, 0:1] = -prevNd - nextNd # from curvature
+          anIndex[0] = nLocals + 1
+        aJacobian[labOffset:measDim, 1:3] = prevNW
+        aJacobian[labOffset:measDim, 3:5] = nextNW
+        for i in range(nDim):
+          anIndex[1 + aDim[i]] = iOff + i
+          anIndex[3 + aDim[i]] = iOff + nDim + i
+#     local slope 
+      if (labSlope >= 0):
+#       derivatives for u'_int
+        prevWPN = np.dot(nextWJ, prevNW) # W+ * J+ * N * W-
+        nextWPN = np.dot(prevWJ, nextNW) # W- * J- * N * W+
+        prevWNd = np.dot(nextWJ, prevNd) # W+ * J+ * N * W- * d-
+        nextWNd = np.dot(prevWJ, nextNd) # W- * J- * N * W+ * d+
+        if (nCurv > 0):
+          aJacobian[labSlope:labOffset, 0:1] = prevWNd - nextWNd # from curvature
+        aJacobian[labSlope:labOffset, 1:3] = -prevWPN
+        aJacobian[labSlope:labOffset, 3:5] = nextWPN
+
+    else: # at point               
+#     anIndex must be sorted
+#     forward : iOff2 = iOff1 + nDim, index1 = 1, index2 = 3
+#     backward: iOff2 = iOff1 - nDim, index1 = 3, index2 = 1
+      iOff1 = nDim * nOffset + nCurv + nLocals + 1 # first offset ('i' in u_i)
+      index1 = 3 - 2 * nJacobian # index of first offset
+      iOff2 = iOff1 + nDim * (nJacobian * 2 - 1) # second offset ('i' in u_i)
+      index2 = 1 + 2 * nJacobian # index of second offset
+#     local offset
+      if (labOffset >= 0):
+        aJacobian[labOffset, index1] = 1.0 # from 1st Offset
+        aJacobian[labOffset + 1, index1 + 1] = 1.0
+        for i in range(nDim):
+          anIndex[index1 + aDim[i]] = iOff1 + i
+#     local slope and curvature
+      if (labSlope >= 0):
+        matW, matWJ, vecWd = aPoint.getDerivatives(nJacobian) # W, W * J, W * d
+        if (nCurv > 0):
+          aJacobian[labSlope:labOffset, 0:1] = -vecWd # from curvature
+          anIndex[0] = nLocals + 1
+        aJacobian[labSlope:labOffset, index1:index1 + 2] = -matWJ
+        aJacobian[labSlope:labOffset, index2:index2 + 2] = matW
+        for i in range(nDim):
+          anIndex[index2 + aDim[i]] = iOff2 + i  
+          
+#   local curvature
+    if (labCurv >= 0):
+      if (nCurv > 0):
+        aJacobian[labCurv, labCurv] = 1.0  
+                    
+    return anIndex, aJacobian    
+  
+  def __getFitToKinkJacobian(self, aPoint):              
+    ''' 
+    Get jacobian for transformation from (trajectory) fit to kink parameters at point.
+
+    Jacobian broken lines (q/p,..,u_i-1,u_i,u_i+1..) to kink (du') parameters.
+    @param aPoint: point to use
+    @type aPoint: GblPoint
+    @return: labels for fit parameters with non zero derivatives, corresponding transformation matrix
+    @rtype: list(vector(int), matrix(float)) 
+    '''
+    aDim = self.__dimensions
+    nDim = len(aDim)
+    nCurv = self.__numCurvature
+    nLocals = self.__numLocals        
+    nOffset = aPoint.getOffset() 
+    anIndex = [0, 0, 0, 0, 0, 0, 0]
+    aJacobian = np.zeros((2, 7))    
+
+    prevW, prevWJ, prevWd = aPoint.getDerivatives(0) # W-, W- * J-, W- * d-
+    nextW, nextWJ, nextWd = aPoint.getDerivatives(1) # W+, W+ * J+, W+ * d+
+    sumWJ = prevWJ + nextWJ         # W- * J- + W+ * J+
+    sumWd = prevWd + nextWd         # W+ * d+ + W- * d-
+    iOff = (nOffset - 1) * nDim + nCurv + nLocals + 1 # first offset ('i' in u_i)
+
+#   local offset
+    if (nCurv > 0):
+      aJacobian[:, 0:1] = -sumWd # from curvature
+      anIndex[0] = nLocals + 1      
+    aJacobian[:, 1:3] = prevW # from 1st Offset
+    aJacobian[:, 3:5] = -sumWJ # from 2nd Offset
+    aJacobian[:, 5:7] = nextW # from 3rd Offset
+    for i in range(nDim):
+      anIndex[1 + aDim[i]] = iOff + i
+      anIndex[3 + aDim[i]] = iOff + nDim + i
+      anIndex[5 + aDim[i]] = iOff + nDim * 2 + i
+        
+    return anIndex, aJacobian    
+
   def getResults(self, aLabel):
     '''
     Get results (corrections, covarinace matrix) at point in forward or backward direction.
@@ -882,15 +898,15 @@ class GblTrajectory(object):
     @return: correction vector, covarinace matrix for track parameters
     @rtype: list
     '''
-    [ anIndex, aJacobian ] = self.__getJacobian(aLabel)
+    anIndex, aJacobian = self.__getJacobian(aLabel)
     nParBRL = len(anIndex)
     aVec = np.empty(nParBRL)
     for i in range(nParBRL):
-      aVec[i] = self.__vector[anIndex[i]]         # compressed vector
+      aVec[i] = self.__vector[anIndex[i] - 1]         # compressed vector
     aMat = self.__matrix.getBlockMatrix(anIndex)  # compressed matrix
     locPar = np.dot(aJacobian, aVec) 
     locCov = np.dot(aJacobian, np.dot(aMat, aJacobian.T))
-    return [ locPar, locCov ]
+    return  locPar, locCov 
   
   def fit(self, optionList=""):
     '''
@@ -901,80 +917,108 @@ class GblTrajectory(object):
     @return: Chi2, Ndf, loss of weight from fit ([0., -1, 0.] if fit failed)
     @rtype: list
     '''
+ 
+    def defineOffsets():
+      '''
+      Define offsets from list of points.
+      '''
+# set labels for previous/next offsets
+#     first point is offset    
+      self.__points[0].setOffset(0)
+      nOffsets = 1
+#     intermediate scatterers are offsets    
+      for aPoint in self.__points[1:-1]:
+        if (aPoint.hasScatterer()):
+          aPoint.setOffset(nOffsets)
+          nOffsets += 1
+        else:  
+          aPoint.setOffset(-nOffsets)
+#     last point is offset    
+      self.__points[-1].setOffset(nOffsets)
+      self.__numOffsets = nOffsets + 1
+      self.__numParameters = self.__numOffsets * len(self.__dimensions) \
+                           + self.__numCurvature + self.__numLocals
+ 
+    def calcJacobians():
+      '''
+      Calculate Jacobians to previous/next scatterer from point to point ones.
+      '''
+      scatJacobian = np.empty((5, 5)) 
+#     forward propagation (all)
+      lastPoint = 0;
+      numStep = 0;
+      for iPoint in range(1, self.__numPoints):
+        if (numStep == 0):
+          scatJacobian = self.__points[iPoint].getP2pJacobian()
+        else: 
+          scatJacobian = np.dot(self.__points[iPoint].getP2pJacobian(), scatJacobian)
+        numStep += 1
+        self.__points[iPoint].addPrevJacobian(scatJacobian) # aPoint -> previous scatterer
+        if (self.__points[iPoint].getOffset() >= 0):
+          self.__points[lastPoint].addNextJacobian(scatJacobian) # lastPoint -> next scatterer
+          numStep = 0;
+          lastPoint = iPoint
+#     backward propagation (without scatterers)
+      numStep = 0
+      for iPoint in range(self.__numPoints - 2, 0, -1):
+        if (self.__points[iPoint].getOffset() >= 0):
+          numStep = 0;
+          continue # skip offsets
+        if (numStep == 0):
+          scatJacobian = self.__points[iPoint].getP2pJacobian()
+        else:
+          scatJacobian = np.dot(scatJacobian, self.__points[iPoint].getP2pJacobian())
+        numStep += 1
+        self.__points[iPoint].addNextJacobian(scatJacobian) # iPoint -> next scatterer
+      
     def prepare():
       '''
       Prepare fit; generate data from points.
       '''
       aDim = self.__dimensions
-      nCurv = self.__numCurvature
-      nBorder = nCurv + self.__numLocals
 # measurements
       for aPoint in self.__points:
         if (aPoint.hasMeasurement()):
-          nOffset = aPoint.getOffset()
           nLabel = aPoint.getLabel()
+          measDim = aPoint.getMeasDim()
           localDer = aPoint.getLocalDerivatives()
           globalLab = aPoint.getGlobalLabels()
           globalDer = aPoint.getGlobalDerivatives()
-          [ matP, aMeas, aPrec ] = aPoint.getMeasurement()
-          if (nOffset < 0): # need interpolation
-            [ prevW, prevWJ, prevWd ] = aPoint.getDerivatives(0) # W-, W- * J-, W- * d-
-            [ nextW, nextWJ, nextWd ] = aPoint.getDerivatives(1) # W+, W+ * J+, W+ * d+
-            sumWJ = prevWJ + nextWJ         # W- * J- + W+ * J+
-            sumWd = prevWd + nextWd         # W+ * d+ + W- * d-
-            matN = np.linalg.inv(sumWJ)     # N = (W- * J- + W+ * J+)^-1
-            matPN = np.dot(matP, matN)      # P * N
-            prevPN = np.dot(matPN, prevW)   # P * N * W-
-            nextPN = np.dot(matPN, nextW)   # P * N * W+
-            vecPNd = np.dot(matPN, sumWd)   # P * N * (W+ * d+ + W- * d-)
-            for i in range(2):
-              iPar = (-nOffset - 1) * len(aDim) + nBorder + 1
-              if (aPrec[i] > 0.):
-                aData = GblData()
-                aData.addDerivatives(nLabel, aMeas[i], aPrec[i], nCurv, -vecPNd[i], \
-                            aDim, iPar, [prevPN[i], nextPN[i]], nCurv + 1, localDer[i], \
-                            globalLab[i], globalDer[i])
-                self.__data.append(aData)
-#                aPoint.setDataMeas(i, len(self.__data)) 
-          else:
-            for i in range(2):
-              iPar = nOffset * len(aDim) + nBorder + 1
-              if (aPrec[i] > 0.):
-                aData = GblData()
-                aData.addDerivatives(nLabel, aMeas[i], aPrec[i], 0, [0.], \
-                                     aDim, iPar, [matP[i]], nCurv + 1, localDer[i], \
-                                     globalLab[i], globalDer[i])
-                self.__data.append(aData)
+          matP, aMeas, aPrec = aPoint.getMeasurement()
+          labDer, matDer = self.__getFitToLocalJacobian(aPoint, measDim)
+          matPDer = np.dot(matP, matDer)
+          for i in range(measDim):
+            if (aPrec[i] > 0.):
+              aData = GblData(nLabel, aMeas[i], aPrec[i])
+              aData.addDerivatives(i, labDer, matPDer, localDer, \
+                                   globalLab, globalDer)
+              self.__data.append(aData)
 #                aPoint.setDataMeas(i, len(self.__data)) 
 # pseudo measurements from kinks
       for aPoint in self.__points[1:-1]:
         if (aPoint.hasScatterer()):
-          nOffset = aPoint.getOffset()
           nLabel = aPoint.getLabel()        
-#          print " kink ", nLabel, nOffset
-          [ prevW, prevWJ, prevWd ] = aPoint.getDerivatives(0) # W-, W- * J-, W- * d-
-          [ nextW, nextWJ, nextWd ] = aPoint.getDerivatives(1) # W+, W+ * J+, W+ * d+
-          sumWJ = prevWJ + nextWJ         # W- * J- + W+ * J+
-          sumWd = prevWd + nextWd         # W+ * d+ + W- * d-
-          [ aMeas, aPrec ] = aPoint.getScatterer()
+          aMeas, aPrec = aPoint.getScatterer()
+          labDer, matDer = self.__getFitToKinkJacobian(aPoint)
           for i in aDim:
-            iPar = (nOffset - 1) * len(aDim) + nBorder + 1
             if (aPrec[i] > 0.):
-              aData = GblData()
-              aData.addDerivatives(nLabel, aMeas[i], aPrec[i], nCurv, -sumWd[i], \
-                                   aDim, iPar, [prevW[i], -sumWJ[i], nextW[i]])            
+              aData = GblData(nLabel, aMeas[i], aPrec[i])
+              aData.addDerivatives(i, labDer, matDer)
               self.__data.append(aData)
 #              aPoint.setDataScat(i, len(self.__data)) 
 #     external seed
       if (self.__externalPoint != 0):
-        [ index, aJacobian ] = self.__getJacobian(self.__externalPoint)
-        self.__externalIndex = index
-        aMatrix = np.dot(aJacobian.T, np.dot(self.__externalSeed[0] , aJacobian))
-        self.__externalSeed.append(aMatrix)   # add transformed matrix
-        self.__externalNdf = 0   # assume Ndf = number of non zero diagonal elements
-        for i in range(len(index)):
-          if (aMatrix[i, i] != 0.):
-            self.__externalNdf += 1 
+        externalIndex, aJacobian = self.__getJacobian(self.__externalPoint)
+        eigenVal, eigenVec = np.linalg.eigh(self.__externalSeed)
+        aMatrix = np.dot(eigenVec.T, aJacobian)
+        for i in range(len(eigenVec)):
+          if (eigenVal[i] > 0.):
+            externalDerivatives = []
+            for j in range(len(externalIndex)):
+              externalDerivatives.append(aMatrix[i, j])
+            aData = GblData(self.__externalPoint, 0., eigenVal[i])
+            aData.addExtDerivatives(externalIndex, externalDerivatives)
+            self.__data.append(aData)
 
     def buildLinearEquationSystem():
       '''
@@ -984,13 +1028,9 @@ class GblTrajectory(object):
       self.__matrix = BorderedBandMatrix(self.__numParameters, nBorder)
       self.__vector = np.zeros(self.__numParameters)
       for aData in self.__data: 
-        [ index, aVector, aMatrix ] = aData.getMatrices()
+        index, aVector, aMatrix = aData.getMatrices()
         for i in range(len(index)):
           self.__vector[ index[i] - 1 ] += aVector[0, i]        # update vector
-        self.__matrix.addBlockMatrix(index, aMatrix)            # update matrix
-      if (self.__externalSeed != []):                           # external seed
-        index = self.__externalIndex
-        aMatrix = self.__externalSeed[-1]
         self.__matrix.addBlockMatrix(index, aMatrix)            # update matrix
 
     def downWeight(aMethod):
@@ -1013,26 +1053,12 @@ class GblTrajectory(object):
       '''
       for aData in self.__data: 
         aData.setPrediction(self.__vector)
-        
-    def externalChi2():
-      '''
-      Chi2 from external seed.
-      
-      @return: Chi2
-      @rtype: float
-      '''
-      extChi2 = 0.
-      nParSeed = len(self.__externalIndex)
-      if (nParSeed > 0):
-        aVector = np.empty(nParSeed)
-        aMatrix = self.__externalSeed[-1]
-        for i in range(nParSeed):
-          aVector[i] = self.__vector[self.__externalIndex[i] - 1]
-          extChi2 = np.dot(aVector.T, np.dot(aMatrix, aVector))
-      return extChi2
-                          
-    prepare()
-    buildLinearEquationSystem()
+    
+    if (self.__data == []): # generate data from points   
+      defineOffsets()    
+      calcJacobians()                      
+      prepare()
+    buildLinearEquationSystem() # create linear equations system from data
 #
     try:
       aMethod = 0
@@ -1050,13 +1076,13 @@ class GblTrajectory(object):
         except ValueError:
           pass                  
              
-      Ndf = len(self.__data) - self.__numParameters + self.__externalNdf
-      Chi2 = externalChi2()
+      Ndf = len(self.__data) - self.__numParameters 
+      Chi2 = 0.
       for aData in self.__data: 
         Chi2 += aData.getChi2()
       Chi2 /= [1.0, 0.8737, 0.9326, 0.8228 ][aMethod]  
-      return [Chi2, Ndf, lostWeight]
+      return Chi2, Ndf, lostWeight
     
     except (ZeroDivisionError, np.linalg.linalg.LinAlgError):
-      return [ 0., -1, 0.]
+      return  0., -1, 0.
     

@@ -1,0 +1,515 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>gblnum.BorderedBandMatrix</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Project homepage -->
+      <th class="navbar" align="right" width="100%">
+        <table border="0" cellpadding="0" cellspacing="0">
+          <tr><th class="navbar" align="center"
+            >GBL</th>
+          </tr></table></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        <a href="gblnum-module.html">Module&nbsp;gblnum</a> ::
+        Class&nbsp;BorderedBandMatrix
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript:void(0);" class="privatelink"
+    onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="gblnum.BorderedBandMatrix-class.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<!-- ==================== CLASS DESCRIPTION ==================== -->
+<h1 class="epydoc">Class BorderedBandMatrix</h1><p class="nomargin-top"><span class="codelink"><a href="gblnum-pysrc.html#BorderedBandMatrix">source&nbsp;code</a></span></p>
+<pre class="base-tree">
+object --+
+         |
+        <strong class="uidshort">BorderedBandMatrix</strong>
+</pre>
+
+<hr />
+<p>(Symmetric) Bordered Band Matrix.</p>
+  <p>Separate storage of border, mixed and band parts. Example for matrix 
+  size=8 with border size and band width of two:</p>
+<pre class="literalblock">
+  +-                                 -+
+  |  B11 B12 M13 M14 M15 M16 M17 M18  |
+  |  B12 B22 M23 M24 M25 M26 M27 M28  |
+  |  M13 M23 C33 C34 C35  0.  0.  0.  |
+  |  M14 M24 C34 C44 C45 C46  0.  0.  |
+  |  M15 M25 C35 C45 C55 C56 C57  0.  |
+  |  M16 M26  0. C46 C56 C66 C67 C68  |
+  |  M17 M27  0.  0. C57 C67 C77 C78  |
+  |  M18 M28  0.  0.  0. C68 C78 C88  |
+  +-                                 -+
+</pre>
+  <p>Is stored as:</p>
+<pre class="literalblock">
+  +-         -+     +-                         -+
+  |  B11 B12  |     |  M13 M14 M15 M16 M17 M18  | 
+  |  B12 B22  |     |  M23 M24 M25 M26 M27 M28  |
+  +-         -+     +-                         -+
+  
+                    +-                         -+
+                    |  C33 C44 C55 C66 C77 C88  |
+                    |  C34 C45 C56 C67 C78  0.  |
+                    |  C35 C46 C57 C68  0.  0.  |
+                    +-                         -+
+</pre>
+
+<!-- ==================== INSTANCE METHODS ==================== -->
+<a name="section-InstanceMethods"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Instance Methods</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-InstanceMethods"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="gblnum.BorderedBandMatrix-class.html#__init__" class="summary-sig-name">__init__</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">nSize</span>,
+        <span class="summary-sig-arg">nBorder</span>=<span class="summary-sig-default">1</span>,
+        <span class="summary-sig-arg">nBand</span>=<span class="summary-sig-default">5</span>)</span><br />
+      Create new BBmatrix.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="gblnum-pysrc.html#BorderedBandMatrix.__init__">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="gblnum.BorderedBandMatrix-class.html#addBlockMatrix" class="summary-sig-name">addBlockMatrix</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">aIndex</span>,
+        <span class="summary-sig-arg">aMatrix</span>)</span><br />
+      Add (compressed) block to BBmatrix:</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="gblnum-pysrc.html#BorderedBandMatrix.addBlockMatrix">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">matrix(float)</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="gblnum.BorderedBandMatrix-class.html#getBlockMatrix" class="summary-sig-name">getBlockMatrix</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">aIndex</span>)</span><br />
+      Retrieve (compressed) block from BBmatrix:</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="gblnum-pysrc.html#BorderedBandMatrix.getBlockMatrix">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="printMatrix"></a><span class="summary-sig-name">printMatrix</span>(<span class="summary-sig-arg">self</span>)</span><br />
+      Print BBmatrix.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="gblnum-pysrc.html#BorderedBandMatrix.printMatrix">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">vector(float)</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="gblnum.BorderedBandMatrix-class.html#solveAndInvertBorderedBand" class="summary-sig-name">solveAndInvertBorderedBand</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">aRightHandSide</span>)</span><br />
+      Solve linear equation A*x=b system with BBmatrix A, calculate BB part
+      of inverse of A.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="gblnum-pysrc.html#BorderedBandMatrix.solveAndInvertBorderedBand">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2" class="summary">
+    <p class="indent-wrapped-lines"><b>Inherited from <code>object</code></b>:
+      <code>__delattr__</code>,
+      <code>__format__</code>,
+      <code>__getattribute__</code>,
+      <code>__hash__</code>,
+      <code>__new__</code>,
+      <code>__reduce__</code>,
+      <code>__reduce_ex__</code>,
+      <code>__repr__</code>,
+      <code>__setattr__</code>,
+      <code>__sizeof__</code>,
+      <code>__str__</code>,
+      <code>__subclasshook__</code>
+      </p>
+    </td>
+  </tr>
+</table>
+<!-- ==================== INSTANCE VARIABLES ==================== -->
+<a name="section-InstanceVariables"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Instance Variables</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-InstanceVariables"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr class="private">
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">int</span>
+    </td><td class="summary">
+        <a name="__numSize"></a><span class="summary-name">__numSize</span><br />
+      size of matrix
+    </td>
+  </tr>
+<tr class="private">
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">int</span>
+    </td><td class="summary">
+        <a name="__numBorder"></a><span class="summary-name">__numBorder</span><br />
+      size of border
+    </td>
+  </tr>
+<tr class="private">
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">int</span>
+    </td><td class="summary">
+        <a name="__numBand"></a><span class="summary-name">__numBand</span><br />
+      (actual) band width
+    </td>
+  </tr>
+<tr class="private">
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">int</span>
+    </td><td class="summary">
+        <a name="__numCol"></a><span class="summary-name">__numCol</span><br />
+      size of band part of matrix
+    </td>
+  </tr>
+<tr class="private">
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">matrix(float)</span>
+    </td><td class="summary">
+        <a name="__border"></a><span class="summary-name">__border</span><br />
+      border part B
+    </td>
+  </tr>
+<tr class="private">
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">matrix(float)</span>
+    </td><td class="summary">
+        <a name="__mixed"></a><span class="summary-name">__mixed</span><br />
+      mixed part M
+    </td>
+  </tr>
+<tr class="private">
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">matrix(float)</span>
+    </td><td class="summary">
+        <a name="__band"></a><span class="summary-name">__band</span><br />
+      band part C
+    </td>
+  </tr>
+</table>
+<!-- ==================== PROPERTIES ==================== -->
+<a name="section-Properties"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Properties</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-Properties"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+  <tr>
+    <td colspan="2" class="summary">
+    <p class="indent-wrapped-lines"><b>Inherited from <code>object</code></b>:
+      <code>__class__</code>
+      </p>
+    </td>
+  </tr>
+</table>
+<!-- ==================== METHOD DETAILS ==================== -->
+<a name="section-MethodDetails"></a>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Method Details</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-MethodDetails"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+</table>
+<a name="__init__"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">__init__</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">nSize</span>,
+        <span class="sig-arg">nBorder</span>=<span class="sig-default">1</span>,
+        <span class="sig-arg">nBand</span>=<span class="sig-default">5</span>)</span>
+    <br /><em class="fname">(Constructor)</em>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="gblnum-pysrc.html#BorderedBandMatrix.__init__">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Create new BBmatrix.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>nSize</code></strong> (int) - size of matrix</li>
+        <li><strong class="pname"><code>nBorder</code></strong> (int) - size of border (default: 1, 'curvature')</li>
+        <li><strong class="pname"><code>nBand</code></strong> (int) - (maximal) band width (5)</li>
+    </ul></dd>
+    <dt>Overrides:
+        object.__init__
+    </dt>
+  </dl>
+</td></tr></table>
+</div>
+<a name="addBlockMatrix"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">addBlockMatrix</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">aIndex</span>,
+        <span class="sig-arg">aMatrix</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="gblnum-pysrc.html#BorderedBandMatrix.addBlockMatrix">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Add (compressed) block to BBmatrix:</p>
+<pre class="literalblock">
+ BBmatrix(aIndex(i),aIndex(j)) += aMatrix(i,j)
+</pre>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>aIndex</code></strong> (list(int)) - list of indices</li>
+        <li><strong class="pname"><code>aMatrix</code></strong> (matrix(float)) - (compressed) matrix</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="getBlockMatrix"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">getBlockMatrix</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">aIndex</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="gblnum-pysrc.html#BorderedBandMatrix.getBlockMatrix">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Retrieve (compressed) block from BBmatrix:</p>
+<pre class="literalblock">
+ aMatrix(i,j) = BBmatrix(aIndex(i),aIndex(j))
+</pre>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>aIndex</code></strong> (list(int)) - list of indices</li>
+    </ul></dd>
+    <dt>Returns: matrix(float)</dt>
+        <dd>(compressed) matrix</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="solveAndInvertBorderedBand"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">solveAndInvertBorderedBand</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">aRightHandSide</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="gblnum-pysrc.html#BorderedBandMatrix.solveAndInvertBorderedBand">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Solve linear equation A*x=b system with BBmatrix A, calculate BB part 
+  of inverse of A.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>aRightHandSide</code></strong> (vector(float)) - right hand side 'b' of linear equation system</li>
+    </ul></dd>
+    <dt>Returns: vector(float)</dt>
+        <dd>solution</dd>
+    <dt>Raises:</dt>
+    <dd><ul class="nomargin-top">
+        <li><code><strong class='fraise'>ZeroDivisionError</strong></code> - Band matrix is not positive definite</li>
+    </ul></dd>
+  </dl>
+<div class="fields">      <p><strong>Note:</strong>
+        BBmatrix is replaced by BB part of it's inverse
+      </p>
+</div></td></tr></table>
+</div>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Project homepage -->
+      <th class="navbar" align="right" width="100%">
+        <table border="0" cellpadding="0" cellspacing="0">
+          <tr><th class="navbar" align="center"
+            >GBL</th>
+          </tr></table></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">
+    Generated by Epydoc 3.0.1 on Thu Mar  1 20:14:01 2012
+    </td>
+    <td align="right" class="footer">
+      <a target="mainFrame" href="http://epydoc.sourceforge.net"
+        >http://epydoc.sourceforge.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie();
+  // -->
+</script>
+</body>
+</html>

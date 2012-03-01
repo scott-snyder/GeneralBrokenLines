@@ -74,7 +74,7 @@ class MilleRecord(object):
       self.__glder.append(0.) 
     self.__numData += 1     
  
-    [aMeas, aPrec, indLocal, derLocal, labGlobal, derGlobal] = dataList
+    aMeas, aPrec, indLocal, derLocal, labGlobal, derGlobal = dataList
     self.__inder.append(0)
     self.__glder.append(aMeas)
     self.__inder.fromlist(indLocal)
@@ -103,44 +103,9 @@ class MilleRecord(object):
     for i in range(self.__iErr + 1, self.__position):
       indGlobal.append(self.__inder[i])
       derGlobal.append(self.__glder[i])    
-    return [ aMeas, aPrec, indLocal, derLocal, indGlobal, derGlobal ]   
+    return aMeas, aPrec, indLocal, derLocal, indGlobal, derGlobal   
     
-  def addSpecial(self, iSpecial, gSpecial, aTag=0):
-    '''
-    Add special data block to record::
-
-         real array              integer array    
-         0.0                     0    
-         -float(NSP)-0.1*tag     0   ! indicates special data of length NSP
-         following NSP floating and NSP integer data
-    
-    @param iSpecial: list of labels
-    @type  iSpecial: list(int)
-    @param gSpecial: list of values
-    @type  gSpecial: list(float)
-    @param aTag: tag (1: external seed (matrix))
-    @type  aTag: int
-    '''
-    self.__inder.append(0)
-    self.__glder.append(0.)
-    self.__inder.append(0)
-    self.__glder.append(-len(iSpecial) - 0.1 * aTag)
-    self.__inder.fromlist(iSpecial)
-    self.__glder.fromlist(gSpecial)
-    
-  def getSpecial(self):
-    '''
-    Get special data block from current position.
-    
-    @return: special data block (list of labels, list of values)
-    @rtype: list
-    '''
-    iSpecial = []
-    gSpecial = []
-    for i in range(self.__iErr + 1, self.__position):
-      iSpecial.append(self.__inder[i])
-      gSpecial.append(self.__glder[i])    
-    return [ iSpecial, gSpecial ]         
+ 
     
   def printRecord(self):
     '''
