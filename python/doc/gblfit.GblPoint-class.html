@@ -1,0 +1,1192 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>gblfit.GblPoint</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Project homepage -->
+      <th class="navbar" align="right" width="100%">
+        <table border="0" cellpadding="0" cellspacing="0">
+          <tr><th class="navbar" align="center"
+            >GBL</th>
+          </tr></table></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        <a href="gblfit-module.html">Module&nbsp;gblfit</a> ::
+        Class&nbsp;GblPoint
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript:void(0);" class="privatelink"
+    onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="gblfit.GblPoint-class.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<!-- ==================== CLASS DESCRIPTION ==================== -->
+<h1 class="epydoc">Class GblPoint</h1><p class="nomargin-top"><span class="codelink"><a href="gblfit-pysrc.html#GblPoint">source&nbsp;code</a></span></p>
+<pre class="base-tree">
+object --+
+         |
+        <strong class="uidshort">GblPoint</strong>
+</pre>
+
+<hr />
+<p>User supplied point on (initial) trajectory.</p>
+  <p>Must have jacobians for propagation to previous or next point with 
+  offsets (first, last point, points with scatterer). May have:</p>
+  <ol start="1">
+    <li>
+      Measurement (1D or 2D)
+    </li>
+    <li>
+      Scatterer (thin, 2D kinks)
+    </li>
+    <li>
+      Additional local parameters (with derivatives). Fitted together with 
+      track parameters.
+    </li>
+    <li>
+      Additional global parameters (with labels and derivatives). Not 
+      fitted, only passed on to (binary) file for fitting with 
+      Millepede-II.
+    </li>
+  </ol>
+
+<!-- ==================== INSTANCE METHODS ==================== -->
+<a name="section-InstanceMethods"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Instance Methods</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-InstanceMethods"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="gblfit.GblPoint-class.html#__init__" class="summary-sig-name">__init__</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">aJacobian</span>)</span><br />
+      Create new point.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="gblfit-pysrc.html#GblPoint.__init__">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="gblfit.GblPoint-class.html#addMeasurement" class="summary-sig-name">addMeasurement</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">aMeasurement</span>)</span><br />
+      Add a mesurement to a point.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="gblfit-pysrc.html#GblPoint.addMeasurement">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">bool</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="hasMeasurement"></a><span class="summary-sig-name">hasMeasurement</span>(<span class="summary-sig-arg">self</span>)</span><br />
+      Check point for a measurement.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="gblfit-pysrc.html#GblPoint.hasMeasurement">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">list(matrix(float))</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="gblfit.GblPoint-class.html#getMeasurement" class="summary-sig-name">getMeasurement</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Retrieve measurement of a point.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="gblfit-pysrc.html#GblPoint.getMeasurement">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">int</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="gblfit.GblPoint-class.html#getMeasDim" class="summary-sig-name">getMeasDim</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Retrieve dimension of measurement of a point.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="gblfit-pysrc.html#GblPoint.getMeasDim">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="gblfit.GblPoint-class.html#addScatterer" class="summary-sig-name">addScatterer</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">aScatterer</span>)</span><br />
+      Add a (thin) scatterer to a point.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="gblfit-pysrc.html#GblPoint.addScatterer">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">bool</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="hasScatterer"></a><span class="summary-sig-name">hasScatterer</span>(<span class="summary-sig-arg">self</span>)</span><br />
+      Check point for a scatterer.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="gblfit-pysrc.html#GblPoint.hasScatterer">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">list(matrix(float))</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="gblfit.GblPoint-class.html#getScatterer" class="summary-sig-name">getScatterer</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Retrieve scatterer of a point.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="gblfit-pysrc.html#GblPoint.getScatterer">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="gblfit.GblPoint-class.html#addLocals" class="summary-sig-name">addLocals</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">derivatives</span>)</span><br />
+      Add local derivatives.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="gblfit-pysrc.html#GblPoint.addLocals">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="gblfit.GblPoint-class.html#addGlobals" class="summary-sig-name">addGlobals</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">labels</span>,
+        <span class="summary-sig-arg">derivatives</span>)</span><br />
+      Add global derivatives.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="gblfit-pysrc.html#GblPoint.addGlobals">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">int</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="gblfit.GblPoint-class.html#getNumLocals" class="summary-sig-name">getNumLocals</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Get number of local derivatives.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="gblfit-pysrc.html#GblPoint.getNumLocals">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">matrix(float)</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="gblfit.GblPoint-class.html#getLocalDerivatives" class="summary-sig-name">getLocalDerivatives</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Get local derivatives.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="gblfit-pysrc.html#GblPoint.getLocalDerivatives">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">matrix(int)</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="gblfit.GblPoint-class.html#getGlobalLabels" class="summary-sig-name">getGlobalLabels</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Get global labels.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="gblfit-pysrc.html#GblPoint.getGlobalLabels">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">matrix(float)</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="gblfit.GblPoint-class.html#getGlobalDerivatives" class="summary-sig-name">getGlobalDerivatives</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Get global derivatives.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="gblfit-pysrc.html#GblPoint.getGlobalDerivatives">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="gblfit.GblPoint-class.html#setLabel" class="summary-sig-name">setLabel</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">aLabel</span>)</span><br />
+      Define label of a point.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="gblfit-pysrc.html#GblPoint.setLabel">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">int</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="gblfit.GblPoint-class.html#getLabel" class="summary-sig-name">getLabel</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Retrieve label of a point.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="gblfit-pysrc.html#GblPoint.getLabel">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="gblfit.GblPoint-class.html#setOffset" class="summary-sig-name">setOffset</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">anOffset</span>)</span><br />
+      Define offset of a point and references to previous and next point 
+      with offset.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="gblfit-pysrc.html#GblPoint.setOffset">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">int</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="gblfit.GblPoint-class.html#getOffset" class="summary-sig-name">getOffset</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Get offset of a point.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="gblfit-pysrc.html#GblPoint.getOffset">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">matrix(float)</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="gblfit.GblPoint-class.html#getP2pJacobian" class="summary-sig-name">getP2pJacobian</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Retrieve jacobian of a point.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="gblfit-pysrc.html#GblPoint.getP2pJacobian">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="gblfit.GblPoint-class.html#addPrevJacobian" class="summary-sig-name">addPrevJacobian</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">aJacobian</span>)</span><br />
+      Add jacobian to previous offset.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="gblfit-pysrc.html#GblPoint.addPrevJacobian">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="gblfit.GblPoint-class.html#addNextJacobian" class="summary-sig-name">addNextJacobian</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">aJacobian</span>)</span><br />
+      Add jacobian to next offset.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="gblfit-pysrc.html#GblPoint.addNextJacobian">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">list(matrix(float))</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="gblfit.GblPoint-class.html#getDerivatives" class="summary-sig-name">getDerivatives</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">index</span>)</span><br />
+      Get derivatives for locally linearized track model (backward or 
+      forward propagation).</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="gblfit-pysrc.html#GblPoint.getDerivatives">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="printPoint"></a><span class="summary-sig-name">printPoint</span>(<span class="summary-sig-arg">self</span>)</span><br />
+      Print point.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="gblfit-pysrc.html#GblPoint.printPoint">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2" class="summary">
+    <p class="indent-wrapped-lines"><b>Inherited from <code>object</code></b>:
+      <code>__delattr__</code>,
+      <code>__format__</code>,
+      <code>__getattribute__</code>,
+      <code>__hash__</code>,
+      <code>__new__</code>,
+      <code>__reduce__</code>,
+      <code>__reduce_ex__</code>,
+      <code>__repr__</code>,
+      <code>__setattr__</code>,
+      <code>__sizeof__</code>,
+      <code>__str__</code>,
+      <code>__subclasshook__</code>
+      </p>
+    </td>
+  </tr>
+</table>
+<!-- ==================== INSTANCE VARIABLES ==================== -->
+<a name="section-InstanceVariables"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Instance Variables</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-InstanceVariables"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr class="private">
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">int</span>
+    </td><td class="summary">
+        <a name="__label"></a><span class="summary-name">__label</span><br />
+      label for referencing point (0,1,..,number(points)-1)
+    </td>
+  </tr>
+<tr class="private">
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">int</span>
+    </td><td class="summary">
+        <a name="__offset"></a><span class="summary-name">__offset</span><br />
+      &gt;=0: offset number at point, &lt;0: offset number at next point 
+      with offset
+    </td>
+  </tr>
+<tr class="private">
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">matrix(float)</span>
+    </td><td class="summary">
+        <a name="__p2pJacobian"></a><span class="summary-name">__p2pJacobian</span><br />
+      Point-to-point jacobian from previous point
+    </td>
+  </tr>
+<tr class="private">
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">pair(matrix(float))</span>
+    </td><td class="summary">
+        <a name="__jacobians"></a><span class="summary-name">__jacobians</span><br />
+      jacobians for propagation to previous or next point with offsets
+    </td>
+  </tr>
+<tr class="private">
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">list(matrix(float))</span>
+    </td><td class="summary">
+        <a name="__measurement"></a><span class="summary-name">__measurement</span><br />
+      measurement at point: projection (dm/du), residuals (to initial 
+      trajectory), precision
+    </td>
+  </tr>
+<tr class="private">
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">int</span>
+    </td><td class="summary">
+        <a name="__measDim"></a><span class="summary-name">__measDim</span><br />
+      dimension of measurement (2D, 4D or 5D)
+    </td>
+  </tr>
+<tr class="private">
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">matrix(float))</span>
+    </td><td class="summary">
+        <a name="__measTransformation"></a><span class="summary-name">__measTransformation</span><br />
+      transformation (to eigen-vectors of precision matrix)
+    </td>
+  </tr>
+<tr class="private">
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">matrix(float)</span>
+    </td><td class="summary">
+        <a name="__scatterer"></a><span class="summary-name">__scatterer</span><br />
+      scatterer at point: initial kinks, precision (inverse covariance 
+      matrix)
+    </td>
+  </tr>
+<tr class="private">
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">matrix(float))</span>
+    </td><td class="summary">
+        <a name="__localDerivatives"></a><span class="summary-name">__localDerivatives</span><br />
+      local derivatives
+    </td>
+  </tr>
+<tr class="private">
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">matrix(int)</span>
+    </td><td class="summary">
+        <a name="__globalLabels"></a><span class="summary-name">__globalLabels</span><br />
+      global labels
+    </td>
+  </tr>
+<tr class="private">
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">matrix(float)</span>
+    </td><td class="summary">
+        <a name="__globalDerivatives"></a><span class="summary-name">__globalDerivatives</span><br />
+      global derivatives
+    </td>
+  </tr>
+</table>
+<!-- ==================== PROPERTIES ==================== -->
+<a name="section-Properties"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Properties</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-Properties"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+  <tr>
+    <td colspan="2" class="summary">
+    <p class="indent-wrapped-lines"><b>Inherited from <code>object</code></b>:
+      <code>__class__</code>
+      </p>
+    </td>
+  </tr>
+</table>
+<!-- ==================== METHOD DETAILS ==================== -->
+<a name="section-MethodDetails"></a>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Method Details</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-MethodDetails"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+</table>
+<a name="__init__"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">__init__</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">aJacobian</span>)</span>
+    <br /><em class="fname">(Constructor)</em>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="gblfit-pysrc.html#GblPoint.__init__">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Create new point.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>aJacobian</code></strong> - jacobian from previous point @type matrix(float)</li>
+    </ul></dd>
+    <dt>Overrides:
+        object.__init__
+    </dt>
+  </dl>
+</td></tr></table>
+</div>
+<a name="addMeasurement"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">addMeasurement</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">aMeasurement</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="gblfit-pysrc.html#GblPoint.addMeasurement">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Add a mesurement to a point.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>aMeasurement</code></strong> (list(matrix(float))) - measurement (projection (or None), residuals, precision (diagonal
+          of or full matrix))</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="getMeasurement"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">getMeasurement</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="gblfit-pysrc.html#GblPoint.getMeasurement">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Retrieve measurement of a point.</p>
+  <dl class="fields">
+    <dt>Returns: list(matrix(float))</dt>
+        <dd>measurement (projection residuals, precision)</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="getMeasDim"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">getMeasDim</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="gblfit-pysrc.html#GblPoint.getMeasDim">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Retrieve dimension of measurement of a point.</p>
+  <dl class="fields">
+    <dt>Returns: int</dt>
+        <dd>measurement dimension (2, 4 or 5)</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="addScatterer"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">addScatterer</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">aScatterer</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="gblfit-pysrc.html#GblPoint.addScatterer">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Add a (thin) scatterer to a point.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>aScatterer</code></strong> (list(matrix(float))) - scatterer (kinks, precision)</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="getScatterer"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">getScatterer</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="gblfit-pysrc.html#GblPoint.getScatterer">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Retrieve scatterer of a point.</p>
+  <dl class="fields">
+    <dt>Returns: list(matrix(float))</dt>
+        <dd>scatterer (kinks, precision)</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="addLocals"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">addLocals</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">derivatives</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="gblfit-pysrc.html#GblPoint.addLocals">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Add local derivatives.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>derivatives</code></strong> (matrix(float)) - local derivatives</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="addGlobals"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">addGlobals</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">labels</span>,
+        <span class="sig-arg">derivatives</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="gblfit-pysrc.html#GblPoint.addGlobals">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Add global derivatives.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>labels</code></strong> (matrix(int)) - global labels</li>
+        <li><strong class="pname"><code>derivatives</code></strong> (matrix(float)) - global derivatives</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="getNumLocals"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">getNumLocals</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="gblfit-pysrc.html#GblPoint.getNumLocals">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Get number of local derivatives.</p>
+  <dl class="fields">
+    <dt>Returns: int</dt>
+        <dd>Number of local derivatives at point</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="getLocalDerivatives"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">getLocalDerivatives</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="gblfit-pysrc.html#GblPoint.getLocalDerivatives">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Get local derivatives.</p>
+  <dl class="fields">
+    <dt>Returns: matrix(float)</dt>
+        <dd>local derivatives</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="getGlobalLabels"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">getGlobalLabels</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="gblfit-pysrc.html#GblPoint.getGlobalLabels">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Get global labels.</p>
+  <dl class="fields">
+    <dt>Returns: matrix(int)</dt>
+        <dd>lglobal labels</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="getGlobalDerivatives"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">getGlobalDerivatives</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="gblfit-pysrc.html#GblPoint.getGlobalDerivatives">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Get global derivatives.</p>
+  <dl class="fields">
+    <dt>Returns: matrix(float)</dt>
+        <dd>global derivatives</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="setLabel"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">setLabel</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">aLabel</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="gblfit-pysrc.html#GblPoint.setLabel">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Define label of a point.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>aLabel</code></strong> (int) - label</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="getLabel"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">getLabel</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="gblfit-pysrc.html#GblPoint.getLabel">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Retrieve label of a point.</p>
+  <dl class="fields">
+    <dt>Returns: int</dt>
+        <dd>label</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="setOffset"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">setOffset</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">anOffset</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="gblfit-pysrc.html#GblPoint.setOffset">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Define offset of a point and references to previous and next point 
+  with offset.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>anOffset</code></strong> (int) - offset number (at point (&gt;=0) or at next point with offset 
+          (&lt;0))</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="getOffset"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">getOffset</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="gblfit-pysrc.html#GblPoint.getOffset">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Get offset of a point.</p>
+  <dl class="fields">
+    <dt>Returns: int</dt>
+        <dd>offset number (at point (&gt;=0) or at next point with offset 
+          (&lt;0))</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="getP2pJacobian"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">getP2pJacobian</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="gblfit-pysrc.html#GblPoint.getP2pJacobian">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Retrieve jacobian of a point.</p>
+  <dl class="fields">
+    <dt>Returns: matrix(float)</dt>
+        <dd>point-to-point jacobian (from previous point)</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="addPrevJacobian"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">addPrevJacobian</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">aJacobian</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="gblfit-pysrc.html#GblPoint.addPrevJacobian">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Add jacobian to previous offset.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>aJacobian</code></strong> (matrix(float)) - jacobian for propagation to previous point with offsets</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="addNextJacobian"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">addNextJacobian</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">aJacobian</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="gblfit-pysrc.html#GblPoint.addNextJacobian">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Add jacobian to next offset.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>aJacobian</code></strong> (matrix(float)) - jacobian for propagation to next point with offsets</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="getDerivatives"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">getDerivatives</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">index</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="gblfit-pysrc.html#GblPoint.getDerivatives">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Get derivatives for locally linearized track model (backward or 
+  forward propagation).</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>index</code></strong> (int) - 0 (previous) or 1 (next point with offsets)</li>
+    </ul></dd>
+    <dt>Returns: list(matrix(float))</dt>
+        <dd>derivatives</dd>
+  </dl>
+</td></tr></table>
+</div>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Project homepage -->
+      <th class="navbar" align="right" width="100%">
+        <table border="0" cellpadding="0" cellspacing="0">
+          <tr><th class="navbar" align="center"
+            >GBL</th>
+          </tr></table></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">
+    Generated by Epydoc 3.0.1 on Thu Mar  1 20:14:01 2012
+    </td>
+    <td align="right" class="footer">
+      <a target="mainFrame" href="http://epydoc.sourceforge.net"
+        >http://epydoc.sourceforge.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie();
+  // -->
+</script>
+</body>
+</html>

@@ -1,0 +1,926 @@
+<?xml version="1.0" encoding="ascii"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN"
+          "DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+  <title>gblfit.GblTrajectory</title>
+  <link rel="stylesheet" href="epydoc.css" type="text/css" />
+  <script type="text/javascript" src="epydoc.js"></script>
+</head>
+
+<body bgcolor="white" text="black" link="blue" vlink="#204080"
+      alink="#204080">
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Project homepage -->
+      <th class="navbar" align="right" width="100%">
+        <table border="0" cellpadding="0" cellspacing="0">
+          <tr><th class="navbar" align="center"
+            >GBL</th>
+          </tr></table></th>
+  </tr>
+</table>
+<table width="100%" cellpadding="0" cellspacing="0">
+  <tr valign="top">
+    <td width="100%">
+      <span class="breadcrumbs">
+        <a href="gblfit-module.html">Module&nbsp;gblfit</a> ::
+        Class&nbsp;GblTrajectory
+      </span>
+    </td>
+    <td>
+      <table cellpadding="0" cellspacing="0">
+        <!-- hide/show private -->
+        <tr><td align="right"><span class="options">[<a href="javascript:void(0);" class="privatelink"
+    onclick="toggle_private();">hide&nbsp;private</a>]</span></td></tr>
+        <tr><td align="right"><span class="options"
+            >[<a href="frames.html" target="_top">frames</a
+            >]&nbsp;|&nbsp;<a href="gblfit.GblTrajectory-class.html"
+            target="_top">no&nbsp;frames</a>]</span></td></tr>
+      </table>
+    </td>
+  </tr>
+</table>
+<!-- ==================== CLASS DESCRIPTION ==================== -->
+<h1 class="epydoc">Class GblTrajectory</h1><p class="nomargin-top"><span class="codelink"><a href="gblfit-pysrc.html#GblTrajectory">source&nbsp;code</a></span></p>
+<pre class="base-tree">
+object --+
+         |
+        <strong class="uidshort">GblTrajectory</strong>
+</pre>
+
+<hr />
+<h1 class="heading">General Broken Lines Trajectory.</h1>
+    <p>For a track with an initial trajectory from a prefit of the (2D, 4D 
+    or 5D) measurements (internal seed) or an external prediction(external 
+    seed) the description of multiple scattering is added by offsets in a 
+    local system. Along the initial trajectory points are defined with can 
+    describe a measurement or a (thin) scatterer or both. The refit 
+    provides corrections to the local track parameters (in the local 
+    system) and the corresponding covariance matrix at any of those 
+    points.</p>
+    <p>The broken lines trajectory is defined by (2D) offsets at the first 
+    and last point and all points with a scatterer. The prediction for a 
+    measurement is obtained by interpolation of the enclosing offsets and 
+    for triplets of adjacent offsets kink angles are determined. This 
+    requires for all points the jacobians for propagation to the previous 
+    and next offset.</p>
+    <p>Additional local or global parameters can be added and the 
+    trajectories can be written to special binary files for calibration and
+    alignment with Millepede-II. (V. Blobel, NIM A, 566 (2006), pp. 
+    5-13).</p>
+    <p>The conventions for the coordinate systems follow: Derivation of 
+    Jacobians for the propagation of covariance matrices of track 
+    parameters in homogeneous magnetic fields A. Strandlie, W. Wittek, NIM 
+    A, 566 (2006) 687-698.</p>
+  <h1 class="heading">Calling sequence:</h1>
+    <ol start="1">
+      <li>
+        Create trajectory:
+<pre class="literalblock">
+       traj = GblTrajectory()
+</pre>
+      </li>
+      <li>
+        For all points on initial trajectory
+        <ul>
+          <li>
+            Create point (supply jacobian from previous point):
+<pre class="literalblock">
+   point = GblPoint(jacobian)
+</pre>
+          </li>
+          <li>
+            Optionally add measurement to point:
+<pre class="literalblock">
+   point.addMeasurement(..)
+</pre>
+          </li>
+          <li>
+            Optionally additional local or global parameters for 
+            measurement:
+<pre class="literalblock">
+   point.addLocals(..)
+   point.addGlobals(..)
+</pre>
+          </li>
+          <li>
+            Optionally add scatterer to point:
+<pre class="literalblock">
+   point.addScatterer(..)
+</pre>
+          </li>
+          <li>
+            Add point (ordered by arc length) to trajectory, get label of 
+            point:
+<pre class="literalblock">
+   label = traj.addPoint(point)
+</pre>
+          </li>
+        </ul>
+      </li>
+      <li>
+        Optionally add external seed:
+<pre class="literalblock">
+       traj.addExternalSeed(..)
+</pre>
+      </li>
+      <li>
+        Fit trajectory, bet Chi2, Ndf (and weight lost by M-estimators):
+<pre class="literalblock">
+       [..] = traj.fit()
+</pre>
+      </li>
+      <li>
+        For any point on inital trajectory
+        <ul>
+          <li>
+            Get corrections and covariance matrix for track parameters:
+<pre class="literalblock">
+   [..] = traj.getResults(label) 
+</pre>
+          </li>
+        </ul>
+      </li>
+      <li>
+        Optionally write trajectory to MP binary file:
+<pre class="literalblock">
+       traj.milleOut(..)
+</pre>
+      </li>
+    </ol>
+    <p>Alternatively trajectories can by read from MP binary files and 
+    fitted. As the points on the initial trajectory are not stored in this 
+    files results at points (corrections, covariance matrix) are not 
+    available.</p>
+  <h1 class="heading">References:</h1>
+    <ul>
+      <li>
+        V. Blobel, C. Kleinwort, F. Meier, Fast alignment of a complex 
+        tracking detector using advanced track models, Computer Phys. 
+        Communications (2011), doi:10.1016/j.cpc.2011.03.017
+      </li>
+      <li>
+        C. Kleinwort, General Broken Lines as advanced track fitting 
+        method, NIM A, 673 (2012), 107-110, doi:10.1016/j.nima.2012.01.024
+      </li>
+    </ul>
+
+<!-- ==================== INSTANCE METHODS ==================== -->
+<a name="section-InstanceMethods"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Instance Methods</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-InstanceMethods"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="gblfit.GblTrajectory-class.html#__init__" class="summary-sig-name">__init__</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">hasCurv</span>=<span class="summary-sig-default">True</span>,
+        <span class="summary-sig-arg">aDim</span>=<span class="summary-sig-default"><code class="variable-group">[</code>0<code class="variable-op">, </code>1<code class="variable-group">]</code></span>)</span><br />
+      Create new trajectory.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="gblfit-pysrc.html#GblTrajectory.__init__">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">int</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="gblfit.GblTrajectory-class.html#addPoint" class="summary-sig-name">addPoint</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">point</span>)</span><br />
+      Add point to trajectory.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="gblfit-pysrc.html#GblTrajectory.addPoint">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">int</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="gblfit.GblTrajectory-class.html#getNumPoints" class="summary-sig-name">getNumPoints</a>(<span class="summary-sig-arg">self</span>)</span><br />
+      Get number of points on trajectory.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="gblfit-pysrc.html#GblTrajectory.getNumPoints">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="gblfit.GblTrajectory-class.html#addExternalSeed" class="summary-sig-name">addExternalSeed</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">aLabel</span>,
+        <span class="summary-sig-arg">aSeed</span>)</span><br />
+      Add external seed to trajectory.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="gblfit-pysrc.html#GblTrajectory.addExternalSeed">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a name="dump"></a><span class="summary-sig-name">dump</span>(<span class="summary-sig-arg">self</span>)</span><br />
+      Dump trajectory.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="gblfit-pysrc.html#GblTrajectory.dump">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="gblfit.GblTrajectory-class.html#milleOut" class="summary-sig-name">milleOut</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">aFile</span>)</span><br />
+      Write (data blocks of) trajectory to MP (binary) file.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="gblfit-pysrc.html#GblTrajectory.milleOut">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">&nbsp;</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="gblfit.GblTrajectory-class.html#milleIn" class="summary-sig-name">milleIn</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">aFile</span>)</span><br />
+      Read (data blocks of) trajectory from MP (binary) file.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="gblfit-pysrc.html#GblTrajectory.milleIn">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr class="private">
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">list</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="gblfit.GblTrajectory-class.html#__getJacobian" class="summary-sig-name" onclick="show_private();">__getJacobian</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">aLabel</span>)</span><br />
+      Get jacobian for transformation from fit to track parameters at 
+      point.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="gblfit-pysrc.html#GblTrajectory.__getJacobian">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr class="private">
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">list(vector(int), matrix(float))</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="gblfit.GblTrajectory-class.html#__getFitToLocalJacobian" class="summary-sig-name" onclick="show_private();">__getFitToLocalJacobian</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">aPoint</span>,
+        <span class="summary-sig-arg">measDim</span>,
+        <span class="summary-sig-arg">nJacobian</span>=<span class="summary-sig-default">1</span>)</span><br />
+      Get (part of) jacobian for transformation from (trajectory) fit to 
+      track parameters at point.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="gblfit-pysrc.html#GblTrajectory.__getFitToLocalJacobian">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr class="private">
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">list(vector(int), matrix(float))</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="gblfit.GblTrajectory-class.html#__getFitToKinkJacobian" class="summary-sig-name" onclick="show_private();">__getFitToKinkJacobian</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">aPoint</span>)</span><br />
+      Get jacobian for transformation from (trajectory) fit to kink 
+      parameters at point.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="gblfit-pysrc.html#GblTrajectory.__getFitToKinkJacobian">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">list</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="gblfit.GblTrajectory-class.html#getResults" class="summary-sig-name">getResults</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">aLabel</span>)</span><br />
+      Get results (corrections, covarinace matrix) at point in forward or 
+      backward direction.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="gblfit-pysrc.html#GblTrajectory.getResults">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+<tr>
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">list</span>
+    </td><td class="summary">
+      <table width="100%" cellpadding="0" cellspacing="0" border="0">
+        <tr>
+          <td><span class="summary-sig"><a href="gblfit.GblTrajectory-class.html#fit" class="summary-sig-name">fit</a>(<span class="summary-sig-arg">self</span>,
+        <span class="summary-sig-arg">optionList</span>=<span class="summary-sig-default"><code class="variable-quote">'</code><code class="variable-string"></code><code class="variable-quote">'</code></span>)</span><br />
+      Perform fit of trajectory.</td>
+          <td align="right" valign="top">
+            <span class="codelink"><a href="gblfit-pysrc.html#GblTrajectory.fit">source&nbsp;code</a></span>
+            
+          </td>
+        </tr>
+      </table>
+      
+    </td>
+  </tr>
+  <tr>
+    <td colspan="2" class="summary">
+    <p class="indent-wrapped-lines"><b>Inherited from <code>object</code></b>:
+      <code>__delattr__</code>,
+      <code>__format__</code>,
+      <code>__getattribute__</code>,
+      <code>__hash__</code>,
+      <code>__new__</code>,
+      <code>__reduce__</code>,
+      <code>__reduce_ex__</code>,
+      <code>__repr__</code>,
+      <code>__setattr__</code>,
+      <code>__sizeof__</code>,
+      <code>__str__</code>,
+      <code>__subclasshook__</code>
+      </p>
+    </td>
+  </tr>
+</table>
+<!-- ==================== INSTANCE VARIABLES ==================== -->
+<a name="section-InstanceVariables"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Instance Variables</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-InstanceVariables"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+<tr class="private">
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">int</span>
+    </td><td class="summary">
+        <a name="__numPoints"></a><span class="summary-name">__numPoints</span><br />
+      number of points on trajectory
+    </td>
+  </tr>
+<tr class="private">
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">int</span>
+    </td><td class="summary">
+        <a name="__numOffsets"></a><span class="summary-name">__numOffsets</span><br />
+      number of (points with) offsets on trajectory
+    </td>
+  </tr>
+<tr class="private">
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">int</span>
+    </td><td class="summary">
+        <a name="__numCurvature"></a><span class="summary-name">__numCurvature</span><br />
+      'curvature' is fit parameter (=1)
+    </td>
+  </tr>
+<tr class="private">
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">int</span>
+    </td><td class="summary">
+        <a name="__numParameters"></a><span class="summary-name">__numParameters</span><br />
+      number fit parameters
+    </td>
+  </tr>
+<tr class="private">
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">int</span>
+    </td><td class="summary">
+        <a name="__numLocals"></a><span class="summary-name">__numLocals</span><br />
+      number of local parameters
+    </td>
+  </tr>
+<tr class="private">
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">int</span>
+    </td><td class="summary">
+        <a name="__externalPoint"></a><span class="summary-name">__externalPoint</span><br />
+      label of point with external seed
+    </td>
+  </tr>
+<tr class="private">
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">list(int)</span>
+    </td><td class="summary">
+        <a name="__dimensions"></a><span class="summary-name">__dimensions</span><br />
+      active components of offsets (both ([0,1]) or single ([0] or [1])
+    </td>
+  </tr>
+<tr class="private">
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">list(GblPoint)</span>
+    </td><td class="summary">
+        <a name="__points"></a><span class="summary-name">__points</span><br />
+      points on trajectory
+    </td>
+  </tr>
+<tr class="private">
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">list(GblData)</span>
+    </td><td class="summary">
+        <a name="__data"></a><span class="summary-name">__data</span><br />
+      data (blocks) of trajectory
+    </td>
+  </tr>
+<tr class="private">
+    <td width="15%" align="right" valign="top" class="summary">
+      <span class="summary-type">matrix(float)</span>
+    </td><td class="summary">
+        <a name="__externalSeed"></a><span class="summary-name">__externalSeed</span><br />
+      external seed (for local, fit parameters)
+    </td>
+  </tr>
+</table>
+<!-- ==================== PROPERTIES ==================== -->
+<a name="section-Properties"></a>
+<table class="summary" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Properties</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-Properties"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+  <tr>
+    <td colspan="2" class="summary">
+    <p class="indent-wrapped-lines"><b>Inherited from <code>object</code></b>:
+      <code>__class__</code>
+      </p>
+    </td>
+  </tr>
+</table>
+<!-- ==================== METHOD DETAILS ==================== -->
+<a name="section-MethodDetails"></a>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr bgcolor="#70b0f0" class="table-header">
+  <td colspan="2" class="table-header">
+    <table border="0" cellpadding="0" cellspacing="0" width="100%">
+      <tr valign="top">
+        <td align="left"><span class="table-header">Method Details</span></td>
+        <td align="right" valign="top"
+         ><span class="options">[<a href="#section-MethodDetails"
+         class="privatelink" onclick="toggle_private();"
+         >hide private</a>]</span></td>
+      </tr>
+    </table>
+  </td>
+</tr>
+</table>
+<a name="__init__"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">__init__</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">hasCurv</span>=<span class="sig-default">True</span>,
+        <span class="sig-arg">aDim</span>=<span class="sig-default"><code class="variable-group">[</code>0<code class="variable-op">, </code>1<code class="variable-group">]</code></span>)</span>
+    <br /><em class="fname">(Constructor)</em>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="gblfit-pysrc.html#GblTrajectory.__init__">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Create new trajectory.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>hasCurv</code></strong> (bool) - flag for curvature</li>
+        <li><strong class="pname"><code>aDim</code></strong> (list(int)) - active offset components (0:u_1, 1:u_2)</li>
+    </ul></dd>
+    <dt>Overrides:
+        object.__init__
+    </dt>
+  </dl>
+</td></tr></table>
+</div>
+<a name="addPoint"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">addPoint</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">point</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="gblfit-pysrc.html#GblTrajectory.addPoint">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Add point to trajectory. Points have to be ordered in arc length.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>point</code></strong> (GblPoint) - point to be added</li>
+    </ul></dd>
+    <dt>Returns: int</dt>
+        <dd>label of added point (1..number(points))</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="getNumPoints"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">getNumPoints</span>(<span class="sig-arg">self</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="gblfit-pysrc.html#GblTrajectory.getNumPoints">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Get number of points on trajectory.</p>
+  <dl class="fields">
+    <dt>Returns: int</dt>
+        <dd>number of points</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="addExternalSeed"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">addExternalSeed</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">aLabel</span>,
+        <span class="sig-arg">aSeed</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="gblfit-pysrc.html#GblTrajectory.addExternalSeed">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Add external seed to trajectory.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>aLabel</code></strong> (int) - label of point with external seed</li>
+        <li><strong class="pname"><code>aSeed</code></strong> (matrix(float)) - seed (covariance matrix of track parameters at point)</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="milleOut"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">milleOut</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">aFile</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="gblfit-pysrc.html#GblTrajectory.milleOut">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Write (data blocks of) trajectory to MP (binary) file.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>aFile</code></strong> (file) - MP file</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="milleIn"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">milleIn</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">aFile</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="gblfit-pysrc.html#GblTrajectory.milleIn">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Read (data blocks of) trajectory from MP (binary) file.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>aFile</code></strong> (file) - MP file</li>
+    </ul></dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="__getJacobian"></a>
+<div class="private">
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">__getJacobian</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">aLabel</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="gblfit-pysrc.html#GblTrajectory.__getJacobian">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Get jacobian for transformation from fit to track parameters at 
+  point.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>aLabel</code></strong> (int) - (signed) label of point</li>
+    </ul></dd>
+    <dt>Returns: list</dt>
+        <dd>labels of required fit parameters and jacobian</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="__getFitToLocalJacobian"></a>
+<div class="private">
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">__getFitToLocalJacobian</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">aPoint</span>,
+        <span class="sig-arg">measDim</span>,
+        <span class="sig-arg">nJacobian</span>=<span class="sig-default">1</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="gblfit-pysrc.html#GblTrajectory.__getFitToLocalJacobian">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Get (part of) jacobian for transformation from (trajectory) fit to 
+  track parameters at point.</p>
+  <p>Jacobian broken lines (q/p,..,u_i,u_i+1..) to local (q/p,u',u) 
+  parameters.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>aPoint</code></strong> (GblPoint) - point to use</li>
+        <li><strong class="pname"><code>measDim</code></strong> (int) - dimension of 'measurement' (2, 4 or 5)</li>
+        <li><strong class="pname"><code>nJacobian</code></strong> (int) - direction (0: to previous offset, 1: to next offset)</li>
+    </ul></dd>
+    <dt>Returns: list(vector(int), matrix(float))</dt>
+        <dd>labels for fit parameters with non zero derivatives, 
+          corresponding transformation matrix</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="__getFitToKinkJacobian"></a>
+<div class="private">
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">__getFitToKinkJacobian</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">aPoint</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="gblfit-pysrc.html#GblTrajectory.__getFitToKinkJacobian">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Get jacobian for transformation from (trajectory) fit to kink 
+  parameters at point.</p>
+  <p>Jacobian broken lines (q/p,..,u_i-1,u_i,u_i+1..) to kink (du') 
+  parameters.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>aPoint</code></strong> (GblPoint) - point to use</li>
+    </ul></dd>
+    <dt>Returns: list(vector(int), matrix(float))</dt>
+        <dd>labels for fit parameters with non zero derivatives, 
+          corresponding transformation matrix</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="getResults"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">getResults</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">aLabel</span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="gblfit-pysrc.html#GblTrajectory.getResults">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Get results (corrections, covarinace matrix) at point in forward or 
+  backward direction.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>aLabel</code></strong> (int) - signed label of point (&lt;0 backward, &gt;0 forward)</li>
+    </ul></dd>
+    <dt>Returns: list</dt>
+        <dd>correction vector, covarinace matrix for track parameters</dd>
+  </dl>
+</td></tr></table>
+</div>
+<a name="fit"></a>
+<div>
+<table class="details" border="1" cellpadding="3"
+       cellspacing="0" width="100%" bgcolor="white">
+<tr><td>
+  <table width="100%" cellpadding="0" cellspacing="0" border="0">
+  <tr valign="top"><td>
+  <h3 class="epydoc"><span class="sig"><span class="sig-name">fit</span>(<span class="sig-arg">self</span>,
+        <span class="sig-arg">optionList</span>=<span class="sig-default"><code class="variable-quote">'</code><code class="variable-string"></code><code class="variable-quote">'</code></span>)</span>
+  </h3>
+  </td><td align="right" valign="top"
+    ><span class="codelink"><a href="gblfit-pysrc.html#GblTrajectory.fit">source&nbsp;code</a></span>&nbsp;
+    </td>
+  </tr></table>
+  
+  <p>Perform fit of trajectory.</p>
+  <dl class="fields">
+    <dt>Parameters:</dt>
+    <dd><ul class="nomargin-top">
+        <li><strong class="pname"><code>optionList</code></strong> (string) - M-estimators to be used (one iteration per character)</li>
+    </ul></dd>
+    <dt>Returns: list</dt>
+        <dd>Chi2, Ndf, loss of weight from fit ([0., -1, 0.] if fit failed)</dd>
+  </dl>
+</td></tr></table>
+</div>
+<br />
+<!-- ==================== NAVIGATION BAR ==================== -->
+<table class="navbar" border="0" width="100%" cellpadding="0"
+       bgcolor="#a0c0ff" cellspacing="0">
+  <tr valign="middle">
+
+  <!-- Tree link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="module-tree.html">Trees</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Index link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="identifier-index.html">Indices</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Help link -->
+      <th>&nbsp;&nbsp;&nbsp;<a
+        href="help.html">Help</a>&nbsp;&nbsp;&nbsp;</th>
+
+  <!-- Project homepage -->
+      <th class="navbar" align="right" width="100%">
+        <table border="0" cellpadding="0" cellspacing="0">
+          <tr><th class="navbar" align="center"
+            >GBL</th>
+          </tr></table></th>
+  </tr>
+</table>
+<table border="0" cellpadding="0" cellspacing="0" width="100%%">
+  <tr>
+    <td align="left" class="footer">
+    Generated by Epydoc 3.0.1 on Thu Mar  1 20:14:01 2012
+    </td>
+    <td align="right" class="footer">
+      <a target="mainFrame" href="http://epydoc.sourceforge.net"
+        >http://epydoc.sourceforge.net</a>
+    </td>
+  </tr>
+</table>
+
+<script type="text/javascript">
+  <!--
+  // Private objects are initially displayed (because if
+  // javascript is turned off then we want them to be
+  // visible); but by default, we want to hide them.  So hide
+  // them unless we have a cookie that says to show them.
+  checkCookie();
+  // -->
+</script>
+</body>
+</html>
