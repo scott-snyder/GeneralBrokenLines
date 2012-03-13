@@ -1,212 +1,227 @@
-*
-*
-*     *************************************************************
-*     *                                                           *
-*     *   Subroutines for symmetric and symmetric band matrices,  * 
-*     *   based on the (square root free) Cholesky decomposition. *
-*     *                                                           *
-*     ************************************************************* 
-*
-*     All floating point arguments are in DOUBLE PRECISION (and all
-*     entry names start with a D).
-* 
-*     The Cholesky decomposition transforms a symmetric matrix W
-*     e.g. the matrix from normal equation of least squares, 
-*     according to
-*                           W = L D L^         (L^ means L transposed)
-*     where D is a diagonal matrix and L is a unit triangular matrix
-*     (diagonal elements all ones, all elements above diagonal zero). 
-*     
-*     The above decomposition allows to solve a matrix equation
-*                         W x = b
-*     in two steps, using an auxiliary vector y:
-*                          
-*                  solve  L y = b  for y, and
-*
-*                solve D L^ x = y  for x.
-*
-*     The inverse matrix of W can be calculated from the decomposition.
-*
-*     In least-squares normal equations the inverse matrix is equal to
-*     the covariance matrix of the fitted parameters. All diagonal elements
-*     of the inverse matrix, the parameter variances, are positive, and
-*     the matrix is positive-definite (all eigenvalues > 0). 
-*
-*     The Cholesky algorithm is stable for a positive-definite matrix.
-*     The standard form of the Cholesky algorithm includes n square roots
-*     for a n-by-n matrix, and is possible only for positive-definite
-*     matrices. The version used here is squareroot-free; this algorithm
-*     does not necessarily break down in the indefinite case, although
-*     it is potentially unstable in this case. All decomposition routines
-*     include a check for singularity, and this check needs an auxiliary
-*     array AUX of dimension n.    
-*        
-*     Method: The Cholesky algorithm for symmetric matrix decomposition 
-*     makes use of the symmetry. The operation count (leading term)
-*     is n**3/6 (compared to n**3/3 for normal Gaussian elimination).
-*     The solution of the two triangular systems involves operations
-*     proportional to n**2. 
-*
-*     The real advantage of the Cholesky algorithm is for band matrices,
-*     where all matrix elements outside of a band with total width
-*     (2m+1) around the diagonal are zero. The band structure is kept
-*     in the decomposition, and allows a fast solution of matrix equations.
-*     The operation count (leading term) is proportional to m**2*n
-*     and thus (for fixed m) linear in n. Thus for n=100 and m=2 the
-*     Cholesky algorithm for the band matrix is 1000 times faster than
-*     the standard solution method.
-*
-*     The inverse of a band matrix is a full matrix. It is not necessary
-*     to calculate the inverse, if only the solution for a matrix equation
-*     is needed. However the inverse is often needed, because the elements
-*     of the inverse are the variances and covariances of parameters in
-*     a least-squares fit. The inverse can be calculated afterwards from
-*     the decomposition. Since the inverse matrix is a full matrix, this
-*     has of course an operation count proportional to n**3.
-*
-*     Usually only the elements of the inverse in and around the diagonal
-*     are really needed, and this subset of inverse elements, corresponding
-*     to the original band, can be calculated from the decomposition with
-*     an operation count, which is linear in n. Thus all variances (the 
-*     diagonal elements) and covariances between neighbour parameters
-*     are calculated in a short time even for large matrices.  
-*
-*     Matrix storage: the mathematical indexing of matrix elements follows
-*     the scheme:
-*
-*                       (  W11   W12   W13 ... W1n  )
-*                       (  W21   W22   W23 ... W2n  )
-*                   W = (  ...   ...   ...     ...  )
-*                       (  ...   ...   ...     ...  )
-*                       (  Wn1   Wn2   Wn3 ... Wnn  )  
-*
-*     and a storage in an array would require n**2 words, although the
-*     symmetric matrix has only (n**2+n)/2 different elements, and a band
-*     matrix has less than (m+1)*n different elements. Therefore the 
-*     following storage schemes are used.
-*
-*     Symmetric matrix: the elements are in the order
-*             W11   W12   W22   W13   W23   W33   W14 ... Wnn   
-*     with total (n**2+n)/2 array elements. 
-*
-*     Band matrix: a band matrix of bandwidth m is stored in an array
-*     of dimension W(m+1,n), according to  
-*
-*                       W(1,.)    W(2,.)    W(3,.) 
-*                      -------------------------------- 
-*                        W11       W12       W13
-*                        W22       W23       W24
-*                        W33       W34       W35 
-*                        ...
-*                        Wnn        -         - 
-*  
-*     The example is for a bandwidth of m=2; three elements at the end
-*     are unused. The diagonal elements are in the array elements W(1,.).
-*
-*     This package includes subroutines for:  
-*
-*        (1) Symmetric matrix W: decomposition, solution, inverse
-*
-*        (2) Symmetric band matrix: decomposition, solution, complete
-*            inverse and band part of the inverse   
-*
-*        (3) Symmetric band matrix of band width m=1: decomposition,
-*            solution, complete, inverse and band part of the inverse 
-*
-*        (4) Symmetric band matrix of band width m=2: decomposition,
-*            solution, complete, inverse and band part of the inverse 
-*
-*        (5) Symmetric matrix with band structure, bordered by full row/col
-*            (not yet included)
-*
-*     The subroutines for a fixed band width of m=1 and of m=2 are 
-*     faster than the general routine, because certain loops are avoided
-*     and replaced by the direct code.  
-*
-*     Historical remark: the square-root algorithm was invented by the 
-*     french Mathematician André-Louis Cholesky (1875 - 1918).
-*     Cholesky's method of computing solutions to the normal equations was 
-*     published 1924, after the death of Cholesky, by Benoit. 
-*     The method received little attention after its publication in 1924.
-*     In 1948 the method was analysed in a paper by Fox, Huskey and
-*     Wilkinson, and in the same year Turing published a paper on the
-*     stability of the method.
-*     
-*     The fast method to calculate the band part of the inverse matrix
-*     is usually not mentioned in the literature. An exception is:
-*     I.S.Duff, A.M.Erisman and J.K.Reid, Direct Methods for Sparse 
-*     Matrices, Oxford Science Publications, 1986.
-*     The following original work is quoted in this book:
-*     K.Takahashi, J.Fagan and M.Chin, Formation of a sparse bus 
-*     impedance matrix and its application to short circuit study.
-*     Proceedings 8th PICA Conference, Minneapolis, Minnesota, 1973   
-*     A.M.Erisman and W.F.Tinney, On computing certain elements of the 
-*     inverse of a sparse matrix, CACM 18, 177-179, 1975  
-*
-*
-*                        
-*     symmetric          decomposit. solution    inv-element    inverse 
-*     ----------------  |-----------|-----------|--------------|-----------|       
-*     n x n matrix        DCHDEC      DCHSLV      -              DCHINV
-*     band matrix m,n     DBCDEC      DBCSLV      DBCIEL/DBCINB  DBCINV 
-*     bandwidth m=1       DB2DEC      DB2SLV      DB2IEL         - 
-*     bandwidth m=2       DB3DEC      DB3SLV      DB3IEL         -
-*
-*     The DB2... and DB3... routines are special routines for a fixed bandwidth 
-*     of 1 and 2, they are faster versions of the general DBG... routines.
-*     The complete inverse matrix can be obtained by DBGINV. 
-*     The routine DBGPRI can be used to print all types of band matrices. 
-*
-*     The decomposition in routines ...DEC replaces (overwrites) the 
-*     original matrix (the number of elements is identical). All other
-*     routines require W to be the already decomposed matrix.
-*     The matrix L is a unit lower triangular matrix, with ones on the 
-*     diagonal, which have not be stored. Instead the inverse of the 
-*     diagonal elements of matrix D are stored in those places.
-*
-*     In the  solution routines ...SLV the array B is the right-hand matrix,
-*     the array is the resulting solution. The same array can be used
-*     for B and X.    
-*
-*
-*     W(.) and V(.) are symmetric n-by-n matrices with (N*N+N)/2 elements
-*
-*     SUBROUTINE DCHDEC(W,N, AUX)      ! decomposition, symmetric matrix
-*          ENTRY DCHSLV(W,N,B, X)      ! solution B -> X
-*          ENTRY DCHINV(W,N, V)        ! inversion
-*
-*     SUBROUTINE DCFDEC(W,N)           ! modified composition, symmetric
-*                                      ! alternative to DCHDEC                                       
-*
-*     W(.) and V(.) are band matrices, n rows, band width m (i.e. the total
-*          width of the band is (2m+1).
-*          With MP1 = m +1, the array has dimension W(MP1,N).
-*          The symmetric matrix VS has (N*N+N)/2 elements       
-*
-*     SUBROUTINE DBCDEC(W,MP1,N, AUX)  ! decomposition, bandwidth M
-*          ENTRY DBCSLV(W,MP1,N,B, X)  ! solution B -> X
-*          ENTRY DBCIEL(W,MP1,N, V)    ! V = inverse band matrix elements
-*          ENTRY DBCINV(W,MP1,N, VS)   ! V = inverse symmetric matrix
-*
-*     SUBROUTINE DBFDEC(W,MP1,N)       ! modified decomposition, bandwidth M
-*                                      ! alternative to DBCDEC
-*
-*     SUBROUTINE DBCPRB(W,MP1,N)       ! print band matrix 
-*     SUBROUTINE DBCPRV(W,MP1,N,B)     ! print corr band matrix and pars
-*
-*     SUBROUTINE DB2DEC(W,N, AUX)      ! decomposition (M=1)
-*          ENTRY DB2SLV(W,N,B, X)      ! solution B -> X
-*          ENTRY DB2IEL(W,N, V)        ! V = inverse band matrix elements 
-*
-*     SUBROUTINE DB3DEC(W,N, AUX)      ! decomposition (M=2) 
-*          ENTRY DB3SLV(W,N,B, X)      ! solution B -> X
-*          ENTRY DB3IEL(W,N, V)        ! V = inverse band matrix elements
-*
+!> \file
+!! Symmetric (band) matrix routines.
+!!
+!! For the original broken lines implementation by V. Blobel
+!! (University Hamburg).
+!!\verbatim
+!!    *************************************************************
+!!    *                                                           *
+!!    *   Subroutines for symmetric and symmetric band matrices,  *
+!!    *   based on the (square root free) Cholesky decomposition. *
+!!    *                                                           *
+!!    *************************************************************
+!!
+!!    All floating point arguments are in DOUBLE PRECISION (and all
+!!    entry names start with a D).
+!!
+!!    The Cholesky decomposition transforms a symmetric matrix W
+!!    e.g. the matrix from normal equation of least squares,
+!!    according to
+!!                          W = L D L^         (L^ means L transposed)
+!!    where D is a diagonal matrix and L is a unit triangular matrix
+!!    (diagonal elements all ones, all elements above diagonal zero).
+!!
+!!    The above decomposition allows to solve a matrix equation
+!!                        W x = b
+!!    in two steps, using an auxiliary vector y:
+!!
+!!                 solve  L y = b  for y, and
+!!
+!!               solve D L^ x = y  for x.
+!!
+!!    The inverse matrix of W can be calculated from the decomposition.
+!!
+!!    In least-squares normal equations the inverse matrix is equal to
+!!    the covariance matrix of the fitted parameters. All diagonal elements
+!!    of the inverse matrix, the parameter variances, are positive, and
+!!    the matrix is positive-definite (all eigenvalues > 0).
+!!
+!!    The Cholesky algorithm is stable for a positive-definite matrix.
+!!    The standard form of the Cholesky algorithm includes n square roots
+!!    for a n-by-n matrix, and is possible only for positive-definite
+!!    matrices. The version used here is squareroot-free; this algorithm
+!!    does not necessarily break down in the indefinite case, although
+!!    it is potentially unstable in this case. All decomposition routines
+!!    include a check for singularity, and this check needs an auxiliary
+!!    array AUX of dimension n.
+!!
+!!    Method: The Cholesky algorithm for symmetric matrix decomposition
+!!    makes use of the symmetry. The operation count (leading term)
+!!    is n**3/6 (compared to n**3/3 for normal Gaussian elimination).
+!!    The solution of the two triangular systems involves operations
+!!    proportional to n**2.
+!!
+!!    The real advantage of the Cholesky algorithm is for band matrices,
+!!    where all matrix elements outside of a band with total width
+!!    (2m+1) around the diagonal are zero. The band structure is kept
+!!    in the decomposition, and allows a fast solution of matrix equations.
+!!    The operation count (leading term) is proportional to m**2*n
+!!    and thus (for fixed m) linear in n. Thus for n=100 and m=2 the
+!!    Cholesky algorithm for the band matrix is 1000 times faster than
+!!    the standard solution method.
+!!
+!!    The inverse of a band matrix is a full matrix. It is not necessary
+!!    to calculate the inverse, if only the solution for a matrix equation
+!!    is needed. However the inverse is often needed, because the elements
+!!    of the inverse are the variances and covariances of parameters in
+!!    a least-squares fit. The inverse can be calculated afterwards from
+!!    the decomposition. Since the inverse matrix is a full matrix, this
+!!    has of course an operation count proportional to n**3.
+!!
+!!    Usually only the elements of the inverse in and around the diagonal
+!!    are really needed, and this subset of inverse elements, corresponding
+!!    to the original band, can be calculated from the decomposition with
+!!    an operation count, which is linear in n. Thus all variances (the
+!!    diagonal elements) and covariances between neighbour parameters
+!!    are calculated in a short time even for large matrices.
+!!
+!!    Matrix storage: the mathematical indexing of matrix elements follows
+!!    the scheme:
+!!
+!!                      (  W11   W12   W13 ... W1n  )
+!!                      (  W21   W22   W23 ... W2n  )
+!!                  W = (  ...   ...   ...     ...  )
+!!                      (  ...   ...   ...     ...  )
+!!                      (  Wn1   Wn2   Wn3 ... Wnn  )
+!!
+!!    and a storage in an array would require n**2 words, although the
+!!    symmetric matrix has only (n**2+n)/2 different elements, and a band
+!!    matrix has less than (m+1)*n different elements. Therefore the
+!!    following storage schemes are used.
+!!
+!!    Symmetric matrix: the elements are in the order
+!!            W11   W12   W22   W13   W23   W33   W14 ... Wnn
+!!    with total (n**2+n)/2 array elements.
+!!
+!!    Band matrix: a band matrix of bandwidth m is stored in an array
+!!    of dimension W(m+1,n), according to
+!!
+!!                      W(1,.)    W(2,.)    W(3,.)
+!!                     --------------------------------
+!!                       W11       W12       W13
+!!                       W22       W23       W24
+!!                       W33       W34       W35
+!!                       ...
+!!                       Wnn        -         -
+!!
+!!    The example is for a bandwidth of m=2; three elements at the end
+!!    are unused. The diagonal elements are in the array elements W(1,.).
+!!
+!!    This package includes subroutines for:
+!!
+!!       (1) Symmetric matrix W: decomposition, solution, inverse
+!!
+!!       (2) Symmetric band matrix: decomposition, solution, complete
+!!           inverse and band part of the inverse
+!!
+!!       (3) Symmetric band matrix of band width m=1: decomposition,
+!!           solution, complete, inverse and band part of the inverse
+!!
+!!       (4) Symmetric band matrix of band width m=2: decomposition,
+!!           solution, complete, inverse and band part of the inverse
+!!
+!!       (5) Symmetric matrix with band structure, bordered by full row/col
+!!           (not yet included)
+!!
+!!    The subroutines for a fixed band width of m=1 and of m=2 are
+!!    faster than the general routine, because certain loops are avoided
+!!    and replaced by the direct code.
+!!
+!!    Historical remark: the square-root algorithm was invented by the
+!!    french Mathematician André-Louis Cholesky (1875 - 1918).
+!!    Cholesky's method of computing solutions to the normal equations was
+!!    published 1924, after the death of Cholesky, by Benoit.
+!!    The method received little attention after its publication in 1924.
+!!    In 1948 the method was analysed in a paper by Fox, Huskey and
+!!    Wilkinson, and in the same year Turing published a paper on the
+!!    stability of the method.
+!!
+!!    The fast method to calculate the band part of the inverse matrix
+!!    is usually not mentioned in the literature. An exception is:
+!!    I.S.Duff, A.M.Erisman and J.K.Reid, Direct Methods for Sparse
+!!    Matrices, Oxford Science Publications, 1986.
+!!    The following original work is quoted in this book:
+!!    K.Takahashi, J.Fagan and M.Chin, Formation of a sparse bus
+!!    impedance matrix and its application to short circuit study.
+!!    Proceedings 8th PICA Conference, Minneapolis, Minnesota, 1973
+!!    A.M.Erisman and W.F.Tinney, On computing certain elements of the
+!!    inverse of a sparse matrix, CACM 18, 177-179, 1975
+!!
+!!
+!!
+!!    symmetric          decomposit. solution    inv-element    inverse
+!!    ----------------  |-----------|-----------|--------------|-----------|
+!!    n x n matrix        DCHDEC      DCHSLV      -              DCHINV
+!!    band matrix m,n     DBCDEC      DBCSLV      DBCIEL/DBCINB  DBCINV
+!!    bandwidth m=1       DB2DEC      DB2SLV      DB2IEL         -
+!!    bandwidth m=2       DB3DEC      DB3SLV      DB3IEL         -
+!!
+!!    The DB2... and DB3... routines are special routines for a fixed bandwidth
+!!    of 1 and 2, they are faster versions of the general DBG... routines.
+!!    The complete inverse matrix can be obtained by DBGINV.
+!!    The routine DBGPRI can be used to print all types of band matrices.
+!!
+!!    The decomposition in routines ...DEC replaces (overwrites) the
+!!    original matrix (the number of elements is identical). All other
+!!    routines require W to be the already decomposed matrix.
+!!    The matrix L is a unit lower triangular matrix, with ones on the
+!!    diagonal, which have not be stored. Instead the inverse of the
+!!    diagonal elements of matrix D are stored in those places.
+!!
+!!    In the  solution routines ...SLV the array B is the right-hand matrix,
+!!    the array is the resulting solution. The same array can be used
+!!    for B and X.
+!!
+!!
+!!    W(.) and V(.) are symmetric n-by-n matrices with (N*N+N)/2 elements
+!!
+!!    SUBROUTINE DCHDEC(W,N, AUX)      ! decomposition, symmetric matrix
+!!         ENTRY DCHSLV(W,N,B, X)      ! solution B -> X
+!!         ENTRY DCHINV(W,N, V)        ! inversion
+!!
+!!    SUBROUTINE DCFDEC(W,N)           ! modified composition, symmetric
+!!                                     ! alternative to DCHDEC
+!!
+!!    W(.) and V(.) are band matrices, n rows, band width m (i.e. the total
+!!         width of the band is (2m+1).
+!!         With MP1 = m +1, the array has dimension W(MP1,N).
+!!         The symmetric matrix VS has (N*N+N)/2 elements
+!!
+!!    SUBROUTINE DBCDEC(W,MP1,N, AUX)  ! decomposition, bandwidth M
+!!         ENTRY DBCSLV(W,MP1,N,B, X)  ! solution B -> X
+!!         ENTRY DBCIEL(W,MP1,N, V)    ! V = inverse band matrix elements
+!!         ENTRY DBCINV(W,MP1,N, VS)   ! V = inverse symmetric matrix
+!!
+!!    SUBROUTINE DBFDEC(W,MP1,N)       ! modified decomposition, bandwidth M
+!!                                     ! alternative to DBCDEC
+!!
+!!    SUBROUTINE DBCPRB(W,MP1,N)       ! print band matrix
+!!    SUBROUTINE DBCPRV(W,MP1,N,B)     ! print corr band matrix and pars
+!!
+!!    SUBROUTINE DB2DEC(W,N, AUX)      ! decomposition (M=1)
+!!         ENTRY DB2SLV(W,N,B, X)      ! solution B -> X
+!!         ENTRY DB2IEL(W,N, V)        ! V = inverse band matrix elements
+!!
+!!    SUBROUTINE DB3DEC(W,N, AUX)      ! decomposition (M=2)
+!!         ENTRY DB3SLV(W,N,B, X)      ! solution B -> X
+!!         ENTRY DB3IEL(W,N, V)        ! V = inverse band matrix elements
+!!\endverbatim
  
 
 *     (1) Symmetric matrix W: decomposition, solution, inverse
 
-      SUBROUTINE DCHDEC(W,N, AUX)      ! decomposition, symmetric matrix
+!> Decomposition of symmetric matrix.
+!!
+!! ENTRY DCHSLV(W,N,B, X) for solution B -> X \n
+!! ENTRY DCHINV(W,N,V) for inversion
+!!
+!! \param [in,out] W    symmetirc matrix
+!! \param [in]     N    size
+!! \param [in]     AUX  scratch array
+*
+      SUBROUTINE DCHDEC(W,N, AUX)
+*
+      INTEGER N
       DOUBLE PRECISION W(*),AUX(N),B(*),X(*),V(*),SUM,RATIO
 *     ...
       DO I=1,N
@@ -282,9 +297,18 @@
       END DO
       END
 
+!> Etimate condition.
+!!
+!! \param [in] W    symmetric matrix
+!! \param [in] N    size
+!! \param [in] AUX  scratch array
+!! \return condition
+*
       FUNCTION CONDES(W,N,AUX)
+*
+      INTEGER N
       DOUBLE PRECISION W(*),AUX(N),SUM,SUMU,SUMS
-*     estimate condition
+*
       IR=1
       IS=1
       DO I=1,N
@@ -326,8 +350,21 @@
 
 *     (2) Symmetric band matrix: decomposition, solution, complete
 *                                inverse and band part of the inverse
+!> Decomposition of symmetric band matrix.
+!!
+!! ENTRY DBCSLV(W,MP1,N,B, X) for solution B -> X \n
+!! ENTRY DBCIEL(W,MP1,N, V), V = inverse band matrix elements \n
+!! ENTRY DBCINB(W,MP1,N, VS), VS = band part of inverse symmetric matrix \n
+!! ENTRY DBCINV(W,MP1,N, VS), V = inverse symmetric matrix
+!!
+!! \param [in,out] W    symmetric band matrix
+!! \param [in]     MP1  band width (M) + 1
+!! \param [in]     N    size
+!! \param [in]     AUX  scratch array
+*
       SUBROUTINE DBCDEC(W,MP1,N, AUX)  ! decomposition, bandwidth M
 *     M=MP1-1                                    N*M(M-1) dot operations
+      INTEGER MP1,N
       DOUBLE PRECISION W(MP1,N),V(MP1,N),B(N),X(N),AUX(N),VS(*),RXW
 *     ...
       DO I=1,N
@@ -414,7 +451,16 @@ C       END DO
       RETURN
       END
 
-      SUBROUTINE DBCPRV(W,MP1,N,B)     ! print corr band matrix and pars
+!> Print corr band matrix and pars.
+!!
+!! \param [in] W    symmetric band matrix
+!! \param [in] MP1  band width (M) + 1
+!! \param [in] N    size
+!! \param [in] B    vector
+*
+      SUBROUTINE DBCPRV(W,MP1,N,B)
+*
+      INTEGER MP1,N
       DOUBLE PRECISION W(MP1,N),B(N)
       INTEGER IRHO(5)
 *     ...
@@ -439,7 +485,15 @@ C       END DO
   103 FORMAT(33X,'(correlation coefficients in percent)')
       END
 
-      SUBROUTINE DBCPRB(W,MP1,N)     ! print band matrix 
+!> Print band matrix.
+!!
+!! \param [in] W    symmetric band matrix
+!! \param [in] MP1  band width (M) + 1
+!! \param [in] N    size
+*
+      SUBROUTINE DBCPRB(W,MP1,N)
+*
+      INTEGER MP1,N
       DOUBLE PRECISION W(MP1,N)
 *     ...
       IF(MP1.GT.6) RETURN
@@ -456,21 +510,33 @@ C       END DO
    
 *     (3) Symmetric band matrix of band width m=1: decomposition,
 *            solution, complete, inverse and band part of the inverse
- 
-      SUBROUTINE DB2DEC(W,N, AUX)      ! decomposition (M=1)
+
+!> Decomposition (M=1).
+!!
+!!    W is a symmetrix positive definite band matrix of bandwidth 1(+1).
+!!    W(1,.) are the diagonal elements, W(2,.) is the next
+!!    diagonals; W(2,N) is never referenced.
+!!    AUX is an auxiliary array of length N.
+!!    W is decomposed to L D Lt, where D = diagonal and L unit triangular.
+!!    A row is set to zero, if the diagonal element is reduced in previous
+!!    steps by a word length (i.e. global correlation coefficient large).
+!!    The resulting L and D replace W: the diagonal elements W(1,...) will
+!!    contain the inverse of the D-elements; the diagonal elements  of L are
+!!    all 1 and not stored. The other elements of L are stored in the
+!!    corresponding elements of W.
+!!
+!! ENTRY DB2SLV(W,N,B, X), solution B -> X \n
+!! ENTRY DB2IEL(W,N, V), V = inverse band matrix elements
+!!
+!! \param [in,out] W    symmetric band matrix
+!! \param [in]     N    size
+!! \param [in]     AUX  scratch array
+*
+      SUBROUTINE DB2DEC(W,N, AUX)
+*
+      INTEGER N
       DOUBLE PRECISION W(2,N),V(2,N),B(N),X(N),AUX(N),RXW
-*     W is a symmetrix positive definite band matrix of bandwidth 1(+1).
-*     W(1,.) are the diagonal elements, W(2,.) is the next
-*     diagonals; W(2,N) is never referenced.
-*     AUX is an auxiliary array of length N.
-*     W is decomposed to L D Lt, where D = diagonal and L unit triangular.
-*     A row is set to zero, if the diagonal element is reduced in previous
-*     steps by a word length (i.e. global correlation coefficient large).
-*     The resulting L and D replace W: the diagonal elements W(1,...) will
-*     contain the inverse of the D-elements; the diagonal elements  of L are
-*     all 1 and not stored. The other elements of L are stored in the
-*     corresponding elements of W.
-*     ...
+*
       DO I=1,N
        AUX(I)=16.0D0*W(1,I) ! save diagonal elements
       END DO
@@ -524,21 +590,33 @@ C       END DO
    
 *     (4) Symmetric band matrix of band width m=2: decomposition,
 *            solution, complete, inverse and band part of the inverse
- 
+
+!> Decomposition (M=2).
+!!
+!!    W is a symmetrix positive definite band matrix of bandwidth 2(+1).
+!!    W(1,.) are the diagonal elements, W(2,.) and W(3,.) are the next
+!!    diagonals; W(3,N-1), W(2,N) and W(3,N) are never referenced.
+!!    AUX is an auxiliary array of length N.
+!!    W is decomposed to L D Lt, where D = diagonal and L unit triangular.
+!!    A row is set to zero, if the diagonal element is reduced in previous
+!!    steps by a word length (i.e. global correlation coefficient large).
+!!    The resulting L and D replace W: the diagonal elements W(1,...) will
+!!    contain the inverse of the D-elements; the diagonal elements  of L are
+!!    all 1 and not stored. The other elements of L are stored in the
+!!    corresponding elements of W.
+!!
+!! ENTRY DB3SLV(W,N,B, X), solution B -> X \n
+!! ENTRY DB3IEL(W,N, V), V = inverse band matrix elements
+!!
+!! \param [in,out] W    symmetric band matrix
+!! \param [in]     N    size
+!! \param [in]     AUX  scratch array
+*
       SUBROUTINE DB3DEC(W,N, AUX)      ! decomposition (M=2) 
+*
+      INTEGER N
       DOUBLE PRECISION W(3,N),V(3,N),B(N),X(N),AUX(N),RXW
-*     W is a symmetrix positive definite band matrix of bandwidth 2(+1).
-*     W(1,.) are the diagonal elements, W(2,.) and W(3,.) are the next
-*     diagonals; W(3,N-1), W(2,N) and W(3,N) are never referenced.
-*     AUX is an auxiliary array of length N.
-*     W is decomposed to L D Lt, where D = diagonal and L unit triangular.
-*     A row is set to zero, if the diagonal element is reduced in previous
-*     steps by a word length (i.e. global correlation coefficient large).
-*     The resulting L and D replace W: the diagonal elements W(1,...) will
-*     contain the inverse of the D-elements; the diagonal elements  of L are
-*     all 1 and not stored. The other elements of L are stored in the
-*     corresponding elements of W.
-*     ...
+*
       DO I=1,N
        AUX(I)=16.0D0*W(1,I) ! save diagonal elements
       END DO
@@ -662,11 +740,17 @@ c      END DO
 
 c      END 
 
+!> Decomposition of symmetric matrix.
+!!
+!!    Modified Cholesky decomposition,
+!!    Philip E.Gill, Walter Murray and Margarete H.Wright:
+!!      Practical Optimization, Academic Press, 1981
+!!
+!! \param [in,out] W    symmetirc matrix
+!! \param [in]     N    size
+*
+      SUBROUTINE DCFDEC(W,N)
 
-      SUBROUTINE DCFDEC(W,N)      ! decomposition of symmetric matrix
-*     modified Cholesky decomposition 
-*     Philip E.Gill, Walter Murray and Margarete H.Wright:
-*       Practical Optimization, Academic Press, 1981 
       IMPLICIT NONE
       INTEGER N,I,J,K
       DOUBLE PRECISION W(*),EPSM,GAMM,XCHI,BETA,DELTA,THETA
@@ -704,10 +788,18 @@ c      END
 
       END
 
+!> Decomposition of symmetric band matrix.
+!!
+!!    Band matrix modified Cholesky decomposition,
+!!    Philip E.Gill, Walter Murray and Margarete H.Wright:
+!!      Practical Optimization, Academic Press, 1981
+!!
+!! \param [in,out] W    symmetric band matrix
+!! \param [in]     MP1  band width (M) + 1
+!! \param [in]     N    size
+*
       SUBROUTINE DBFDEC(W,MP1,N)
-*     band matrix modified Cholesky decomposition
-*     Philip E.Gill, Walter Murray and Margarete H.Wright:
-*       Practical Optimization, Academic Press, 1981
+*
       IMPLICIT NONE
       INTEGER MP1,N,I,J,K  
       DOUBLE PRECISION W(MP1,N),EPSM,GAMM,XCHI,BETA,DELTA,THETA
