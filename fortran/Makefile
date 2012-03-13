@@ -17,7 +17,7 @@ L_FLAGS = -Wall -O3
 #
 # objects for this project
 #
-USER_OBJ_GBL = gbltst.o gblfit.o gblnum.o Dbandmatrix.o mille.o
+USER_OBJ_GBL = gbltst.o gblmod.o gblfit.o gblnum.o Dbandmatrix.o mille.o
 #
 EXECUTABLES = gbltst
 #
@@ -40,7 +40,9 @@ install: $(EXECUTABLES) #clean
 
 # Make the object files - depend on source and include file 
 #
-%.o : %.F Makefile gblcom.inc gbldef.inc
+%.o : %.F Makefile
+	${FCOMP} ${F_FLAGS} -c $< -o $@ 
+%.o : %.f90 Makefile
 	${FCOMP} ${F_FLAGS} -c $< -o $@ 
 #
 # ##################################################################
