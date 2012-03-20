@@ -52,6 +52,9 @@ public:
 			std::vector<unsigned int>* &indLocal,
 			std::vector<double>* &derLocal, std::vector<int>* &labGlobal,
 			std::vector<double>* &derGlobal);
+	void getResidual(double &aResidual, double &aVariance, double &aDownWeight,
+			std::vector<unsigned int>* &indLocal,
+			std::vector<double>* &derLocal);
 
 private:
 	unsigned int theLabel; ///< Label (of measurements point)
