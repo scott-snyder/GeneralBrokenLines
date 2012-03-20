@@ -202,3 +202,22 @@ void GblData::getAllData(float &fValue, float &fErr,
 	labGlobal = &globalLabels;
 	derGlobal = &globalDerivatives;
 }
+
+/// Get data for residual (and errors).
+/**
+ * \param [out] aResidual Measurement-Prediction
+ * \param [out] aVariance Variance (of measurement)
+ * \param [out] aDownWeight Down-weighting factor
+ * \param [out] indLocal List of labels of used (local) fit parameters
+ * \param [out] derLocal List of derivatives for used (local) fit parameters
+ */
+void GblData::getResidual(double &aResidual, double &aVariance,
+		double &aDownWeight, std::vector<unsigned int>* &indLocal,
+		std::vector<double>* &derLocal) {
+	aResidual = theValue - thePrediction;
+	aVariance = 1.0 / thePrecision;
+	aDownWeight = theDownWeight;
+	indLocal = &theParameters;
+	derLocal = &theDerivatives;
+}
+
