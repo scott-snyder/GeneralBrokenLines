@@ -28,8 +28,14 @@ public:
 	unsigned int addPoint(GblPoint aPoint);
 	unsigned int getNumPoints() const;
 	void addExternalSeed(unsigned int aLabel, const TMatrixDSym &aSeed);
-	void getResults(int aSignedLabel, TVectorD &localPar,
+	unsigned int getResults(int aSignedLabel, TVectorD &localPar,
 			TMatrixDSym &localCov) const;
+	unsigned int getMeasResults(unsigned int aLabel, unsigned int &numRes,
+			TVectorD &aResiduals, TVectorD &aMeasErrors, TVectorD &aResErrors,
+			TVectorD &aDownWeights);
+	unsigned int getScatResults(unsigned int aLabel, unsigned int &numRes,
+			TVectorD &aResiduals, TVectorD &aMeasErrors, TVectorD &aResErrors,
+			TVectorD &aDownWeights);
 	unsigned int fit(double &Chi2, int &Ndf, double &lostWeight,
 			std::string optionList = "");
 	void milleOut(MilleBinary &aMille);
@@ -41,12 +47,15 @@ private:
 	unsigned int numParameters; ///< Number of fit parameters
 	unsigned int numLocals; ///< Total number of (additional) local parameters
 	unsigned int externalPoint; ///< Label of external point (or 0)
+	bool fitOK; ///< Trajectory has been successfully fitted (results are valid)
 	std::vector<unsigned int> theDimension; ///< List of active dimensions (0=u1, 1=u2) in fit
 	std::vector<GblPoint> thePoints; ///< List of points on trajectory
 	std::vector<GblData> theData; ///< List of data blocks
+	std::vector<unsigned int> measDataIndex; ///< mapping points to data blocks from measurements
+	std::vector<unsigned int> scatDataIndex; ///< mapping points to data blocks from scatterers
 	std::vector<unsigned int> externalIndex; ///< List of fit parameters used by external seed
 	TMatrixDSym externalSeed; ///< Precision (inverse covariance matrix) of external seed
-	VVector::VVector theVector; ///< Vector of linear equation system
+	VVector theVector; ///< Vector of linear equation system
 	BorderedBandMatrix theMatrix; ///< (Bordered band) matrix of linear equation system
 
 	std::pair<std::vector<unsigned int>, TMatrixD> getJacobian(
@@ -62,6 +71,8 @@ private:
 	void prepare();
 	void predict();
 	double downWeight(unsigned int aMethod);
+	void getResAndErr(unsigned int aData, double &aResidual,
+			double &aMeadsError, double &aResError, double &aDownWeight);
 };
 
 #endif /* GBLTRAJECTORY_H_ */
