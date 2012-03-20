@@ -80,6 +80,7 @@
  */
 
 #include "GblTrajectory.h"
+#include "TMatrixDSymEigen.h"
 
 /// Create new trajectory.
 /**

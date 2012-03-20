@@ -5,7 +5,10 @@
  *      Author: kleinwrt
  */
 
+#include <iostream>
+#include <iomanip>
 #include <cstring>
+#include <cmath>
 #include "VMatrix.h"
 
 /*********** simple Matrix based on std::vector<double> **********/

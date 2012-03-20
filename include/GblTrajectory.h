@@ -10,10 +10,8 @@
 
 #include "GblPoint.h"
 #include "GblData.h"
-#include "GblPoint.h"
 #include "BorderedBandMatrix.h"
 #include "MilleBinary.h"
-#include "TMatrixDSymEigen.h"
 
 /// GBL trajectory.
 /**

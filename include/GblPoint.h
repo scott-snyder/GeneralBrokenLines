@@ -8,13 +8,10 @@
 #ifndef GBLPOINT_H_
 #define GBLPOINT_H_
 
-#include<iostream>
 #include<vector>
-#include<math.h>
 #include "TVectorD.h"
 #include "TMatrixD.h"
 #include "TMatrixDSym.h"
-#include "TMatrixDSymEigen.h"
 
 #include "Math/SMatrix.h"
 #include "Math/SVector.h"

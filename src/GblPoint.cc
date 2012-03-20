@@ -6,6 +6,7 @@
  */
 
 #include "GblPoint.h"
+#include "TMatrixDSymEigen.h"
 
 /// Create a point.
 /**
