@@ -44,6 +44,8 @@
  *                       +-                         -+
  *\endverbatim
  */
+namespace gbl 
+{
 
 class BorderedBandMatrix {
 public:
@@ -75,5 +77,5 @@ private:
 	VMatrix bandOfAVAT(const VMatrix &anArray,
 			const VSymMatrix &aSymArray) const;
 };
-
+}
 #endif /* BORDEREDBANDMATRIX_H_ */

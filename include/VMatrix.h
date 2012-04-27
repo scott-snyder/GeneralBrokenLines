@@ -11,6 +11,9 @@
 #include<vector>
 
 /// Simple Vector based on std::vector<double>
+namespace gbl
+{
+
 class VVector {
 public:
 	VVector(const unsigned int nRows = 0);
@@ -100,5 +103,5 @@ inline double VSymMatrix::operator()(unsigned int iRow,
 		unsigned int iCol) const {
 	return theVec[(iRow * iRow + iRow) / 2 + iCol]; // assuming iCol <= iRow
 }
-
+}
 #endif /* VMATRIX_H_ */

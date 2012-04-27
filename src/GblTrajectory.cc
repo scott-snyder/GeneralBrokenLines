@@ -81,6 +81,7 @@
 
 #include "GblTrajectory.h"
 #include "TMatrixDSymEigen.h"
+using namespace gbl;
 
 /// Create new trajectory.
 /**

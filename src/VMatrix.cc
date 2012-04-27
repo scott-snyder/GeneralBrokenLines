@@ -10,6 +10,7 @@
 #include <cstring>
 #include <cmath>
 #include "VMatrix.h"
+using namespace gbl;
 
 /*********** simple Matrix based on std::vector<double> **********/
 

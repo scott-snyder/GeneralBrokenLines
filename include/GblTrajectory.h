@@ -18,6 +18,9 @@
  * List of GblPoints ordered by arc length.
  * Can be fitted and optionally written to MP-II binary file.
  */
+namespace gbl
+{
+
 class GblTrajectory {
 public:
 	GblTrajectory(bool flagCurv = true, bool flagU1dir = true, bool flagU2dir =
@@ -72,5 +75,5 @@ private:
 	void getResAndErr(unsigned int aData, double &aResidual,
 			double &aMeadsError, double &aResError, double &aDownWeight);
 };
-
+}
 #endif /* GBLTRAJECTORY_H_ */

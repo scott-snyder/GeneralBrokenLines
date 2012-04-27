@@ -38,6 +38,9 @@
  *         global derivative       label of global derivative
  *\endverbatim
  */
+namespace gbl
+{
+
 class MilleBinary {
 public:
 	MilleBinary(const std::string fileName = "milleBinaryISN.dat",
@@ -55,5 +58,5 @@ private:
 	std::vector<int> intBuffer; ///< Integer buffer
 	std::vector<float> floatBuffer; ///< Float buffer
 };
-
+}
 #endif /* MILLEBINARY_H_ */

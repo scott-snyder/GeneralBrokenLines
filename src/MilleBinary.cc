@@ -6,6 +6,7 @@
  */
 
 #include "MilleBinary.h"
+using namespace gbl;
 
 /// Create binary file.
 /**

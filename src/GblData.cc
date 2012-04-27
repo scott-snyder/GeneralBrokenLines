@@ -6,6 +6,7 @@
  */
 
 #include "GblData.h"
+using namespace gbl;
 
 /// Create data block.
 /**

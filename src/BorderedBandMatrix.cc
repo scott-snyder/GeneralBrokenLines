@@ -8,6 +8,7 @@
 #include "BorderedBandMatrix.h"
 #include <iostream>
 #include <cstdlib>
+using namespace gbl;
 
 /// Create bordered band matrix.
 BorderedBandMatrix::BorderedBandMatrix() {

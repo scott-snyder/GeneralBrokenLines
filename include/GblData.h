@@ -23,6 +23,9 @@ typedef ROOT::Math::SMatrix<double, 5, 5> SMatrix55;
  * Data (block) containing value, precision and derivatives for measurements and kinks.
  * Created from attributes of GblPoints, used to construct linear equation system for track fit.
  */
+namespace gbl
+{
+
 class GblData {
 public:
 	GblData(unsigned int aLabel, double aMeas, double aPrec);
@@ -63,5 +66,5 @@ private:
 	std::vector<int> globalLabels; ///< Labels for global derivatives
 	std::vector<double> globalDerivatives; ///< Global derivatives
 };
-
+}
 #endif /* GBLDATA_H_ */

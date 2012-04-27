@@ -37,6 +37,9 @@ typedef ROOT::Math::SVector<double, 5> SVector5;
  *   -# Additional global parameters (with labels and derivatives). Not fitted, only passed
  *      on to (binary) file for fitting with Millepede-II.
  */
+namespace gbl
+{
+
 class GblPoint {
 public:
 	GblPoint(const TMatrixD &aJacobian);
@@ -88,5 +91,5 @@ private:
 	std::vector<int> globalLabels; ///< Labels of global (MP-II) derivatives
 	TMatrixD globalDerivatives; ///< Derivatives of measurement vs additional global (MP-II) parameters
 };
-
+}
 #endif /* GBLPOINT_H_ */
