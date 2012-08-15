@@ -43,7 +43,7 @@ def example1():
 #
   nTry = 10#00 #: number of tries
   nLayer = 5   #: number of detector layers
-  print " Gbltst $Rev: 135 $ ", nTry, nLayer
+  print " Gbltst $Rev$ ", nTry, nLayer
   start = time.clock()
 # track direction
   sinLambda = 0.3
@@ -95,8 +95,8 @@ def example1():
       sinStereo = (0. if iLayer % 2 == 0 else 0.5) 
       cosStereo = math.sqrt(1.0 - sinStereo ** 2)    
       mDir = np.array([[sinStereo, cosStereo, 0.0], [0., 0, 1.]])
-# projection local (uv) to measurement directions
-      proL2m = np.linalg.inv(np.dot(mDir, uvDir.T))
+# projection local (uv) to measurement directions (dm/duv)
+      proL2m = np.dot(mDir, uvDir.T)
 # measurement - prediction in measurement system with error
       measNorm = np.random.normal(0., 1., 2)  
       meas = np.dot(proL2m, clPar[3:5]) + measErr * measNorm

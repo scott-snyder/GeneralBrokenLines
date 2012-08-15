@@ -18,11 +18,11 @@ PROGRAM test
     PARAMETER (mp=5+nloc)
     PARAMETER (mp2=(mp+1)*mp/2)
     DOUBLE PRECISION :: dpar(mp), dcov(mp2), dpseed(mp2), djac(5,5),daux(15),  &
-    ajacp,ajacn,pm2l,pl2m,det
+    ajacp,ajacn,pl2m
 
     DIMENSION clpar(5),dirt(3),dirm(3,2),tmp(5),sarc(100),  &
     dif(2),sig(2),prec(2),ajacp(5,5),ajacn(5,5),  &
-    dirz(3),diru(3),dirv(3),pm2l(2,2),pl2m(2,2),beta0(2),  &
+    dirz(3),diru(3),dirv(3),pl2m(2,2),beta0(2),  &
     clerr(5),lder(nloc),derlc(2,nloc),thsig(2),thprec(2)
 
     DATA dirz / 0.0, 0.0, 1.0 / ! Z direction
@@ -150,17 +150,11 @@ PROGRAM test
             dirm(1,2)=0.0 ! direction of measurement
             dirm(2,2)=eps
             dirm(3,2)=SQRT(1.0-eps**2)
-            ! projection (du/dm: measurement to local)
-            DO l=1,2
-                pm2l(l,1)= DBLE(dirm(1,l)*diru(1)+dirm(2,l)*diru(2)+dirm(3,l)*diru(3))
-                pm2l(l,2)= DBLE(dirm(1,l)*dirv(1)+dirm(2,l)*dirv(2)+dirm(3,l)*dirv(3))
-            END DO
             ! projection (dm/du: local to measurement)
-            det=pm2l(1,1)*pm2l(2,2)-pm2l(1,2)*pm2l(2,1)
-            pl2m(1,1)= pm2l(2,2)/det
-            pl2m(1,2)=-pm2l(1,2)/det
-            pl2m(2,1)=-pm2l(2,1)/det
-            pl2m(2,2)= pm2l(1,1)/det
+            DO l=1,2
+                pl2m(l,1)= DBLE(dirm(1,l)*diru(1)+dirm(2,l)*diru(2)+dirm(3,l)*diru(3))
+                pl2m(l,2)= DBLE(dirm(1,l)*dirv(1)+dirm(2,l)*dirv(2)+dirm(3,l)*dirv(3))
+            END DO
             ! measurement - prediction in measurement system with error
             DO m=1,2
                 dif(m)=clpar(4)*SNGL(pl2m(m,1)) +clpar(5)*SNGL(pl2m(m,2))+sig(m)*unrm()

@@ -129,11 +129,8 @@ void example1() {
 			mDir[0][0] = sinStereo;
 			mDir[0][1] = cosStereo;
 			mDir[1][2] = 1.;
-// projection measurement to local (uv) directions
-			TMatrixD proM2l = mDir * uvDirT;
-// projection local (uv) to measurement directions
-			TMatrixD proL2m = proM2l;
-			proL2m.Invert();
+// projection local (uv) to measurement directions (dm/duv)
+			TMatrixD proL2m = mDir * uvDirT;
 // point with (independent) measurements (in measurement system)
 			GblPoint point(jacPointToPoint);
 // measurement - prediction in measurement system with error
@@ -145,6 +142,9 @@ void example1() {
 			point.addMeasurement(proL2m, meas, measPrec);
 			/* point with (correlated) measurements (in local system)
 			 GblPoint point(jacPointToPoint);
+// projection measurement to local (uv) directions
+			 TMatrixD proM2l = proL2m;
+			 proM2l.Invert();			 
 			 // measurement - prediction in local system with error
 			 TVectorD meas(2);
 			 for (unsigned int i = 0; i < 2; ++i) {
