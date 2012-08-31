@@ -12,7 +12,20 @@ SET( ${PROJECT_NAME}_VERSION_PATCH 0 )
 # make life easier and simply use the ilcsoft default settings
 # load default ilcsoft settings (install prefix, build type, rpath, etc.)
 LIST( APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake )
-INCLUDE( ilcsoft_default_settings )
+
+# include helper macros by ilcsoft/Jan Engels, DESY
+INCLUDE( MacroDisplayStandardVariables )
+INCLUDE( MacroGeneratePackageConfigFiles )
+
+# set default install prefix to project root directory
+# instead of the cmake default /usr/local
+IF( CMAKE_INSTALL_PREFIX STREQUAL "/usr/local" )
+    SET( CMAKE_INSTALL_PREFIX "${PROJECT_SOURCE_DIR}" )
+ENDIF()
+
+# write this variable to cache
+SET( CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}" CACHE PATH "Where to install ${PROJECT_NAME}" FORCE )
+
 
 FIND_PACKAGE(ROOT REQUIRED)
 
@@ -28,7 +41,13 @@ LINK_DIRECTORIES(${ROOT_LIBRARY_DIR})
 
 # add library
 AUX_SOURCE_DIRECTORY( ./src library_sources )
-ADD_SHARED_LIBRARY( ${PROJECT_NAME} ${library_sources} )
+ADD_LIBRARY( ${PROJECT_NAME} SHARED ${library_sources} )
+SET_TARGET_PROPERTIES( ${PROJECT_NAME} PROPERTIES
+        # create *nix style library versions + symbolic links
+        VERSION ${${PROJECT_NAME}_VERSION}
+        SOVERSION ${${PROJECT_NAME}_SOVERSION}
+    )
+
 INSTALL( TARGETS ${PROJECT_NAME} DESTINATION lib )
 
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${ROOT_LIBS})
