@@ -98,23 +98,23 @@ TMatrixDSym BorderedBandMatrix::getBlockMatrix(
  * calculate bordered band part of inverse of A. Use decomposition
  * in border and band part for block matrix algebra:
  *
- *   | A  Ct |   | x1 |   | b1 |        , A  is the border part
- *   |       | * |    | = |    |        , Ct is the mixed part
- *   | C  D  |   | x2 |   | b2 |        , D  is the band part
+ *     | A  Ct |   | x1 |   | b1 |        , A  is the border part
+ *     |       | * |    | = |    |        , Ct is the mixed part
+ *     | C  D  |   | x2 |   | b2 |        , D  is the band part
  *
- *  Explicit inversion of D is avoided by using solution X of D*X=C (X=D^-1*C,
- *  obtained from Cholesky decomposition and forward/backward substitution)
+ * Explicit inversion of D is avoided by using solution X of D*X=C (X=D^-1*C,
+ * obtained from Cholesky decomposition and forward/backward substitution)
  *
- *   | x1 |   | E*b1 - E*Xt*b2 |        , E^-1 = A-Ct*D^-1*C = A-Ct*X
- *   |    | = |                |
- *   | x2 |   |  x   - X*x1    |        , x is solution of D*x=b2 (x=D^-1*b2)
+ *     | x1 |   | E*b1 - E*Xt*b2 |        , E^-1 = A-Ct*D^-1*C = A-Ct*X
+ *     |    | = |                |
+ *     | x2 |   |  x   - X*x1    |        , x is solution of D*x=b2 (x=D^-1*b2)
  *
- *  Inverse matrix is:
+ * Inverse matrix is:
  *
- *   |  E   -E*Xt          |
- *   |                     |
- *   | -X*E  D^-1 + X*E*Xt |            , only band part of (D^-1 + X*E*Xt)
- *                                        is calculated
+ *     |  E   -E*Xt          |
+ *     |                     |            , only band part of (D^-1 + X*E*Xt)
+ *     | -X*E  D^-1 + X*E*Xt |              is calculated
+ *
  *
  * \param [in] aRightHandSide Right hand side (vector) 'b' of A*x=b
  * \param [out] aSolution Solution (vector) x of A*x=b

@@ -59,6 +59,7 @@ void GblPoint::addMeasurement(const TVectorD &aResiduals,
 		const TMatrixDSym &aPrecision) {
 	measDim = aResiduals.GetNrows();
 	TMatrixDSymEigen measEigen(aPrecision);
+	measTransformation.ResizeTo(measDim, measDim);
 	measTransformation = measEigen.GetEigenVectors();
 	measTransformation.T();
 	transFlag = true;
@@ -254,16 +255,18 @@ void GblPoint::addNextJacobian(const SMatrix55 aJac) {
 void GblPoint::getDerivatives(int aDirection, SMatrix22 &matW, SMatrix22 &matWJ,
 		SVector2 &vecWd) const {
 
+	SMatrix22 matJ;
+	SVector2 vecd;
 	if (aDirection < 1) {
-		matWJ = prevJacobian.Sub<SMatrix22>(3, 3);
+		matJ = prevJacobian.Sub<SMatrix22>(3, 3);
 		matW = -prevJacobian.Sub<SMatrix22>(3, 1);
-		vecWd = prevJacobian.SubCol<SVector2>(0, 3);
+		vecd = prevJacobian.SubCol<SVector2>(0, 3);
 	} else {
-		matWJ = nextJacobian.Sub<SMatrix22>(3, 3);
+		matJ = nextJacobian.Sub<SMatrix22>(3, 3);
 		matW = nextJacobian.Sub<SMatrix22>(3, 1);
-		vecWd = nextJacobian.SubCol<SVector2>(0, 3);
+		vecd = nextJacobian.SubCol<SVector2>(0, 3);
 	}
 	matW.InvertFast();
-	matWJ = matW * matWJ;
-	vecWd = matW * vecWd;
+	matWJ = matW * matJ;
+	vecWd = matW * vecd;
 }
