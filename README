@@ -1,0 +1,18 @@
+To build the code, you need to have CMake and root installed on your system.
+
+Execute the following steps:
+  1) create a compilation directory, e.g. 'build' and change into it
+	mkdir build; cd build
+  2) create the Makefile by invoking cmake on the configuration file
+	cmake ..
+  3) start the build process
+	make
+As a result of successful compilation, the shared library will be created in the lib/ sub directory, and the executable example can be found in bin/.
+
+If you want to use the General Broken Lines as a project in another CMake managed project, or want (slightly) simpler path also invoke:
+  make install
+This will create some configuration files for inclusion and also create the lib/ and bin/ directory in the directory of the source code.
+
+To build the documentation, you need doxygen (version > 1.7.0 recommended ) on your system.
+Invoke, also in the build directory:
+  make doc
