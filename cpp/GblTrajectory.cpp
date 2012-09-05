@@ -85,11 +85,13 @@
 /**
  * Curved trajectory in space (default) or without curvature (q/p) or in one
  * plane (u-direction) only.
+ * \param [in] nReserve Expected number of points (to reserve space for)
  * \param [in] flagCurv Use q/p
  * \param [in] flagU1dir Use in u1 direction
  * \param [in] flagU2dir Use in u2 direction
  */
-GblTrajectory::GblTrajectory(bool flagCurv, bool flagU1dir, bool flagU2dir) :
+GblTrajectory::GblTrajectory(unsigned int nReserve, bool flagCurv,
+		bool flagU1dir, bool flagU2dir) :
 		numPoints(0), numOffsets(0), numCurvature(flagCurv ? 1 : 0), numParameters(
 				0), numLocals(0), externalPoint(0), theDimension(0), thePoints(), theData(), measDataIndex(), scatDataIndex(), externalIndex(), externalSeed() {
 
@@ -97,7 +99,8 @@ GblTrajectory::GblTrajectory(bool flagCurv, bool flagU1dir, bool flagU2dir) :
 		theDimension.push_back(0);
 	if (flagU2dir)
 		theDimension.push_back(1);
-	thePoints.reserve(100); // reserve some space for points
+	thePoints.reserve(nReserve); // reserve some space for points
+	dataGenerated = false;
 	fitOK = false;
 }
 
@@ -121,6 +124,15 @@ unsigned int GblTrajectory::addPoint(GblPoint aPoint) {
 /// Retrieve number of point from trajectory
 unsigned int GblTrajectory::getNumPoints() const {
 	return numPoints;
+}
+
+/// Retrieve point from trajectory
+/**
+ * \param [in] aLabel Label of point
+ * \return Pointer to point
+ */
+GblPoint* GblTrajectory::getPoint(unsigned int aLabel) {
+	return &thePoints[aLabel];
 }
 
 /// Add external seed to trajectory.
@@ -666,9 +678,12 @@ unsigned int GblTrajectory::fit(double &Chi2, int &Ndf, double &lostWeight,
 
 	unsigned int aMethod = 0;
 
-	defineOffsets();
-	calcJacobians();
-	prepare();
+	if (!dataGenerated) {
+		defineOffsets();
+		calcJacobians();
+		prepare();
+		dataGenerated = true;
+	}
 	buildLinearEquationSystem();
 	lostWeight = 0.;
 	unsigned int ierr = 0;
@@ -716,8 +731,14 @@ void GblTrajectory::milleOut(MilleBinary &aMille) {
 	std::vector<double>* derGlobal;
 
 //   data: measurements, kinks and external seed
+	if (!dataGenerated) {
+		defineOffsets();
+		calcJacobians();
+		prepare();
+		dataGenerated = true;
+	}
 	std::vector<GblData>::iterator itData;
-	for (itData = theData.begin(); itData < theData.end(); ++itData) {
+	for (itData = theData.begin(); itData != theData.end(); ++itData) {
 		itData->getAllData(fValue, fErr, indLocal, derLocal, labGlobal,
 				derGlobal);
 		aMille.addData(fValue, fErr, *indLocal, *derLocal, *labGlobal,
