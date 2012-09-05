@@ -23,6 +23,12 @@ GblPoint::GblPoint(const TMatrixD &aJacobian) :
 	}
 }
 
+GblPoint::GblPoint(const SMatrix55 &aJacobian) :
+		theLabel(0), theOffset(0), p2pJacobian(aJacobian), measDim(0), transFlag(
+				false), measTransformation(), scatFlag(false), localDerivatives(), globalLabels(), globalDerivatives() {
+
+}
+
 GblPoint::~GblPoint() {
 }
 
@@ -33,14 +39,17 @@ GblPoint::~GblPoint() {
  * \param [in] aProjection Projection from measurement to local system
  * \param [in] aResiduals Measurement residuals
  * \param [in] aPrecision Measurement precision (diagonal)
+ * \param [in] minPrecision Minimal precision to accept measurement
  */
 void GblPoint::addMeasurement(const TMatrixD &aProjection,
-		const TVectorD &aResiduals, const TVectorD &aPrecision) {
+		const TVectorD &aResiduals, const TVectorD &aPrecision,
+		double minPrecision) {
 	measDim = aResiduals.GetNrows();
 	unsigned int iOff = 5 - measDim;
 	for (unsigned int i = 0; i < measDim; ++i) {
 		measResiduals(iOff + i) = aResiduals[i];
-		measPrecision(iOff + i) = aPrecision[i];
+		measPrecision(iOff + i) = (
+				aPrecision[i] >= minPrecision ? aPrecision[i] : 0.);
 		for (unsigned int j = 0; j < measDim; ++j) {
 			measProjection(iOff + i, iOff + j) = aProjection(i, j);
 		}
@@ -52,11 +61,45 @@ void GblPoint::addMeasurement(const TMatrixD &aProjection,
  * Add measurement on local system with arbitrary precision (inverse covariance) matrix.
  * Will be diagonalized.
  * ((up to) 2D: position, 4D: slope+position, 5D: curvature+slope+position)
+ * \param [in] aProjection Projection from measurement to local system
  * \param [in] aResiduals Measurement residuals
  * \param [in] aPrecision Measurement precision (matrix)
+ * \param [in] minPrecision Minimal precision to accept measurement
+ */
+void GblPoint::addMeasurement(const TMatrixD &aProjection,
+		const TVectorD &aResiduals, const TMatrixDSym &aPrecision,
+		double minPrecision) {
+	measDim = aResiduals.GetNrows();
+	TMatrixDSymEigen measEigen(aPrecision);
+	measTransformation.ResizeTo(measDim, measDim);
+	measTransformation = measEigen.GetEigenVectors();
+	measTransformation.T();
+	transFlag = true;
+	TVectorD transResiduals = measTransformation * aResiduals;
+	TVectorD transPrecision = measEigen.GetEigenValues();
+	TMatrixD transProjection = measTransformation * aProjection;
+	unsigned int iOff = 5 - measDim;
+	for (unsigned int i = 0; i < measDim; ++i) {
+		measResiduals(iOff + i) = transResiduals[i];
+		measPrecision(iOff + i) = (
+				transPrecision[i] >= minPrecision ? transPrecision[i] : 0.);
+		for (unsigned int j = 0; j < measDim; ++j) {
+			measProjection(iOff + i, iOff + j) = transProjection(i, j);
+		}
+	}
+}
+
+/// Add a mesurement to a point.
+/**
+ * Add measurement on local system with arbitrary precision (inverse covariance) matrix.
+ * Will be diagonalized.
+ * ((up to) 2D: position, 4D: slope+position, 5D: curvature+slope+position)
+ * \param [in] aResiduals Measurement residuals
+ * \param [in] aPrecision Measurement precision (matrix)
+ * \param [in] minPrecision Minimal precision to accept measurement
  */
 void GblPoint::addMeasurement(const TVectorD &aResiduals,
-		const TMatrixDSym &aPrecision) {
+		const TMatrixDSym &aPrecision, double minPrecision) {
 	measDim = aResiduals.GetNrows();
 	TMatrixDSymEigen measEigen(aPrecision);
 	measTransformation.ResizeTo(measDim, measDim);
@@ -68,7 +111,8 @@ void GblPoint::addMeasurement(const TVectorD &aResiduals,
 	unsigned int iOff = 5 - measDim;
 	for (unsigned int i = 0; i < measDim; ++i) {
 		measResiduals(iOff + i) = transResiduals[i];
-		measPrecision(iOff + i) = transPrecision[i];
+		measPrecision(iOff + i) = (
+				transPrecision[i] >= minPrecision ? transPrecision[i] : 0.);
 		for (unsigned int j = 0; j < measDim; ++j) {
 			measProjection(iOff + i, iOff + j) = measTransformation(i, j);
 		}
@@ -266,7 +310,9 @@ void GblPoint::getDerivatives(int aDirection, SMatrix22 &matW, SMatrix22 &matWJ,
 		matW = nextJacobian.Sub<SMatrix22>(3, 1);
 		vecd = nextJacobian.SubCol<SVector2>(0, 3);
 	}
+
 	matW.InvertFast();
 	matWJ = matW * matJ;
 	vecWd = matW * vecd;
+
 }

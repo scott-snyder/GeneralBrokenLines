@@ -43,11 +43,14 @@ typedef ROOT::Math::SVector<double, 5> SVector5;
 class GblPoint {
 public:
 	GblPoint(const TMatrixD &aJacobian);
+	GblPoint(const SMatrix55 &aJacobian);
 	virtual ~GblPoint();
 	void addMeasurement(const TMatrixD &aProjection, const TVectorD &aResiduals,
-			const TVectorD &aPrecision);
+			const TVectorD &aPrecision, double minPrecision = 0.);
+	void addMeasurement(const TMatrixD &aProjection, const TVectorD &aResiduals,
+			const TMatrixDSym &aPrecision, double minPrecision = 0.);
 	void addMeasurement(const TVectorD &aResiduals,
-			const TMatrixDSym &aPrecision);
+			const TMatrixDSym &aPrecision, double minPrecision = 0.);
 	unsigned int hasMeasurement() const;
 	void getMeasurement(SMatrix55 &aProjection, SVector5 &aResiduals,
 			SVector5 &aPrecision) const;
