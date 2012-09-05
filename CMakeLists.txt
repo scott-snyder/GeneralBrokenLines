@@ -8,12 +8,26 @@ PROJECT(GBL)
 SET( ${PROJECT_NAME}_VERSION_MAJOR 0 )
 SET( ${PROJECT_NAME}_VERSION_MINOR 0 )
 SET( ${PROJECT_NAME}_VERSION_PATCH 0 )
-SET( ${PROJECT_NAME}_SOVERSION "${${PROJECT_NAME}_VERSION_MAJOR}.${${PROJECT_NAME}_VERSION_MINOR}.${${PROJECT_NAME}_VERSION_PATCH}" )
+SET ( ${PROJECT_NAME}_SOVERSION ${${PROJECT_NAME}_VERSION_MAJOR}.${${PROJECT_NAME}_VERSION_MINOR} )
+SET ( ${PROJECT_NAME}_VERSION ${${PROJECT_NAME}_SOVERSION}.${${PROJECT_NAME}_VERSION_PATCH} )
 
-# make life easier and use some of the ilcsoft cmake modules
+# make life easier and simply use the ilcsoft default settings
+# load default ilcsoft settings (install prefix, build type, rpath, etc.)
 LIST( APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake )
-INCLUDE ( MacroDisplayStandardVariables )
-INCLUDE ( MacroGeneratePackageConfigFiles )
+
+# include helper macros by ilcsoft/Jan Engels, DESY
+INCLUDE( MacroDisplayStandardVariables )
+INCLUDE( MacroGeneratePackageConfigFiles )
+
+# set default install prefix to project root directory
+# instead of the cmake default /usr/local
+IF( CMAKE_INSTALL_PREFIX STREQUAL "/usr/local" )
+    SET( CMAKE_INSTALL_PREFIX "${PROJECT_SOURCE_DIR}" )
+ENDIF()
+
+# write this variable to cache
+SET( CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}" CACHE PATH "Where to install ${PROJECT_NAME}" FORCE )
+
 
 FIND_PACKAGE(ROOT REQUIRED)
 
@@ -27,12 +41,12 @@ INSTALL( DIRECTORY ./include DESTINATION . PATTERN ".svn" EXCLUDE )
 # declare the stupid ROOT library path
 LINK_DIRECTORIES(${ROOT_LIBRARY_DIR})
 
-# add the creation of a shared library and declare the dependencies
+# add library
 AUX_SOURCE_DIRECTORY( ./src library_sources )
 ADD_LIBRARY( ${PROJECT_NAME} SHARED ${library_sources} )
 SET_TARGET_PROPERTIES( ${PROJECT_NAME} PROPERTIES
         # create *nix style library versions + symbolic links
-#        VERSION ${${PROJECT_NAME}_VERSION}
+        VERSION ${${PROJECT_NAME}_VERSION}
         SOVERSION ${${PROJECT_NAME}_SOVERSION}
     )
 
@@ -40,15 +54,9 @@ INSTALL( TARGETS ${PROJECT_NAME} DESTINATION lib )
 
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${ROOT_LIBS})
 
-# set the install path right (not into system directory...)
-IF( CMAKE_INSTALL_PREFIX STREQUAL "/usr/local" )
-    SET( CMAKE_INSTALL_PREFIX "${PROJECT_SOURCE_DIR}" )
-ENDIF()
-
-
 # the examples, build with "make examples"
 ADD_SUBDIRECTORY( examples/ )
-
+  
 # add a target to generate API documentation with Doxygen
 FIND_PACKAGE(Doxygen)
 
@@ -67,7 +75,7 @@ ELSE()
 
 ENDIF(DOXYGEN_FOUND)
 
-# display some standard variables
+# display some variables and write them to cache
 DISPLAY_STD_VARIABLES()
 
 # generate and install following configuration files
