@@ -16,3 +16,6 @@ This will create some configuration files for inclusion and also create the lib/
 To build the documentation, you need doxygen (version > 1.7.0 recommended ) on your system.
 Invoke, also in the build directory:
   make doc
+
+The shortest way to build everything, if you have the required packages installed (CMake, root and doxygen) is to execute from the current (project root) directory:
+	mkdir build; cd build; cmake ..; make; make doc; make install

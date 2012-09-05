@@ -33,7 +33,7 @@ PROJECT_NAME = GeneralBrokenLines
 # This could be handy for archiving the generated documentation or
 # if some version control system is used.
 
-PROJECT_NUMBER = @rev@ 
+PROJECT_NUMBER = @VERSION@ 
 
 # Using the PROJECT_BRIEF tag one can provide an optional one line description
 # for a project that appears at the top of each page and should give viewer
@@ -46,7 +46,7 @@ PROJECT_BRIEF =
 # exceed 55 pixels and the maximum width should not exceed 200 pixels.
 # Doxygen will copy the logo to the output directory.
 
-PROJECT_LOGO = @{CMAKE_CURRENT_SOURCE_DIR}@/doc/gbl-logo.png
+PROJECT_LOGO = @CMAKE_CURRENT_SOURCE_DIR@/doc/gbl-logo.png
 
 # The OUTPUT_DIRECTORY tag is used to specify the (relative or absolute)
 # base path where the generated documentation will be put.
