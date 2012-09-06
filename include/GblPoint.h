@@ -25,6 +25,10 @@ typedef ROOT::Math::SMatrix<double, 5> SMatrix55;
 typedef ROOT::Math::SVector<double, 2> SVector2;
 typedef ROOT::Math::SVector<double, 5> SVector5;
 
+//! Namespace for the general broken lines package
+namespace gbl 
+{
+
 /// Point on trajectory
 /**
  * User supplied point on (initial) trajectory.
@@ -37,8 +41,6 @@ typedef ROOT::Math::SVector<double, 5> SVector5;
  *   -# Additional global parameters (with labels and derivatives). Not fitted, only passed
  *      on to (binary) file for fitting with Millepede-II.
  */
-namespace gbl
-{
 
 class GblPoint {
 public:

@@ -18,13 +18,15 @@ typedef ROOT::Math::SMatrix<double, 2, 5> SMatrix25;
 typedef ROOT::Math::SMatrix<double, 2, 7> SMatrix27;
 typedef ROOT::Math::SMatrix<double, 5, 5> SMatrix55;
 
+//! Namespace for the general broken lines package
+namespace gbl 
+{
+
 /// Data (block) for independent scalar measurement
 /**
  * Data (block) containing value, precision and derivatives for measurements and kinks.
  * Created from attributes of GblPoints, used to construct linear equation system for track fit.
  */
-namespace gbl
-{
 
 class GblData {
 public:

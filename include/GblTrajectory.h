@@ -13,13 +13,15 @@
 #include "BorderedBandMatrix.h"
 #include "MilleBinary.h"
 
+//! Namespace for the general broken lines package
+namespace gbl 
+{
+
 /// GBL trajectory.
 /**
  * List of GblPoints ordered by arc length.
  * Can be fitted and optionally written to MP-II binary file.
  */
-namespace gbl
-{
 
 class GblTrajectory {
 public:

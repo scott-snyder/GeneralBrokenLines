@@ -12,6 +12,10 @@
 #include "TMatrixDSym.h"
 #include "VMatrix.h"
 
+//! Namespace for the general broken lines package
+namespace gbl 
+{
+
 /// (Symmetric) Bordered Band Matrix.
 /**
  *  Separate storage of border, mixed and band parts (as vector<double>).
@@ -44,8 +48,6 @@
  *                       +-                         -+
  *\endverbatim
  */
-namespace gbl 
-{
 
 class BorderedBandMatrix {
 public:

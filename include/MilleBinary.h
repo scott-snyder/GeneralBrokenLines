@@ -11,6 +11,10 @@
 #include<fstream>
 #include<vector>
 
+//! Namespace for the general broken lines package
+namespace gbl 
+{
+
 ///  Millepede-II (binary) record.
 /**
  *  Containing information for local (track) and global fit.
@@ -38,8 +42,6 @@
  *         global derivative       label of global derivative
  *\endverbatim
  */
-namespace gbl
-{
 
 class MilleBinary {
 public:

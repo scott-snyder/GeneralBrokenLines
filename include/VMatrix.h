@@ -10,9 +10,11 @@
 
 #include<vector>
 
-/// Simple Vector based on std::vector<double>
-namespace gbl
+//! Namespace for the general broken lines package
+namespace gbl 
 {
+
+/// Simple Vector based on std::vector<double>
 
 class VVector {
 public:
