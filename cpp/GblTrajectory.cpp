@@ -42,8 +42,8 @@
  *
  *  \section call_sec Calling sequence
  *
- *    -# Create trajectory:\n
- *            <tt>traj = GblTrajectory(..)</tt>
+ *    -# Create list of points on initial trajectory:\n
+ *            <tt>std::vector<GblPoint> list</tt>
  *    -# For all points on initial trajectory:
  *        - Create points and add appropriate attributes:\n
  *           - <tt>point = GblPoint(..)</tt>
@@ -52,11 +52,13 @@
  *             - <tt>point.addLocals(..)</tt>
  *             - <tt>point.addGlobals(..)</tt>
  *           - <tt>point.addScatterer(..)</tt>
- *        - Add point (ordered by arc length) to trajectory, return label of point:\n
- *            <tt>label = traj.addPoint(point)</tt>
- *    -# Optionally add external seed:\n
- *            <tt>traj.addExternalSeed(..)</tt>
- *    -# Construct and fit trajectory, return error code,
+ *        - Add point (ordered by arc length) to list:\n
+ *            <tt>list.push_back(point)</tt>
+ *    -# Create trajectory from list of points:\n
+ *            <tt>traj = GblTrajectory (list)</tt>
+ *    -# Optionally with external seed:\n
+ *            <tt>traj = GblTrajectory (list,seed)</tt>
+ *    -# Fit trajectory, return error code,
  *       get Chi2, Ndf (and weight lost by M-estimators):\n
  *            <tt>ierr = traj.fit(..)</tt>
  *    -# For any point on initial trajectory:
@@ -81,44 +83,56 @@
 
 #include "GblTrajectory.h"
 
-/// Create new trajectory.
+/// Create new trajectory from list of points.
 /**
  * Curved trajectory in space (default) or without curvature (q/p) or in one
  * plane (u-direction) only.
- * \param [in] nReserve Expected number of points (to reserve space for)
+ * \param [in] aPointList List of points
  * \param [in] flagCurv Use q/p
  * \param [in] flagU1dir Use in u1 direction
  * \param [in] flagU2dir Use in u2 direction
  */
-GblTrajectory::GblTrajectory(unsigned int nReserve, bool flagCurv,
+GblTrajectory::GblTrajectory(std::vector<GblPoint> &aPointList, bool flagCurv,
 		bool flagU1dir, bool flagU2dir) :
-		numPoints(0), numOffsets(0), numCurvature(flagCurv ? 1 : 0), numParameters(
-				0), numLocals(0), externalPoint(0), theDimension(0), thePoints(), theData(), measDataIndex(), scatDataIndex(), externalIndex(), externalSeed() {
+		numPoints(aPointList.size()), numOffsets(0), numCurvature(
+				flagCurv ? 1 : 0), numParameters(0), numLocals(0), externalPoint(
+				0), theDimension(0), thePoints(aPointList), theData(), measDataIndex(), scatDataIndex(), externalIndex(), externalSeed() {
 
 	if (flagU1dir)
 		theDimension.push_back(0);
 	if (flagU2dir)
 		theDimension.push_back(1);
-	thePoints.reserve(nReserve); // reserve some space for points
-	dataGenerated = false;
-	fitOK = false;
+    construct(); // construct trajectory
+}
+
+/// Create new trajectory from list of points with external seed.
+/**
+ * Curved trajectory in space (default) or without curvature (q/p) or in one
+ * plane (u-direction) only.
+ * \param [in] aPointList List of points
+ * \param [in] aLabel (Signed) label of point for external seed
+ * (<0: in front, >0: after point, slope changes at scatterer!)
+ * \param [in] aSeed Precision matrix of external seed
+ * \param [in] flagCurv Use q/p
+ * \param [in] flagU1dir Use in u1 direction
+ * \param [in] flagU2dir Use in u2 direction
+ */
+GblTrajectory::GblTrajectory(std::vector<GblPoint> &aPointList,
+		unsigned int aLabel, const TMatrixDSym &aSeed, bool flagCurv,
+		bool flagU1dir, bool flagU2dir) :
+		numPoints(aPointList.size()), numOffsets(0), numCurvature(
+				flagCurv ? 1 : 0), numParameters(0), numLocals(0), externalPoint(
+				aLabel), theDimension(0), thePoints(aPointList), theData(), measDataIndex(), scatDataIndex(), externalIndex(), externalSeed(
+				aSeed) {
+
+	if (flagU1dir)
+		theDimension.push_back(0);
+	if (flagU2dir)
+		theDimension.push_back(1);
+    construct(); // construct trajectory
 }
 
 GblTrajectory::~GblTrajectory() {
-}
-
-/// Add point to trajectory.
-/**
- * Points have to be ordered in arc length.
- * \param [in] aPoint Point to add
- * \return Label of point on trajectory
- */
-unsigned int GblTrajectory::addPoint(GblPoint aPoint) {
-	numPoints++;
-	aPoint.setLabel(numPoints);
-	thePoints.push_back(aPoint);
-	numLocals = std::max(numLocals, aPoint.getNumLocals());
-	return numPoints;
 }
 
 /// Retrieve number of point from trajectory
@@ -135,17 +149,20 @@ GblPoint* GblTrajectory::getPoint(unsigned int aLabel) {
 	return &thePoints[aLabel];
 }
 
-/// Add external seed to trajectory.
+/// Construct trajectory from list of points.
 /**
- * \param [in] aLabel (Signed) label of point for external seed
- * (<0: in front, >0: after point, slope changes at scatterer!)
- * \param [in] aSeed Precision matrix of external seed
+ * Trajectory is prepared for fit or output to binary file.
  */
-void GblTrajectory::addExternalSeed(unsigned int aLabel,
-		const TMatrixDSym &aSeed) {
-	externalPoint = aLabel;
-	externalSeed.ResizeTo(aSeed);
-	externalSeed = aSeed;
+void GblTrajectory::construct() {
+
+	fitOK = false;
+	std::vector<GblPoint>::iterator itPoint;
+	for (itPoint = thePoints.begin(); itPoint < thePoints.end(); ++itPoint) {
+		numLocals = std::max(numLocals, itPoint->getNumLocals());
+	}
+	defineOffsets();
+	calcJacobians();
+	prepare();
 }
 
 /// Define offsets from list of points.
@@ -678,12 +695,6 @@ unsigned int GblTrajectory::fit(double &Chi2, int &Ndf, double &lostWeight,
 
 	unsigned int aMethod = 0;
 
-	if (!dataGenerated) {
-		defineOffsets();
-		calcJacobians();
-		prepare();
-		dataGenerated = true;
-	}
 	buildLinearEquationSystem();
 	lostWeight = 0.;
 	unsigned int ierr = 0;
@@ -731,12 +742,6 @@ void GblTrajectory::milleOut(MilleBinary &aMille) {
 	std::vector<double>* derGlobal;
 
 //   data: measurements, kinks and external seed
-	if (!dataGenerated) {
-		defineOffsets();
-		calcJacobians();
-		prepare();
-		dataGenerated = true;
-	}
 	std::vector<GblData>::iterator itData;
 	for (itData = theData.begin(); itData != theData.end(); ++itData) {
 		itData->getAllData(fValue, fErr, indLocal, derLocal, labGlobal,
