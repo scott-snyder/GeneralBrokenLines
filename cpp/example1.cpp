@@ -116,8 +116,9 @@ void example1() {
 		std::vector<double> sPoint;
 		TMatrixD jacPointToPoint(5, 5);
 		jacPointToPoint.UnitMatrix();
-// create trajectory
-		GblTrajectory traj;
+// create list of points
+		std::vector<GblPoint> listOfPoints;
+		listOfPoints.reserve(2*nLayer);
 
 		for (unsigned int iLayer = 0; iLayer < nLayer; ++iLayer) {
 //			std::cout << " Layer " << iLayer << ", " << s << std::endl;
@@ -160,7 +161,8 @@ void example1() {
 //MP			point.addGlobals(globalLabels, addDer);
 			addDer *= -1.; // Der flips sign every measurement
 // add point to trajectory
-			unsigned int iLabel = traj.addPoint(point);
+			listOfPoints.push_back(point);
+			unsigned int iLabel = listOfPoints.size();
 			sPoint.push_back(s);
 			if (iLabel == seedLabel) {
 				clSeed = clCov.Invert();
@@ -176,7 +178,8 @@ void example1() {
 				// point with scatterer
 				GblPoint point(jacPointToPoint);
 				point.addScatterer(scat, scatPrec);
-				iLabel = traj.addPoint(point);
+				listOfPoints.push_back(point);
+				iLabel = listOfPoints.size();
 				sPoint.push_back(s);
 				if (iLabel == seedLabel) {
 					clSeed = clCov.Invert();
@@ -193,9 +196,9 @@ void example1() {
 			}
 		}
 //
-		if (seedLabel) {
-			traj.addExternalSeed(seedLabel, clSeed); // external seed
-		}
+		// create trajectory
+		//GblTrajectory traj(listOfPoints);
+		GblTrajectory traj(listOfPoints, seedLabel, clSeed); // with external seed
 // fit trajectory
 		double Chi2;
 		int Ndf;

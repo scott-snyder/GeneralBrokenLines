@@ -22,13 +22,14 @@
  */
 class GblTrajectory {
 public:
-	GblTrajectory(unsigned int nReserve = 100, bool flagCurv = true,
+	GblTrajectory(std::vector<GblPoint> &aPointList, bool flagCurv = true,
 			bool flagU1dir = true, bool flagU2dir = true);
+	GblTrajectory(std::vector<GblPoint> &aPointList, unsigned int aLabel,
+			const TMatrixDSym &aSeed, bool flagCurv = true, bool flagU1dir =
+					true, bool flagU2dir = true);
 	virtual ~GblTrajectory();
-	unsigned int addPoint(GblPoint aPoint);
 	unsigned int getNumPoints() const;
 	GblPoint* getPoint(unsigned int aLabel);
-	void addExternalSeed(unsigned int aLabel, const TMatrixDSym &aSeed);
 	unsigned int getResults(int aSignedLabel, TVectorD &localPar,
 			TMatrixDSym &localCov) const;
 	unsigned int getMeasResults(unsigned int aLabel, unsigned int &numRes,
@@ -48,7 +49,6 @@ private:
 	unsigned int numParameters; ///< Number of fit parameters
 	unsigned int numLocals; ///< Total number of (additional) local parameters
 	unsigned int externalPoint; ///< Label of external point (or 0)
-	bool dataGenerated; ///< GblData prepared for fit or milleOut
 	bool fitOK; ///< Trajectory has been successfully fitted (results are valid)
 	std::vector<unsigned int> theDimension; ///< List of active dimensions (0=u1, 1=u2) in fit
 	std::vector<GblPoint> thePoints; ///< List of points on trajectory
@@ -67,6 +67,7 @@ private:
 			unsigned int nJacobian = 1) const;
 	void getFitToKinkJacobian(std::vector<unsigned int> &anIndex,
 			SMatrix27 &aJacobian, const GblPoint &aPoint) const;
+	void construct();
 	void defineOffsets();
 	void calcJacobians();
 	void buildLinearEquationSystem();
