@@ -102,7 +102,7 @@ GblTrajectory::GblTrajectory(std::vector<GblPoint> &aPointList, bool flagCurv,
 		theDimension.push_back(0);
 	if (flagU2dir)
 		theDimension.push_back(1);
-    construct(); // construct trajectory
+	construct(); // construct trajectory
 }
 
 /// Create new trajectory from list of points with external seed.
@@ -129,7 +129,7 @@ GblTrajectory::GblTrajectory(std::vector<GblPoint> &aPointList,
 		theDimension.push_back(0);
 	if (flagU2dir)
 		theDimension.push_back(1);
-    construct(); // construct trajectory
+	construct(); // construct trajectory
 }
 
 GblTrajectory::~GblTrajectory() {
@@ -140,15 +140,6 @@ unsigned int GblTrajectory::getNumPoints() const {
 	return numPoints;
 }
 
-/// Retrieve point from trajectory
-/**
- * \param [in] aLabel Label of point
- * \return Pointer to point
- */
-GblPoint* GblTrajectory::getPoint(unsigned int aLabel) {
-	return &thePoints[aLabel];
-}
-
 /// Construct trajectory from list of points.
 /**
  * Trajectory is prepared for fit or output to binary file.
@@ -156,9 +147,11 @@ GblPoint* GblTrajectory::getPoint(unsigned int aLabel) {
 void GblTrajectory::construct() {
 
 	fitOK = false;
+	unsigned int aLabel = 0;
 	std::vector<GblPoint>::iterator itPoint;
 	for (itPoint = thePoints.begin(); itPoint < thePoints.end(); ++itPoint) {
 		numLocals = std::max(numLocals, itPoint->getNumLocals());
+		itPoint->setLabel(++aLabel);
 	}
 	defineOffsets();
 	calcJacobians();

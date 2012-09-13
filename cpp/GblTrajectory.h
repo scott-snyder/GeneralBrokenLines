@@ -29,7 +29,6 @@ public:
 					true, bool flagU2dir = true);
 	virtual ~GblTrajectory();
 	unsigned int getNumPoints() const;
-	GblPoint* getPoint(unsigned int aLabel);
 	unsigned int getResults(int aSignedLabel, TVectorD &localPar,
 			TMatrixDSym &localCov) const;
 	unsigned int getMeasResults(unsigned int aLabel, unsigned int &numRes,
