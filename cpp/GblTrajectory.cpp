@@ -35,6 +35,13 @@
  *  calibration and alignment with Millepede-II.
  *  (V. Blobel, NIM A, 566 (2006), pp. 5-13).
  *
+ *  Besides simple trajectories describing the path of a single
+ *  particle composed trajectories are supported. These are
+ *  constructed from the trajectories of multiple particles and
+ *  some external parameters (like those describing a decay)
+ *  and transformations at the first points from the external
+ *  to the local track parameters.
+ *
  *  The conventions for the coordinate systems follow:
  *  Derivation of Jacobians for the propagation of covariance
  *  matrices of track parameters in homogeneous magnetic fields
@@ -54,7 +61,7 @@
  *           - <tt>point.addScatterer(..)</tt>
  *        - Add point (ordered by arc length) to list:\n
  *            <tt>list.push_back(point)</tt>
- *    -# Create trajectory from list of points:\n
+ *    -# Create (simple) trajectory from list of points:\n
  *            <tt>traj = GblTrajectory (list)</tt>
  *    -# Optionally with external seed:\n
  *            <tt>traj = GblTrajectory (list,seed)</tt>
@@ -83,7 +90,7 @@
 
 #include "GblTrajectory.h"
 
-/// Create new trajectory from list of points.
+/// Create new (simple) trajectory from list of points.
 /**
  * Curved trajectory in space (default) or without curvature (q/p) or in one
  * plane (u-direction) only.
@@ -92,20 +99,23 @@
  * \param [in] flagU1dir Use in u1 direction
  * \param [in] flagU2dir Use in u2 direction
  */
-GblTrajectory::GblTrajectory(std::vector<GblPoint> &aPointList, bool flagCurv,
-		bool flagU1dir, bool flagU2dir) :
-		numPoints(aPointList.size()), numOffsets(0), numCurvature(
-				flagCurv ? 1 : 0), numParameters(0), numLocals(0), externalPoint(
-				0), theDimension(0), thePoints(aPointList), theData(), measDataIndex(), scatDataIndex(), externalIndex(), externalSeed() {
+GblTrajectory::GblTrajectory(const std::vector<GblPoint> &aPointList,
+		bool flagCurv, bool flagU1dir, bool flagU2dir) :
+		numAllPoints(aPointList.size()), numPoints(), numOffsets(0), numInnerTrans(
+				0), numCurvature(flagCurv ? 1 : 0), numParameters(0), numLocals(
+				0), numMeasurements(0), externalPoint(0), theDimension(0), thePoints(), theData(), measDataIndex(), scatDataIndex(), externalIndex(), externalSeed(), innerTransformations(), externalDerivatives(), externalMeasurements(), externalPrecisions() {
 
 	if (flagU1dir)
 		theDimension.push_back(0);
 	if (flagU2dir)
 		theDimension.push_back(1);
+	// simple (single) trajectory
+	thePoints.push_back(aPointList);
+	numPoints.push_back(numAllPoints);
 	construct(); // construct trajectory
 }
 
-/// Create new trajectory from list of points with external seed.
+/// Create new (simple) trajectory from list of points with external seed.
 /**
  * Curved trajectory in space (default) or without curvature (q/p) or in one
  * plane (u-direction) only.
@@ -117,19 +127,75 @@ GblTrajectory::GblTrajectory(std::vector<GblPoint> &aPointList, bool flagCurv,
  * \param [in] flagU1dir Use in u1 direction
  * \param [in] flagU2dir Use in u2 direction
  */
-GblTrajectory::GblTrajectory(std::vector<GblPoint> &aPointList,
+GblTrajectory::GblTrajectory(const std::vector<GblPoint> &aPointList,
 		unsigned int aLabel, const TMatrixDSym &aSeed, bool flagCurv,
 		bool flagU1dir, bool flagU2dir) :
-		numPoints(aPointList.size()), numOffsets(0), numCurvature(
-				flagCurv ? 1 : 0), numParameters(0), numLocals(0), externalPoint(
-				aLabel), theDimension(0), thePoints(aPointList), theData(), measDataIndex(), scatDataIndex(), externalIndex(), externalSeed(
-				aSeed) {
+		numAllPoints(aPointList.size()), numPoints(), numOffsets(0), numInnerTrans(
+				0), numCurvature(flagCurv ? 1 : 0), numParameters(0), numLocals(
+				0), numMeasurements(0), externalPoint(aLabel), theDimension(0), thePoints(), theData(), measDataIndex(), scatDataIndex(), externalIndex(), externalSeed(
+				aSeed), innerTransformations(), externalDerivatives(), externalMeasurements(), externalPrecisions() {
 
 	if (flagU1dir)
 		theDimension.push_back(0);
 	if (flagU2dir)
 		theDimension.push_back(1);
+	// simple (single) trajectory
+	thePoints.push_back(aPointList);
+	numPoints.push_back(numAllPoints);
 	construct(); // construct trajectory
+}
+
+/// Create new composed trajectory from list of points and transformations.
+/**
+ * Composed of curved trajectory in space.
+ * \param [in] aPointsAndTransList List containing pairs with list of points and transformation (at inner (first) point)
+ */
+GblTrajectory::GblTrajectory(
+		const std::vector<std::pair<std::vector<GblPoint>, TMatrixD> > &aPointsAndTransList) :
+		numAllPoints(), numPoints(), numOffsets(0), numInnerTrans(
+				aPointsAndTransList.size()), numParameters(0), numLocals(0), numMeasurements(
+				0), externalPoint(0), theDimension(0), thePoints(), theData(), measDataIndex(), scatDataIndex(), externalIndex(), externalSeed(), innerTransformations(), externalDerivatives(), externalMeasurements(), externalPrecisions() {
+
+	for (unsigned int iTraj = 0; iTraj < aPointsAndTransList.size(); ++iTraj) {
+		thePoints.push_back(aPointsAndTransList[iTraj].first);
+		numPoints.push_back(thePoints.back().size());
+		numAllPoints += numPoints.back();
+		innerTransformations.push_back(aPointsAndTransList[iTraj].second);
+	}
+	theDimension.push_back(0);
+	theDimension.push_back(1);
+	numCurvature = innerTransformations[0].GetNcols();
+	construct(); // construct (composed) trajectory
+}
+
+/// Create new composed trajectory from list of points and transformations with (independent) external measurements.
+/**
+ * Composed of curved trajectory in space.
+ * \param [in] aPointsAndTransList List containing pairs with list of points and transformation (at inner (first) point)
+ * \param [in] extDerivatives Derivatives of external measurements vs external parameters
+ * \param [in] extMeasurements External measurements (residuals)
+ * \param [in] extPrecisions Precision of external measurements
+ */
+GblTrajectory::GblTrajectory(
+		const std::vector<std::pair<std::vector<GblPoint>, TMatrixD> > &aPointsAndTransList,
+		const TMatrixD &extDerivatives, const TVectorD &extMeasurements,
+		const TVectorD &extPrecisions) :
+		numAllPoints(), numPoints(), numOffsets(0), numInnerTrans(
+				aPointsAndTransList.size()), numParameters(0), numLocals(0), numMeasurements(
+				0), externalPoint(0), theDimension(0), thePoints(), theData(), measDataIndex(), scatDataIndex(), externalIndex(), externalSeed(), innerTransformations(), externalDerivatives(
+				extDerivatives), externalMeasurements(extMeasurements), externalPrecisions(
+				extPrecisions) {
+
+	for (unsigned int iTraj = 0; iTraj < aPointsAndTransList.size(); ++iTraj) {
+		thePoints.push_back(aPointsAndTransList[iTraj].first);
+		numPoints.push_back(thePoints.back().size());
+		numAllPoints += numPoints.back();
+		innerTransformations.push_back(aPointsAndTransList[iTraj].second);
+	}
+	theDimension.push_back(0);
+	theDimension.push_back(1);
+	numCurvature = innerTransformations[0].GetNcols();
+	construct(); // construct (composed) trajectory
 }
 
 GblTrajectory::~GblTrajectory() {
@@ -137,25 +203,35 @@ GblTrajectory::~GblTrajectory() {
 
 /// Retrieve number of point from trajectory
 unsigned int GblTrajectory::getNumPoints() const {
-	return numPoints;
+	return numAllPoints;
 }
 
 /// Construct trajectory from list of points.
 /**
- * Trajectory is prepared for fit or output to binary file.
+ * Trajectory is prepared for fit or output to binary file, may consists of sub-trajectories.
  */
 void GblTrajectory::construct() {
 
 	fitOK = false;
 	unsigned int aLabel = 0;
-	std::vector<GblPoint>::iterator itPoint;
-	for (itPoint = thePoints.begin(); itPoint < thePoints.end(); ++itPoint) {
-		numLocals = std::max(numLocals, itPoint->getNumLocals());
-		itPoint->setLabel(++aLabel);
+	// loop over trajectories
+	numTrajectories = thePoints.size();
+	//std::cout << " numTrajectories: " << numTrajectories << ", "<< innerTransformations.size()  << std::endl;
+	for (unsigned int iTraj = 0; iTraj < numTrajectories; ++iTraj) {
+		std::vector<GblPoint>::iterator itPoint;
+		for (itPoint = thePoints[iTraj].begin();
+				itPoint < thePoints[iTraj].end(); ++itPoint) {
+			numLocals = std::max(numLocals, itPoint->getNumLocals());
+			numMeasurements += itPoint->hasMeasurement();
+			itPoint->setLabel(++aLabel);
+		}
 	}
 	defineOffsets();
 	calcJacobians();
 	prepare();
+	// number of fit parameters
+	numParameters = (numOffsets - 2 * numInnerTrans) * theDimension.size()
+			+ numCurvature + numLocals;
 }
 
 /// Define offsets from list of points.
@@ -164,61 +240,67 @@ void GblTrajectory::construct() {
  * All other points need interpolation from adjacent points with offsets.
  */
 void GblTrajectory::defineOffsets() {
-//   first point is offset
-	thePoints[0].setOffset(0);
-	int nOffsets = 1;
-//   intermediate scatterers are offsets
-	for (unsigned int i = 1; i < numPoints - 1; ++i) {
-		if (thePoints[i].hasScatterer()) {
-			thePoints[i].setOffset(nOffsets);
-			nOffsets++;
-		} else {
-			thePoints[i].setOffset(-nOffsets);
+
+	// loop over trajectories
+	for (unsigned int iTraj = 0; iTraj < numTrajectories; ++iTraj) {
+		// first point is offset
+		thePoints[iTraj].front().setOffset(numOffsets++);
+		// intermediate scatterers are offsets
+		std::vector<GblPoint>::iterator itPoint;
+		for (itPoint = thePoints[iTraj].begin() + 1;
+				itPoint < thePoints[iTraj].end() - 1; ++itPoint) {
+			if (itPoint->hasScatterer()) {
+				itPoint->setOffset(numOffsets++);
+			} else {
+				itPoint->setOffset(-numOffsets);
+			}
 		}
+		// last point is offset
+		thePoints[iTraj].back().setOffset(numOffsets++);
 	}
-//   last point is offset
-	thePoints[numPoints - 1].setOffset(nOffsets);
-	numOffsets = nOffsets + 1;
-	numParameters = numOffsets * theDimension.size() + numCurvature + numLocals;
 }
 
 /// Calculate Jacobians to previous/next scatterer from point to point ones.
 void GblTrajectory::calcJacobians() {
 
 	SMatrix55 scatJacobian;
-// forward propagation (all)
-	unsigned int lastPoint = 0;
-	unsigned int numStep = 0;
-	for (unsigned int iPoint = 1; iPoint < numPoints; iPoint++) {
-		if (numStep == 0) {
-			scatJacobian = thePoints[iPoint].getP2pJacobian();
-		} else {
-			scatJacobian = thePoints[iPoint].getP2pJacobian() * scatJacobian;
+	// loop over trajectories
+	for (unsigned int iTraj = 0; iTraj < numTrajectories; ++iTraj) {
+		// forward propagation (all)
+		GblPoint* previousPoint = &thePoints[iTraj].front();
+		unsigned int numStep = 0;
+		std::vector<GblPoint>::iterator itPoint;
+		for (itPoint = thePoints[iTraj].begin() + 1;
+				itPoint < thePoints[iTraj].end(); ++itPoint) {
+			if (numStep == 0) {
+				scatJacobian = itPoint->getP2pJacobian();
+			} else {
+				scatJacobian = itPoint->getP2pJacobian() * scatJacobian;
+			}
+			numStep++;
+			itPoint->addPrevJacobian(scatJacobian); // iPoint -> previous scatterer
+			if (itPoint->getOffset() >= 0) {
+				previousPoint->addNextJacobian(scatJacobian); // lastPoint -> next scatterer
+				numStep = 0;
+				previousPoint = &(*itPoint);
+			}
 		}
-		numStep++;
-		thePoints[iPoint].addPrevJacobian(scatJacobian); // iPoint -> previous scatterer
-		if (thePoints[iPoint].getOffset() >= 0) {
-			thePoints[lastPoint].addNextJacobian(scatJacobian); // lastPoint -> next scatterer
-			numStep = 0;
-			lastPoint = iPoint;
+		// backward propagation (without scatterers)
+		numStep = 0;
+		for (itPoint = thePoints[iTraj].end() - 1;
+				itPoint > thePoints[iTraj].begin() + 1; --itPoint) {
+			if (itPoint->getOffset() >= 0) {
+				numStep = 0;
+				continue; // skip offsets
+			}
+			if (numStep == 0) {
+				scatJacobian = itPoint->getP2pJacobian();
+			} else {
+				scatJacobian = scatJacobian * itPoint->getP2pJacobian();
+			}
+			numStep++;
+			itPoint->addNextJacobian(scatJacobian); // iPoint -> next scatterer
 		}
-	}
-// backward propagation (without scatterers)
-	numStep = 0;
-	unsigned iPoint = numPoints - 1;
-	for (unsigned int i = 1; i < numPoints - 1; ++i) {
-		iPoint--;
-		if (thePoints[iPoint].getOffset() >= 0) {
-			numStep = 0;
-			continue; // skip offsets
-		}
-		if (numStep == 0) {
-			scatJacobian = thePoints[iPoint].getP2pJacobian();
-		} else {
-			scatJacobian = scatJacobian * thePoints[iPoint].getP2pJacobian();
-		}
-		numStep++;
-		thePoints[iPoint].addNextJacobian(scatJacobian); // iPoint -> next scatterer
 	}
 }
 
@@ -246,22 +328,34 @@ std::pair<std::vector<unsigned int>, TMatrixD> GblTrajectory::getJacobian(
 	aJacobian.Zero();
 
 	unsigned int aLabel = abs(aSignedLabel);
+	unsigned int firstLabel = 1;
+	unsigned int lastLabel = 0;
+	unsigned int aTrajectory = 0;
+	// loop over trajectories
+	for (unsigned int iTraj = 0; iTraj < numTrajectories; ++iTraj) {
+		aTrajectory = iTraj;
+		lastLabel += numPoints[iTraj];
+		if (aLabel <= lastLabel)
+			break;
+		if (iTraj < numTrajectories - 1)
+			firstLabel += numPoints[iTraj];
+	}
 	int nJacobian; // 0: prev, 1: next
 	// check consistency of (index, direction)
 	if (aSignedLabel > 0) {
 		nJacobian = 1;
-		if (aLabel >= numPoints) {
-			aLabel = numPoints;
+		if (aLabel >= lastLabel) {
+			aLabel = lastLabel;
 			nJacobian = 0;
 		}
 	} else {
 		nJacobian = 0;
-		if (aLabel <= 0) {
-			aLabel = 1;
+		if (aLabel <= firstLabel) {
+			aLabel = firstLabel;
 			nJacobian = 1;
 		}
 	}
-	const GblPoint aPoint = thePoints[aLabel - 1];
+	const GblPoint aPoint = thePoints[aTrajectory][aLabel - firstLabel];
 	std::vector<unsigned int> labDer(5);
 	SMatrix55 matDer;
 	getFitToLocalJacobian(labDer, matDer, aPoint, 5, nJacobian);
@@ -356,7 +450,6 @@ void GblTrajectory::getFitToLocalJacobian(std::vector<unsigned int> &anIndex,
 		unsigned int index1 = 3 - 2 * nJacobian; // index of first offset
 		unsigned int iOff2 = iOff1 + nDim * (nJacobian * 2 - 1); // second offset ('i' in u_i)
 		unsigned int index2 = 1 + 2 * nJacobian; // index of second offset
-
 		// local offset
 		aJacobian(3, index1) = 1.0; // from 1st Offset
 		aJacobian(4, index1 + 1) = 1.0;
@@ -553,79 +646,174 @@ void GblTrajectory::buildLinearEquationSystem() {
 	}
 }
 
-/// Prepare fit
+/// Prepare fit for simple or composed trajectory
 /**
- * Generate data (blocks) from measurements, kinks and external seed.
+ * Generate data (blocks) from measurements, kinks, external seed and measurements.
  */
 void GblTrajectory::prepare() {
 	unsigned int nDim = theDimension.size();
-	unsigned int maxData = 2 * (numPoints + numOffsets - 2); // upper limit
+	// upper limit
+	unsigned int maxData = numMeasurements + nDim * (numOffsets - 2)
+			+ externalSeed.GetNrows();
 	theData.reserve(maxData);
-	measDataIndex.resize(numPoints + 1);
-	scatDataIndex.resize(numPoints + 1);
+	measDataIndex.resize(numAllPoints + 3); // include external seed and measurements
+	scatDataIndex.resize(numAllPoints + 1);
 	unsigned int nData = 0;
-	// measurements
-	SMatrix55 matP;
-	std::vector<GblPoint>::iterator itPoint;
-	for (itPoint = thePoints.begin(); itPoint < thePoints.end(); ++itPoint) {
-		SVector5 aMeas, aPrec;
-		unsigned int nLabel = itPoint->getLabel();
-		unsigned int measDim = itPoint->hasMeasurement();
-		if (measDim) {
-			const TMatrixD localDer = itPoint->getLocalDerivatives();
-			const std::vector<int> globalLab = itPoint->getGlobalLabels();
-			const TMatrixD globalDer = itPoint->getGlobalDerivatives();
-			itPoint->getMeasurement(matP, aMeas, aPrec);
-			unsigned int iOff = 5 - measDim; // first active component
-			std::vector<unsigned int> labDer(5);
-			SMatrix55 matDer, matPDer;
-			getFitToLocalJacobian(labDer, matDer, *itPoint, measDim);
-			if (measDim > 2) {
-				matPDer = matP * matDer;
-			} else { // 'shortcut' for position measurements
-				matPDer.Place_at(
-						matP.Sub<SMatrix22>(3, 3) * matDer.Sub<SMatrix25>(3, 0),
-						3, 0);
-			}
-
-			for (unsigned int i = iOff; i < 5; ++i) {
-				if (aPrec(i) > 0.) {
-					GblData aData(nLabel, aMeas(i), aPrec(i));
-					aData.addDerivatives(i, labDer, matPDer, iOff, localDer,
-							globalLab, globalDer);
-					theData.push_back(aData);
-					nData++;
+	std::vector<TMatrixD> innerTransDer;
+	std::vector<std::vector<unsigned int> > innerTransLab;
+	// composed trajectory ?
+	if (numInnerTrans > 0) {
+		//std::cout << "composed trajectory" << std::endl;
+		for (unsigned int iTraj = 0; iTraj < numTrajectories; ++iTraj) {
+			// innermost point
+			GblPoint* innerPoint = &thePoints[iTraj].front();
+			// transformation fit to local track parameters
+			std::vector<unsigned int> firstLabels(5);
+			SMatrix55 matFitToLocal, matLocalToFit;
+			getFitToLocalJacobian(firstLabels, matFitToLocal, *innerPoint, 5);
+			// transformation local track to fit parameters
+			int ierr;
+			matLocalToFit = matFitToLocal.Inverse(ierr);
+			TMatrixD localToFit(5, 5);
+			for (unsigned int i = 0; i < 5; ++i) {
+				for (unsigned int j = 0; j < 5; ++j) {
+					localToFit(i, j) = matLocalToFit(i, j);
 				}
 			}
-
+			// transformation external to fit parameters at inner (first) point
+			innerTransDer.push_back(localToFit * innerTransformations[iTraj]);
+			innerTransLab.push_back(firstLabels);
 		}
-		measDataIndex[nLabel] = nData;
 	}
+	// measurements
+	SMatrix55 matP;
+	// loop over trajectories
+	std::vector<GblPoint>::iterator itPoint;
+	for (unsigned int iTraj = 0; iTraj < numTrajectories; ++iTraj) {
+		for (itPoint = thePoints[iTraj].begin();
+				itPoint < thePoints[iTraj].end(); ++itPoint) {
+			SVector5 aMeas, aPrec;
+			unsigned int nLabel = itPoint->getLabel();
+			unsigned int measDim = itPoint->hasMeasurement();
+			if (measDim) {
+				const TMatrixD localDer = itPoint->getLocalDerivatives();
+				const std::vector<int> globalLab = itPoint->getGlobalLabels();
+				const TMatrixD globalDer = itPoint->getGlobalDerivatives();
+				TMatrixD transDer;
+				itPoint->getMeasurement(matP, aMeas, aPrec);
+				unsigned int iOff = 5 - measDim; // first active component
+				std::vector<unsigned int> labDer(5);
+				SMatrix55 matDer, matPDer;
+				getFitToLocalJacobian(labDer, matDer, *itPoint, measDim);
+				if (measDim > 2) {
+					matPDer = matP * matDer;
+				} else { // 'shortcut' for position measurements
+					matPDer.Place_at(
+							matP.Sub<SMatrix22>(3, 3)
+									* matDer.Sub<SMatrix25>(3, 0), 3, 0);
+				}
+
+				if (numInnerTrans > 0) {
+					// transform for external parameters
+					TMatrixD proDer(measDim, 5);
+					// match parameters
+					unsigned int ifirst = 0;
+					unsigned int ilabel = 0;
+					while (ilabel < 5) {
+						if (labDer[ilabel] > 0) {
+							while (innerTransLab[iTraj][ifirst]
+									!= labDer[ilabel] and ifirst < 5) {
+								++ifirst;
+							}
+							if (ifirst >= 5) {
+								labDer[ilabel] -= 2 * nDim * (iTraj + 1); // adjust label
+							} else {
+								// match
+								labDer[ilabel] = 0; // mark as related to external parameters
+								for (unsigned int k = iOff; k < 5; ++k) {
+									proDer(k - iOff, ifirst) = matPDer(k,
+											ilabel);
+								}
+							}
+						}
+						++ilabel;
+					}
+					transDer.ResizeTo(measDim, numCurvature);
+					transDer = proDer * innerTransDer[iTraj];
+				}
+				for (unsigned int i = iOff; i < 5; ++i) {
+					if (aPrec(i) > 0.) {
+						GblData aData(nLabel, aMeas(i), aPrec(i));
+						aData.addDerivatives(i, labDer, matPDer, iOff, localDer,
+								globalLab, globalDer, numLocals, transDer);
+						theData.push_back(aData);
+						nData++;
+					}
+				}
+
+			}
+			measDataIndex[nLabel] = nData;
+		}
+	}
+
 	// pseudo measurements from kinks
 	scatDataIndex[0] = nData;
 	scatDataIndex[1] = nData;
-	for (itPoint = thePoints.begin() + 1; itPoint < thePoints.end() - 1;
-			itPoint++) {
-		SVector2 aMeas, aPrec;
-		unsigned int nLabel = itPoint->getLabel();
-		if (itPoint->hasScatterer()) {
-			itPoint->getScatterer(aMeas, aPrec);
-			std::vector<unsigned int> labDer(7);
-			SMatrix27 matDer;
-			getFitToKinkJacobian(labDer, matDer, *itPoint);
-			for (unsigned int i = 0; i < nDim; ++i) {
-				unsigned int iDim = theDimension[i];
-				if (aPrec(iDim) > 0.) {
-					GblData aData(nLabel, aMeas(iDim), aPrec(iDim));
-					aData.addDerivatives(iDim, labDer, matDer);
-					theData.push_back(aData);
-					nData++;
+	// loop over trajectories
+	for (unsigned int iTraj = 0; iTraj < numTrajectories; ++iTraj) {
+		for (itPoint = thePoints[iTraj].begin() + 1;
+				itPoint < thePoints[iTraj].end() - 1; ++itPoint) {
+			SVector2 aMeas, aPrec;
+			unsigned int nLabel = itPoint->getLabel();
+			if (itPoint->hasScatterer()) {
+				itPoint->getScatterer(aMeas, aPrec);
+				TMatrixD transDer;
+				std::vector<unsigned int> labDer(7);
+				SMatrix27 matDer;
+				getFitToKinkJacobian(labDer, matDer, *itPoint);
+
+				if (numInnerTrans > 0) {
+					// transform for external parameters
+					TMatrixD proDer(nDim, 5);
+					// match parameters
+					unsigned int ifirst = 0;
+					unsigned int ilabel = 0;
+					while (ilabel < 7) {
+						if (labDer[ilabel] > 0) {
+							while (innerTransLab[iTraj][ifirst]
+									!= labDer[ilabel] and ifirst < 5) {
+								++ifirst;
+							}
+							if (ifirst >= 5) {
+								labDer[ilabel] -= 2 * nDim * (iTraj + 1); // adjust label
+							} else {
+								// match
+								labDer[ilabel] = 0; // mark as related to external parameters
+								for (unsigned int k = 0; k < nDim; ++k) {
+									proDer(k, ifirst) = matDer(k, ilabel);
+								}
+							}
+						}
+						++ilabel;
+					}
+					transDer.ResizeTo(nDim, numCurvature);
+					transDer = proDer * innerTransDer[iTraj];
+				}
+				for (unsigned int i = 0; i < nDim; ++i) {
+					unsigned int iDim = theDimension[i];
+					if (aPrec(iDim) > 0.) {
+						GblData aData(nLabel, aMeas(iDim), aPrec(iDim));
+						aData.addDerivatives(iDim, labDer, matDer, numLocals,
+								transDer);
+						theData.push_back(aData);
+						nData++;
+					}
 				}
 			}
+			scatDataIndex[nLabel] = nData;
 		}
-		scatDataIndex[nLabel] = nData;
+		scatDataIndex[thePoints[iTraj].back().getLabel()] = nData;
 	}
-	scatDataIndex[numPoints] = nData;
 
 	// external seed
 	if (externalPoint > 0) {
@@ -645,9 +833,29 @@ void GblTrajectory::prepare() {
 				GblData aData(externalPoint, 0., valEigen(i));
 				aData.addDerivatives(externalIndex, externalDerivatives);
 				theData.push_back(aData);
+				nData++;
 			}
 		}
 	}
+	measDataIndex[numAllPoints + 2] = nData;
+	// external measurements
+	unsigned int nExt = externalMeasurements.GetNrows();
+	if (nExt > 0) {
+		std::vector<unsigned int> index(numCurvature);
+		std::vector<double> derivatives(numCurvature);
+		for (unsigned int iExt = 0; iExt < nExt; ++iExt) {
+			for (unsigned int iCol = 0; iCol < numCurvature; ++iCol) {
+				index[iCol] = iCol + 1;
+				derivatives[iCol] = externalDerivatives(iExt, iCol);
+			}
+			GblData aData(1U, externalMeasurements(iExt),
+					externalPrecisions(iExt));
+			aData.addDerivatives(index, derivatives);
+			theData.push_back(aData);
+			nData++;
+		}
+	}
+	measDataIndex[numAllPoints + 3] = nData;
 }
 
 /// Calculate predictions for all points.

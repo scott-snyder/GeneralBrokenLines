@@ -22,11 +22,17 @@
  */
 class GblTrajectory {
 public:
-	GblTrajectory(std::vector<GblPoint> &aPointList, bool flagCurv = true,
+	GblTrajectory(const std::vector<GblPoint> &aPointList, bool flagCurv = true,
 			bool flagU1dir = true, bool flagU2dir = true);
-	GblTrajectory(std::vector<GblPoint> &aPointList, unsigned int aLabel,
+	GblTrajectory(const std::vector<GblPoint> &aPointList, unsigned int aLabel,
 			const TMatrixDSym &aSeed, bool flagCurv = true, bool flagU1dir =
 					true, bool flagU2dir = true);
+	GblTrajectory(
+			const std::vector<std::pair<std::vector<GblPoint>, TMatrixD> > &aPointaAndTransList);
+	GblTrajectory(
+			const std::vector<std::pair<std::vector<GblPoint>, TMatrixD> > &aPointaAndTransList,
+			const TMatrixD &extDerivatives, const TVectorD &extMeasurements,
+			const TVectorD &extPrecisions);
 	virtual ~GblTrajectory();
 	unsigned int getNumPoints() const;
 	unsigned int getResults(int aSignedLabel, TVectorD &localPar,
@@ -42,20 +48,29 @@ public:
 	void milleOut(MilleBinary &aMille);
 
 private:
-	unsigned int numPoints; ///< Number of point on trajectory
+	unsigned int numAllPoints; ///< Number of all points on trajectory
+	std::vector<unsigned int> numPoints; ///< Number of points on (sub)trajectory
+	unsigned int numTrajectories; ///< Number of trajectories (in composed trajectory)
 	unsigned int numOffsets; ///< Number of (points with) offsets on trajectory
-	unsigned int numCurvature; ///< Number of curvature parameters (0 or 1)
+	unsigned int numInnerTrans; ///< Number of inner transformations to external parameters
+	unsigned int numCurvature; ///< Number of curvature parameters (0 or 1) or external parameters
 	unsigned int numParameters; ///< Number of fit parameters
 	unsigned int numLocals; ///< Total number of (additional) local parameters
+	unsigned int numMeasurements; ///< Total number of measurements
 	unsigned int externalPoint; ///< Label of external point (or 0)
 	bool fitOK; ///< Trajectory has been successfully fitted (results are valid)
 	std::vector<unsigned int> theDimension; ///< List of active dimensions (0=u1, 1=u2) in fit
-	std::vector<GblPoint> thePoints; ///< List of points on trajectory
+	std::vector<std::vector<GblPoint> > thePoints; ///< (list of) List of points on trajectory
 	std::vector<GblData> theData; ///< List of data blocks
 	std::vector<unsigned int> measDataIndex; ///< mapping points to data blocks from measurements
 	std::vector<unsigned int> scatDataIndex; ///< mapping points to data blocks from scatterers
 	std::vector<unsigned int> externalIndex; ///< List of fit parameters used by external seed
 	TMatrixDSym externalSeed; ///< Precision (inverse covariance matrix) of external seed
+	std::vector<TMatrixD> innerTransformations; ///< Transformations at innermost points of
+	// composed trajectory (from common external parameters)
+	TMatrixD externalDerivatives; // Derivatives for external measurements of composed trajectory
+	TVectorD externalMeasurements; // Residuals for external measurements of composed trajectory
+	TVectorD externalPrecisions; // Precisions for external measurements of composed trajectory
 	VVector theVector; ///< Vector of linear equation system
 	BorderedBandMatrix theMatrix; ///< (Bordered band) matrix of linear equation system
 
@@ -69,8 +84,8 @@ private:
 	void construct();
 	void defineOffsets();
 	void calcJacobians();
-	void buildLinearEquationSystem();
 	void prepare();
+	void buildLinearEquationSystem();
 	void predict();
 	double downWeight(unsigned int aMethod);
 	void getResAndErr(unsigned int aData, double &aResidual,
