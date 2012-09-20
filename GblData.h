@@ -33,11 +33,12 @@ public:
 	virtual ~GblData();
 	void addDerivatives(unsigned int iRow,
 			const std::vector<unsigned int> &labDer, const SMatrix55 &matDer,
-			unsigned int iOff, const TMatrixD &derLocal = TMatrixD(),
-			const std::vector<int> &labGlobal = std::vector<int>(0),
-			const TMatrixD &derGlobal = TMatrixD());
+			unsigned int iOff, const TMatrixD &derLocal,
+			const std::vector<int> &labGlobal, const TMatrixD &derGlobal,
+			unsigned int nLocal, const TMatrixD &derTrans);
 	void addDerivatives(unsigned int iRow,
-			const std::vector<unsigned int> &labDer, const SMatrix27 &matDer);
+			const std::vector<unsigned int> &labDer, const SMatrix27 &matDer,
+			unsigned int nLocal, const TMatrixD &derTrans);
 	void addDerivatives(const std::vector<unsigned int> &index,
 			const std::vector<double> &derivatives);
 

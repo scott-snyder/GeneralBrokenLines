@@ -47,8 +47,10 @@ void MilleBinary::addData(float aMeas, float aErr,
 	intBuffer.push_back(0);
 	floatBuffer.push_back(aErr);
 	for (unsigned int i = 0; i < labGlobal.size(); ++i) {
-		intBuffer.push_back(labGlobal[i]);
-		floatBuffer.push_back(derGlobal[i]);
+		if (derGlobal[i]) {
+			intBuffer.push_back(labGlobal[i]);
+			floatBuffer.push_back(derGlobal[i]);
+		}
 	}
 }
 
