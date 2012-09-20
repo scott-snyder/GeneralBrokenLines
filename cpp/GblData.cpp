@@ -32,13 +32,16 @@ GblData::~GblData() {
  * \param [in] derLocal Derivatives (matrix) for additional local parameters
  * \param [in] labGlobal Labels for additional global (MP-II) parameters
  * \param [in] derGlobal Derivatives (matrix) for additional global (MP-II) parameters
+ * \param [in] extOff Offset for external parameters
+ * \param [in] extDer Derivatives for external Parameters
  */
 void GblData::addDerivatives(unsigned int iRow,
 		const std::vector<unsigned int> &labDer, const SMatrix55 &matDer,
 		unsigned int iOff, const TMatrixD &derLocal,
-		const std::vector<int> &labGlobal, const TMatrixD &derGlobal) {
+		const std::vector<int> &labGlobal, const TMatrixD &derGlobal,
+		unsigned int extOff, const TMatrixD &extDer) {
 
-	unsigned int nParMax = 5 + derLocal.GetNcols();
+	unsigned int nParMax = 5 + derLocal.GetNcols() + extDer.GetNcols();
 	theParameters.reserve(nParMax); // have to be sorted
 	theDerivatives.reserve(nParMax);
 
@@ -47,6 +50,14 @@ void GblData::addDerivatives(unsigned int iRow,
 		if (derLocal(iRow - iOff, i)) {
 			theParameters.push_back(i + 1);
 			theDerivatives.push_back(derLocal(iRow - iOff, i));
+		}
+	}
+
+	for (int i = 0; i < extDer.GetNcols(); ++i) // external derivatives
+			{
+		if (extDer(iRow - iOff, i)) {
+			theParameters.push_back(extOff + i + 1);
+			theDerivatives.push_back(extDer(iRow - iOff, i));
 		}
 	}
 
@@ -69,13 +80,24 @@ void GblData::addDerivatives(unsigned int iRow,
  * \param [in] iRow Row index (0-1) in 2D kink
  * \param [in] labDer Labels for derivatives
  * \param [in] matDer Derivatives (matrix) 'kink vs track fit parameters'
+ * \param [in] extOff Offset for external parameters
+ * \param [in] extDer Derivatives for external Parameters
  */
 void GblData::addDerivatives(unsigned int iRow,
-		const std::vector<unsigned int> &labDer, const SMatrix27 &matDer) {
+		const std::vector<unsigned int> &labDer, const SMatrix27 &matDer,
+		unsigned int extOff, const TMatrixD &extDer) {
 
-	unsigned int nParMax = 7;
+	unsigned int nParMax = 7 + extDer.GetNcols();
 	theParameters.reserve(nParMax); // have to be sorted
 	theDerivatives.reserve(nParMax);
+
+	for (int i = 0; i < extDer.GetNcols(); ++i) // external derivatives
+			{
+		if (extDer(iRow, i)) {
+			theParameters.push_back(extOff + i + 1);
+			theDerivatives.push_back(extDer(iRow, i));
+		}
+	}
 
 	for (unsigned int i = 0; i < 7; ++i) // curvature, offset derivatives
 			{
