@@ -28,7 +28,10 @@ typedef ROOT::Math::SMatrix<double, 5> SMatrix55;
 typedef ROOT::Math::SVector<double, 2> SVector2;
 typedef ROOT::Math::SVector<double, 5> SVector5;
 
-/// Point on trajectory
+namespace gbl 
+{
+
+// Point on trajectory
 /**
  * User supplied point on (initial) trajectory.
  *
@@ -94,5 +97,5 @@ private:
 	std::vector<int> globalLabels; ///< Labels of global (MP-II) derivatives
 	TMatrixD globalDerivatives; ///< Derivatives of measurement vs additional global (MP-II) parameters
 };
-
+}
 #endif /* GBLPOINT_H_ */

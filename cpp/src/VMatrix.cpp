@@ -7,6 +7,10 @@
 
 #include "VMatrix.h"
 
+//! Namespace for the general broken lines package
+namespace gbl 
+{
+
 /*********** simple Matrix based on std::vector<double> **********/
 
 VMatrix::VMatrix(const unsigned int nRows, const unsigned int nCols) :
@@ -397,4 +401,4 @@ unsigned int VSymMatrix::invert() {
 	}
 	return nrank;
 }
-
+}

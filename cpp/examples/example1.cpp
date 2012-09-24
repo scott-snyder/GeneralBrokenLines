@@ -10,6 +10,8 @@
 #include "TRandom3.h"
 #include "GblTrajectory.h"
 
+using namespace gbl;
+
 TMatrixD gblSimpleJacobian(double ds, double cosl, double bfac) {
 	/* Simple jacobian: quadratic in arc length difference */
 	TMatrixD jac(5, 5);

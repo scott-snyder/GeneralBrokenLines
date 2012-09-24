@@ -90,6 +90,10 @@
 
 #include "GblTrajectory.h"
 
+//! Namespace for the general broken lines package
+namespace gbl 
+{
+
 /// Create new (simple) trajectory from list of points.
 /**
  * Curved trajectory in space (default) or without curvature (q/p) or in one
@@ -951,4 +955,5 @@ void GblTrajectory::milleOut(MilleBinary &aMille) {
 				*derGlobal);
 	}
 	aMille.writeRecord();
+}
 }

@@ -7,6 +7,10 @@
 
 #include "MilleBinary.h"
 
+//! Namespace for the general broken lines package
+namespace gbl 
+{
+
 /// Create binary file.
 /**
  * \param [in] fileName File name
@@ -68,4 +72,4 @@ void MilleBinary::writeRecord() {
 	intBuffer.resize(1);
 	floatBuffer.resize(1);
 }
-
+}

@@ -14,6 +14,10 @@
 #include<cstring>
 #include<math.h>
 
+//! Namespace for the general broken lines package
+namespace gbl 
+{
+
 /// Simple Vector based on std::vector<double>
 class VVector {
 public:
@@ -104,5 +108,5 @@ inline double VSymMatrix::operator()(unsigned int iRow,
 		unsigned int iCol) const {
 	return theVec[(iRow * iRow + iRow) / 2 + iCol]; // assuming iCol <= iRow
 }
-
+}
 #endif /* VMATRIX_H_ */

@@ -11,6 +11,10 @@
 #include<fstream>
 #include<vector>
 
+//! Namespace for the general broken lines package
+namespace gbl 
+{
+
 ///  Millepede-II (binary) record.
 /**
  *  Containing information for local (track) and global fit.
@@ -55,5 +59,5 @@ private:
 	std::vector<int> intBuffer; ///< Integer buffer
 	std::vector<float> floatBuffer; ///< Float buffer
 };
-
+}
 #endif /* MILLEBINARY_H_ */

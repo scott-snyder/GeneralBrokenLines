@@ -7,6 +7,10 @@
 
 #include "BorderedBandMatrix.h"
 
+//! Namespace for the general broken lines package
+namespace gbl 
+{
+
 /// Create bordered band matrix.
 BorderedBandMatrix::BorderedBandMatrix() {
 }
@@ -309,4 +313,6 @@ VMatrix BorderedBandMatrix::bandOfAVAT(const VMatrix &anArray,
 		}
 	}
 	return aBand;
+}
+
 }
