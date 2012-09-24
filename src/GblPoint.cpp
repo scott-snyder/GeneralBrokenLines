@@ -7,6 +7,10 @@
 
 #include "GblPoint.h"
 
+//! Namespace for the general broken lines package
+namespace gbl 
+{
+
 /// Create a point.
 /**
  * Create point on (initial) trajectory. Needs transformation jacobian from previous point.
@@ -315,4 +319,5 @@ void GblPoint::getDerivatives(int aDirection, SMatrix22 &matW, SMatrix22 &matWJ,
 	matWJ = matW * matJ;
 	vecWd = matW * vecd;
 
+}
 }

@@ -22,6 +22,10 @@ typedef ROOT::Math::SMatrix<double, 2, 5> SMatrix25;
 typedef ROOT::Math::SMatrix<double, 2, 7> SMatrix27;
 typedef ROOT::Math::SMatrix<double, 5, 5> SMatrix55;
 
+//! Namespace for the general broken lines package
+namespace gbl 
+{
+
 /// Data (block) for independent scalar measurement
 /**
  * Data (block) containing value, precision and derivatives for measurements and kinks.
@@ -68,5 +72,5 @@ private:
 	std::vector<int> globalLabels; ///< Labels for global derivatives
 	std::vector<double> globalDerivatives; ///< Global derivatives
 };
-
+}
 #endif /* GBLDATA_H_ */

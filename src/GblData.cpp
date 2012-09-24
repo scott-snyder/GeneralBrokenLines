@@ -7,6 +7,10 @@
 
 #include "GblData.h"
 
+//! Namespace for the general broken lines package
+namespace gbl 
+{
+
 /// Create data block.
 /**
  * \param [in] aLabel Label of corresponding point
@@ -242,4 +246,4 @@ void GblData::getResidual(double &aResidual, double &aVariance,
 	indLocal = &theParameters;
 	derLocal = &theDerivatives;
 }
-
+}
