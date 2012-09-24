@@ -15,6 +15,10 @@
 #include "MilleBinary.h"
 #include "TMatrixDSymEigen.h"
 
+//! Namespace for the general broken lines package
+namespace gbl 
+{
+
 /// GBL trajectory.
 /**
  * List of GblPoints ordered by arc length.
@@ -91,5 +95,5 @@ private:
 	void getResAndErr(unsigned int aData, double &aResidual,
 			double &aMeadsError, double &aResError, double &aDownWeight);
 };
-
+}
 #endif /* GBLTRAJECTORY_H_ */

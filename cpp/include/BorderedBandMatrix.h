@@ -17,6 +17,10 @@
 #include "TMatrixDSym.h"
 #include "VMatrix.h"
 
+//! Namespace for the general broken lines package
+namespace gbl 
+{
+
 /// (Symmetric) Bordered Band Matrix.
 /**
  *  Separate storage of border, mixed and band parts (as vector<double>).
@@ -80,5 +84,5 @@ private:
 	VMatrix bandOfAVAT(const VMatrix &anArray,
 			const VSymMatrix &aSymArray) const;
 };
-
+}
 #endif /* BORDEREDBANDMATRIX_H_ */
