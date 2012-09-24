@@ -36,7 +36,7 @@ void example1()
 //MP  MilleBinary mille; // for producing MillePede-II binary file
   unsigned int nTry = 10000; //: number of tries
   unsigned int nLayer = 10; //: number of detector layers
-  std::cout << " Gbltst $Rev$ " << nTry << ", " << nLayer << std::endl;
+  std::cout << " Gbltst $Rev$Rev$ $ " << nTry << ", " << nLayer << std::endl;
 
   TRandom *r = new TRandom3();
 
