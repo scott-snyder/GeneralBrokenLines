@@ -841,7 +841,7 @@ void GblTrajectory::prepare() {
 			}
 		}
 	}
-	measDataIndex[numAllPoints + 2] = nData;
+	measDataIndex[numAllPoints + 1] = nData;
 	// external measurements
 	unsigned int nExt = externalMeasurements.GetNrows();
 	if (nExt > 0) {
@@ -859,7 +859,7 @@ void GblTrajectory::prepare() {
 			nData++;
 		}
 	}
-	measDataIndex[numAllPoints + 3] = nData;
+	measDataIndex[numAllPoints + 2] = nData;
 }
 
 /// Calculate predictions for all points.
