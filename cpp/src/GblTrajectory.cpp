@@ -53,7 +53,7 @@
  *            <tt>std::vector<GblPoint> list</tt>
  *    -# For all points on initial trajectory:
  *        - Create points and add appropriate attributes:\n
- *           - <tt>point = GblPoint(..)</tt>
+ *           - <tt>point = gbl::GblPoint(..)</tt>
  *           - <tt>point.addMeasurement(..)</tt>
  *           - Add additional local or global parameters to measurement:\n
  *             - <tt>point.addLocals(..)</tt>
@@ -62,9 +62,9 @@
  *        - Add point (ordered by arc length) to list:\n
  *            <tt>list.push_back(point)</tt>
  *    -# Create (simple) trajectory from list of points:\n
- *            <tt>traj = GblTrajectory (list)</tt>
+ *            <tt>traj = gbl::GblTrajectory (list)</tt>
  *    -# Optionally with external seed:\n
- *            <tt>traj = GblTrajectory (list,seed)</tt>
+ *            <tt>traj = gbl::GblTrajectory (list,seed)</tt>
  *    -# Fit trajectory, return error code,
  *       get Chi2, Ndf (and weight lost by M-estimators):\n
  *            <tt>ierr = traj.fit(..)</tt>
@@ -91,8 +91,7 @@
 #include "GblTrajectory.h"
 
 //! Namespace for the general broken lines package
-namespace gbl 
-{
+namespace gbl {
 
 /// Create new (simple) trajectory from list of points.
 /**

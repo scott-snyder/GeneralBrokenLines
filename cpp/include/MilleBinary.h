@@ -12,8 +12,7 @@
 #include<vector>
 
 //! Namespace for the general broken lines package
-namespace gbl 
-{
+namespace gbl {
 
 ///  Millepede-II (binary) record.
 /**

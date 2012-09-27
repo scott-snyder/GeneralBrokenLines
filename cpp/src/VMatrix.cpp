@@ -8,8 +8,7 @@
 #include "VMatrix.h"
 
 //! Namespace for the general broken lines package
-namespace gbl 
-{
+namespace gbl {
 
 /*********** simple Matrix based on std::vector<double> **********/
 

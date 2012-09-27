@@ -18,8 +18,7 @@
 #include "VMatrix.h"
 
 //! Namespace for the general broken lines package
-namespace gbl 
-{
+namespace gbl {
 
 /// (Symmetric) Bordered Band Matrix.
 /**

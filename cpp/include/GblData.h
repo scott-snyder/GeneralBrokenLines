@@ -23,8 +23,7 @@ typedef ROOT::Math::SMatrix<double, 2, 7> SMatrix27;
 typedef ROOT::Math::SMatrix<double, 5, 5> SMatrix55;
 
 //! Namespace for the general broken lines package
-namespace gbl 
-{
+namespace gbl {
 
 /// Data (block) for independent scalar measurement
 /**

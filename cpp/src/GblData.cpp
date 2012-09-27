@@ -8,8 +8,7 @@
 #include "GblData.h"
 
 //! Namespace for the general broken lines package
-namespace gbl 
-{
+namespace gbl {
 
 /// Create data block.
 /**
