@@ -523,7 +523,7 @@ void GblTrajectory::getFitToKinkJacobian(std::vector<unsigned int> &anIndex,
 /**
  * Get corrections and covariance matrix for local track and additional parameters
  * in forward or backward direction.
- * \param [in] aSignedLabel (Signed) label of point
+ * \param [in] aSignedLabel (Signed) label of point on trajectory
  * (<0: in front, >0: after point, slope changes at scatterer!)
  * \param [out] localPar Corrections for local parameters
  * \param [out] localCov Covariance for local parameters
@@ -550,7 +550,7 @@ unsigned int GblTrajectory::getResults(int aSignedLabel, TVectorD &localPar,
 /**
  * Get residual, error of measurement and residual and down-weighting
  * factor for measurement at point
- * \param [in]  aLabel Label of point
+ * \param [in]  aLabel Label of point on trajectory
  * \param [out] numData Number of data blocks from measurement at point
  * \param [out] aResiduals Measurements-Predictions
  * \param [out] aMeasErrors Errors of Measurements
@@ -578,7 +578,7 @@ unsigned int GblTrajectory::getMeasResults(unsigned int aLabel,
 /**
  * Get residual, error of measurement and residual and down-weighting
  * factor for scatterering kinks at point
- * \param [in]  aLabel Label of point
+ * \param [in]  aLabel Label of point on trajectory
  * \param [out] numData Number of data blocks from scatterer at point
  * \param [out] aResiduals (kink)Measurements-(kink)Predictions
  * \param [out] aMeasErrors Errors of (kink)Measurements
@@ -600,6 +600,36 @@ unsigned int GblTrajectory::getScatResults(unsigned int aLabel,
 				aResErrors[i], aDownWeights[i]);
 	}
 	return 0;
+}
+
+/// Get (list of) labels of points on (simple) trajectory
+/**
+ * \param [in,out] aLabelList List of labels (aLabelList[i] = i+1)
+ */
+void GblTrajectory::getLabels(std::vector<unsigned int> aLabelList) {
+	unsigned int aLabel = 0;
+	unsigned int nPoint = thePoints[0].size();
+	aLabelList.resize(nPoint);
+	for (unsigned i = 0; i < nPoint; ++i) {
+		aLabelList[i] = ++aLabel;
+	}
+}
+
+/// Get (list of lists of) labels of points on (composed) trajectory
+/**
+ * \param [in,out] aLabelList List of of lists of labels
+ */
+void GblTrajectory::getLabels(
+		std::vector<std::vector<unsigned int> > aLabelList) {
+	unsigned int aLabel = 0;
+	aLabelList.resize(numTrajectories);
+	for (unsigned int iTraj = 0; iTraj < numTrajectories; ++iTraj) {
+		unsigned int nPoint = thePoints[iTraj].size();
+		aLabelList[iTraj].resize(nPoint);
+		for (unsigned i = 0; i < nPoint; ++i) {
+			aLabelList[iTraj][i] = ++aLabel;
+		}
+	}
 }
 
 /// Get residual and errors from data block.
