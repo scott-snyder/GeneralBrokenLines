@@ -8,8 +8,7 @@
 #include "MilleBinary.h"
 
 //! Namespace for the general broken lines package
-namespace gbl 
-{
+namespace gbl {
 
 /// Create binary file.
 /**

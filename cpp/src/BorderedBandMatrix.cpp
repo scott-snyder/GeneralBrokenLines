@@ -8,8 +8,7 @@
 #include "BorderedBandMatrix.h"
 
 //! Namespace for the general broken lines package
-namespace gbl 
-{
+namespace gbl {
 
 /// Create bordered band matrix.
 BorderedBandMatrix::BorderedBandMatrix() {
