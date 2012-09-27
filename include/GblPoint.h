@@ -28,10 +28,9 @@ typedef ROOT::Math::SMatrix<double, 5> SMatrix55;
 typedef ROOT::Math::SVector<double, 2> SVector2;
 typedef ROOT::Math::SVector<double, 5> SVector5;
 
-namespace gbl 
-{
+namespace gbl {
 
-// Point on trajectory
+/// Point on trajectory
 /**
  * User supplied point on (initial) trajectory.
  *
