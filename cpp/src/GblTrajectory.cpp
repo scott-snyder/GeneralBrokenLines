@@ -604,9 +604,9 @@ unsigned int GblTrajectory::getScatResults(unsigned int aLabel,
 
 /// Get (list of) labels of points on (simple) trajectory
 /**
- * \param [in,out] aLabelList List of labels (aLabelList[i] = i+1)
+ * \param [out] aLabelList List of labels (aLabelList[i] = i+1)
  */
-void GblTrajectory::getLabels(std::vector<unsigned int> aLabelList) {
+void GblTrajectory::getLabels(std::vector<unsigned int> &aLabelList) {
 	unsigned int aLabel = 0;
 	unsigned int nPoint = thePoints[0].size();
 	aLabelList.resize(nPoint);
@@ -617,10 +617,10 @@ void GblTrajectory::getLabels(std::vector<unsigned int> aLabelList) {
 
 /// Get (list of lists of) labels of points on (composed) trajectory
 /**
- * \param [in,out] aLabelList List of of lists of labels
+ * \param [out] aLabelList List of of lists of labels
  */
 void GblTrajectory::getLabels(
-		std::vector<std::vector<unsigned int> > aLabelList) {
+		std::vector<std::vector<unsigned int> > &aLabelList) {
 	unsigned int aLabel = 0;
 	aLabelList.resize(numTrajectories);
 	for (unsigned int iTraj = 0; iTraj < numTrajectories; ++iTraj) {
