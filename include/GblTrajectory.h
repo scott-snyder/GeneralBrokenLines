@@ -46,6 +46,8 @@ public:
 	unsigned int getScatResults(unsigned int aLabel, unsigned int &numRes,
 			TVectorD &aResiduals, TVectorD &aMeasErrors, TVectorD &aResErrors,
 			TVectorD &aDownWeights);
+	void getLabels(std::vector<unsigned int> aLabelList);
+	void getLabels(std::vector<std::vector< unsigned int> > aLabelList);
 	unsigned int fit(double &Chi2, int &Ndf, double &lostWeight,
 			std::string optionList = "");
 	void milleOut(MilleBinary &aMille);
