@@ -66,6 +66,8 @@ FIND_PACKAGE(Doxygen)
 
 if(DOXYGEN_FOUND)
 
+    INCLUDE(GlobalSVNRevision)
+    
     CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/doc/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile @ONLY)
 
     ADD_CUSTOM_TARGET(doc
