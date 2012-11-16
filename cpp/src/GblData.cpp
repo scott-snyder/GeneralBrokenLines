@@ -178,14 +178,14 @@ double GblData::getChi2() const {
 /// Print data block.
 void GblData::printData() const {
 
-	std::cout << " meas. " << theLabel << "," << theValue << "," << thePrecision
-			<< std::endl;
-	std::cout << " param " << theParameters.size() << ":";
+	std::cout << " measurement at label " << theLabel << ": " << theValue
+			<< ", " << thePrecision << std::endl;
+	std::cout << "  param " << theParameters.size() << ":";
 	for (unsigned int i = 0; i < theParameters.size(); ++i) {
 		std::cout << " " << theParameters[i];
 	}
 	std::cout << std::endl;
-	std::cout << " deriv " << theDerivatives.size() << ":";
+	std::cout << "  deriv " << theDerivatives.size() << ":";
 	for (unsigned int i = 0; i < theDerivatives.size(); ++i) {
 		std::cout << " " << theDerivatives[i];
 	}

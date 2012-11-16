@@ -985,4 +985,92 @@ void GblTrajectory::milleOut(MilleBinary &aMille) {
 	}
 	aMille.writeRecord();
 }
+
+/// Print GblTrajectory
+/**
+ * \param [in] level print level (0: minimum, >0: more)
+ */
+void GblTrajectory::printTrajectory(unsigned int level) {
+	if (numInnerTrans) {
+		std::cout << "Composed GblTrajectory, " << numInnerTrans
+				<< " subtrajectories" << std::endl;
+	} else {
+		std::cout << "Simple GblTrajectory" << std::endl;
+	}
+	if (theDimension.size() < 2) {
+		std::cout << " 2D-trajectory" << std::endl;
+	}
+	std::cout << " Number of GblPoints          : " << numAllPoints
+			<< std::endl;
+	std::cout << " Number of points with offsets: " << numOffsets << std::endl;
+	std::cout << " Number of fit parameters     : " << numParameters
+			<< std::endl;
+	std::cout << " Number of measurements       : " << numMeasurements
+			<< std::endl;
+	if (externalMeasurements.GetNrows()) {
+		std::cout << " Number of ext. measurements  : "
+				<< externalMeasurements.GetNrows() << std::endl;
+	}
+	if (externalPoint) {
+		std::cout << " Label of point with ext. seed: " << externalPoint
+				<< std::endl;
+	}
+	if (fitOK) {
+		std::cout << " Fitted OK " << std::endl;
+	}
+	if (level > 0) {
+		if (numInnerTrans) {
+			std::cout << " Inner transformations" << std::endl;
+			for (unsigned int i = 0; i < numInnerTrans; ++i) {
+				innerTransformations[i].Print();
+			}
+		}
+		if (externalMeasurements.GetNrows()) {
+			std::cout << " External measurements" << std::endl;
+			std::cout << "  Measurements:" << std::endl;
+			externalMeasurements.Print();
+			std::cout << "  Precisions:" << std::endl;
+			externalPrecisions.Print();
+			std::cout << "  Derivatives:" << std::endl;
+			externalDerivatives.Print();
+		}
+		if (externalPoint) {
+			std::cout << " External seed:" << std::endl;
+			externalSeed.Print();
+		}
+		if (fitOK) {
+			std::cout << " Fit results" << std::endl;
+			std::cout << "  Parameters:" << std::endl;
+			theVector.print();
+			std::cout << "  Covariance matrix (bordered band part):"
+					<< std::endl;
+			theMatrix.printMatrix();
+		}
+	}
+}
+
+/// Print GblPoints on trajectory
+/**
+ * \param [in] level print level (0: minimum, >0: more)
+ */
+void GblTrajectory::printPoints(unsigned int level) {
+	std::cout << "GblPoints " << std::endl;
+	for (unsigned int iTraj = 0; iTraj < numTrajectories; ++iTraj) {
+		std::vector<GblPoint>::iterator itPoint;
+		for (itPoint = thePoints[iTraj].begin();
+				itPoint < thePoints[iTraj].end(); ++itPoint) {
+			itPoint->printPoint(level);
+		}
+	}
+}
+
+/// Print GblData blocks for trajectory
+void GblTrajectory::printData() {
+	std::cout << "GblData blocks " << std::endl;
+	std::vector<GblData>::iterator itData;
+	for (itData = theData.begin(); itData < theData.end(); ++itData) {
+		itData->printData();
+	}
+}
+
 }

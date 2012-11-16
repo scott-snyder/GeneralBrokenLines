@@ -319,4 +319,73 @@ void GblPoint::getDerivatives(int aDirection, SMatrix22 &matW, SMatrix22 &matWJ,
 	vecWd = matW * vecd;
 
 }
+
+/// Print GblPoint
+/**
+ * \param [in] level print level (0: minimum, >0: more)
+ */
+void GblPoint::printPoint(unsigned int level) const {
+	std::cout << " GblPoint";
+	if (theLabel) {
+		std::cout << ", label " << theLabel;
+		if (theOffset >= 0) {
+			std::cout << ", offset " << theOffset;
+		}
+	}
+	if (measDim) {
+		std::cout << ", " << measDim << " measurements";
+	}
+	if (scatFlag) {
+		std::cout << ", scatterer";
+	}
+	if (transFlag) {
+		std::cout << ", diagonalized";
+	}
+	if (localDerivatives.GetNcols()) {
+		std::cout << ", " << localDerivatives.GetNcols()
+				<< " local derivatives";
+	}
+	if (globalDerivatives.GetNcols()) {
+		std::cout << ", " << globalDerivatives.GetNcols()
+				<< " global derivatives";
+	}
+	std::cout << std::endl;
+	if (level > 0) {
+		if (measDim) {
+			std::cout << "  Measurement" << std::endl;
+			std::cout << "   Projection: " << std::endl << measProjection
+					<< std::endl;
+			std::cout << "   Residuals: " << measResiduals << std::endl;
+			std::cout << "   Precision: " << measPrecision << std::endl;
+		}
+		if (scatFlag) {
+			std::cout << "  Scatterer" << std::endl;
+			std::cout << "   Residuals: " << scatResiduals << std::endl;
+			std::cout << "   Precision: " << scatPrecision << std::endl;
+		}
+		if (localDerivatives.GetNcols()) {
+			std::cout << "  Local Derivatives:" << std::endl;
+			localDerivatives.Print();
+		}
+		if (globalDerivatives.GetNcols()) {
+			std::cout << "  Global Labels:";
+			for (unsigned int i = 0; i < globalLabels.size(); ++i) {
+				std::cout << " " << globalLabels[i];
+			}
+			std::cout << std::endl;
+			std::cout << "  Global Derivatives:" << std::endl;
+			globalDerivatives.Print();
+		}
+		std::cout << "  Jacobian " << std::endl;
+		std::cout << "   Point-to-point " << std::endl << p2pJacobian
+				<< std::endl;
+		if (theLabel) {
+			std::cout << "   To previous offset " << std::endl << prevJacobian
+					<< std::endl;
+			std::cout << "   To next offset " << std::endl << nextJacobian
+					<< std::endl;
+		}
+	}
+}
+
 }
