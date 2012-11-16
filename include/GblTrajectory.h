@@ -51,6 +51,9 @@ public:
 	unsigned int fit(double &Chi2, int &Ndf, double &lostWeight,
 			std::string optionList = "");
 	void milleOut(MilleBinary &aMille);
+	void printTrajectory(unsigned int level = 0);
+	void printPoints(unsigned int level = 0);
+	void printData();
 
 private:
 	unsigned int numAllPoints; ///< Number of all points on trajectory

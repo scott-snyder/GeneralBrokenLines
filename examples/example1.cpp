@@ -87,6 +87,9 @@ void example1() {
 	TVectorD addPar(2);
 	addPar[0] = 0.0025;
 	addPar[1] = -0.005;
+	std::vector<int> globalLabels;
+	globalLabels.push_back(4711);
+	globalLabels.push_back(4712);
 // global labels for MP
 	/*MP	std::vector<int> globalLabels(2);
 	 globalLabels[0] = 11;
@@ -120,7 +123,7 @@ void example1() {
 		jacPointToPoint.UnitMatrix();
 // create list of points
 		std::vector<GblPoint> listOfPoints;
-		listOfPoints.reserve(2*nLayer);
+		listOfPoints.reserve(2 * nLayer);
 
 		for (unsigned int iLayer = 0; iLayer < nLayer; ++iLayer) {
 //			std::cout << " Layer " << iLayer << ", " << s << std::endl;
@@ -145,7 +148,7 @@ void example1() {
 			point.addMeasurement(proL2m, meas, measPrec);
 			/* point with (correlated) measurements (in local system)
 			 GblPoint point(jacPointToPoint);
-// projection measurement to local (uv) directions
+			 // projection measurement to local (uv) directions
 			 TMatrixD proM2l = proL2m;
 			 proM2l.Invert();			 
 			 // measurement - prediction in local system with error
@@ -214,6 +217,10 @@ void example1() {
 		 aCorrection.Print();
 		 std::cout << " cov " << std::endl;
 		 aCovariance.Print(); */
+// debug printout
+		//traj.printTrajectory();
+		//traj.printPoints();
+		//traj.printData();
 // write to MP binary file
 //MP		traj.milleOut(mille);
 		Chi2Sum += Chi2;

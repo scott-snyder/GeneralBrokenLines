@@ -76,6 +76,7 @@ public:
 	void addNextJacobian(const SMatrix55 aJac);
 	void getDerivatives(int aDirection, SMatrix22 &matW, SMatrix22 &matWJ,
 			SVector2 &vecWd) const;
+	void printPoint(unsigned int level = 0) const;
 
 private:
 	unsigned int theLabel; ///< Label identifying point
