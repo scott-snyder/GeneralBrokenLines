@@ -28,7 +28,8 @@
  *  kink angles are determined. This requires for all points the
  *  jacobians for propagation to the previous and next offset.
  *  These are calculated from the point-to-point jacobians along
- *  the initial trajectory.
+ *  the initial trajectory. The sequence of points has to be
+ *  strictly monotonic in arc-length.
  *
  *  Additional local or global parameters can be added and the
  *  trajectories can be written to special binary files for
@@ -1049,7 +1050,7 @@ void GblTrajectory::printTrajectory(unsigned int level) {
 	}
 }
 
-/// Print GblPoints on trajectory
+/// Print \link GblPoint GblPoints \endlink on trajectory
 /**
  * \param [in] level print level (0: minimum, >0: more)
  */
