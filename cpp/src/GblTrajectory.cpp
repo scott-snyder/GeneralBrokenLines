@@ -290,20 +290,14 @@ void GblTrajectory::calcJacobians() {
 			}
 		}
 		// backward propagation (without scatterers)
-		numStep = 0;
 		for (itPoint = thePoints[iTraj].end() - 1;
-				itPoint > thePoints[iTraj].begin() + 1; --itPoint) {
+				itPoint > thePoints[iTraj].begin(); --itPoint) {
 			if (itPoint->getOffset() >= 0) {
-				numStep = 0;
+				scatJacobian = itPoint->getP2pJacobian();
 				continue; // skip offsets
 			}
-			if (numStep == 0) {
-				scatJacobian = itPoint->getP2pJacobian();
-			} else {
-				scatJacobian = scatJacobian * itPoint->getP2pJacobian();
-			}
-			numStep++;
 			itPoint->addNextJacobian(scatJacobian); // iPoint -> next scatterer
+			scatJacobian = scatJacobian * itPoint->getP2pJacobian();
 		}
 	}
 }
