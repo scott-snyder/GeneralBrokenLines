@@ -298,6 +298,7 @@ void GblPoint::addNextJacobian(const SMatrix55 aJac) {
  * \param [out] matW W
  * \param [out] matWJ W*J
  * \param [out] vecWd W*d
+ * \exception std::overflow_error : matrix S is singular.
  */
 void GblPoint::getDerivatives(int aDirection, SMatrix22 &matW, SMatrix22 &matWJ,
 		SVector2 &vecWd) const {
@@ -314,7 +315,11 @@ void GblPoint::getDerivatives(int aDirection, SMatrix22 &matW, SMatrix22 &matWJ,
 		vecd = nextJacobian.SubCol<SVector2>(0, 3);
 	}
 
-	matW.InvertFast();
+	if (!matW.InvertFast()) {
+		std::cout << " GblPoint::getDerivatives failed to invert matrix: "
+				<< matW << std::cout;
+		throw std::overflow_error("Singular matrix inversion exception");
+	}
 	matWJ = matW * matJ;
 	vecWd = matW * vecd;
 
