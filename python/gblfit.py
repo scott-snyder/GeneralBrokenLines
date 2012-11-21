@@ -959,17 +959,12 @@ class GblTrajectory(object):
           numStep = 0;
           lastPoint = iPoint
 #     backward propagation (without scatterers)
-      numStep = 0
-      for iPoint in range(self.__numPoints - 2, 0, -1):
+      for iPoint in range(self.__numPoints - 1, 0, -1):
         if (self.__points[iPoint].getOffset() >= 0):
-          numStep = 0;
-          continue # skip offsets
-        if (numStep == 0):
           scatJacobian = self.__points[iPoint].getP2pJacobian()
-        else:
-          scatJacobian = np.dot(scatJacobian, self.__points[iPoint].getP2pJacobian())
-        numStep += 1
+          continue # skip offsets
         self.__points[iPoint].addNextJacobian(scatJacobian) # iPoint -> next scatterer
+        scatJacobian = np.dot(scatJacobian, self.__points[iPoint].getP2pJacobian())
       
     def prepare():
       '''

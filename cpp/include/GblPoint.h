@@ -11,6 +11,7 @@
 #include<iostream>
 #include<vector>
 #include<math.h>
+#include <stdexcept>
 #include "TVectorD.h"
 #include "TMatrixD.h"
 #include "TMatrixDSym.h"
