@@ -121,6 +121,8 @@ class GblPoint(object):
     '''
     Add a (thin) scatterer to a point.
     
+    Changes local track direction.
+    
     @param aScatterer: scatterer (kinks, precision)
     @type aScatterer: list(matrix(float))
     '''

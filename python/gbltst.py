@@ -1,6 +1,5 @@
 '''
 Simple Test Program for General Broken Lines.
-=============================================
 
 Created on Jul 27, 2011
 
@@ -20,6 +19,7 @@ def example1():
   
   Equidistant measurement layers and thin scatterers, propagation 
   with simple jacobian (quadratic in arc length differences).
+  Curvilinear system (U,V,T) as local coordinate system.
   '''  
   def gblSimpleJacobian(ds, cosl, bfac):
     '''
@@ -60,7 +60,7 @@ def example1():
 # scattering error
   scatErr = np.array([ 0.001, 0.001]) # 1 mread
   scatPrec = 1.0 / scatErr ** 2
-# RMS of track parameters
+# RMS of CurviLinear track parameters (Q/P, slopes, offsets)
   clErr = np.array([0.001, -0.1, 0.2, -0.15, 0.25])
   clSeed = np.eye(5)
   for i in range(5):
@@ -76,7 +76,7 @@ def example1():
   binaryFile = open("milleBinaryISN.dat", "wb")
 #
   for iTry in range(nTry):
-# generate (CurvLinear) track parameters 
+# generate (CurviLinear) track parameters 
     clNorm = np.random.normal(0., 1., 5)  
     clPar = clErr * clNorm
 # arclength
@@ -95,8 +95,10 @@ def example1():
       sinStereo = (0. if iLayer % 2 == 0 else 0.5) 
       cosStereo = math.sqrt(1.0 - sinStereo ** 2)    
       mDir = np.array([[sinStereo, cosStereo, 0.0], [0., 0, 1.]])
+# projection measurement to local (curvilinear uv) directions (duv/dm)
+      proM2l = np.dot(uvDir, mDir.T)
 # projection local (uv) to measurement directions (dm/duv)
-      proL2m = np.dot(mDir, uvDir.T)
+      proL2m = np.linalg.inv(proM2l)
 # measurement - prediction in measurement system with error
       measNorm = np.random.normal(0., 1., 2)  
       meas = np.dot(proL2m, clPar[3:5]) + measErr * measNorm

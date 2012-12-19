@@ -328,7 +328,7 @@
        AUX(I)=SUM
        SUMU=SUMU+AUX(I)*AUX(I)
       END DO
-      XLAN=W((IR*IR+IR)/2)*SQRT(SUMU)
+      XLAN=SNGL(W((IR*IR+IR)/2)*DSQRT(SUMU))
       IF(XLAN.NE.0.0) XLAN=1.0/XLAN
       
       DO I=1,N
@@ -339,7 +339,7 @@
        END IF
       END DO       ! is Ws
       XLA1=0.0 
-      IF(W((IS*IS+IS)/2).NE.0.0) XLA1=SQRT(SUMS)/W((IS*IS+IS)/2)
+      IF(W((IS*IS+IS)/2).NE.0.0) XLA1=SNGL(DSQRT(SUMS)/W((IS*IS+IS)/2))
       
       COND=0.0
       IF(XLA1.GT.0.0.AND.XLAN.GT.0.0) COND=XLA1/XLAN 
@@ -461,19 +461,19 @@ C       END DO
       SUBROUTINE DBCPRV(W,MP1,N,B)
 *
       INTEGER MP1,N
-      DOUBLE PRECISION W(MP1,N),B(N)
+      DOUBLE PRECISION W(MP1,N),B(N),ERR
       INTEGER IRHO(5)
 *     ...
       WRITE(*,*) ' '
       WRITE(*,101)
       DO I=1,N
-       ERR=SQRT(W(1,I))
+       ERR=DSQRT(W(1,I))
        NJ=0
        DO J=2,MP1
         IF(I+1-J.GT.0.AND.NJ.LT.5) THEN
            NJ=NJ+1
-           RHO=W(J,I+1-J)/(ERR*SQRT(W(1,I+1-J)))
-           IRHO(NJ)=100.0*ABS(RHO)+0.5
+           RHO=SNGL(W(J,I+1-J)/(ERR*DSQRT(W(1,I+1-J))))
+           IRHO(NJ)=IFIX(100.0*ABS(RHO)+0.5)
            IF(RHO.LT.0.0) IRHO(NJ)=-IRHO(NJ)
         END IF
        END DO

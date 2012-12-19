@@ -17,7 +17,7 @@ L_FLAGS = -Wall -O3
 #
 # objects for this project
 #
-USER_OBJ_GBL = gbltst.o gblmod.o gblfit.o gblnum.o Dbandmatrix.o mille.o
+USER_OBJ_GBL = gbltraj.o gbltst.o gblnum.o Dbandmatrix.o mille.o
 #
 EXECUTABLES = gbltst
 #

@@ -31,6 +31,7 @@ void example1() {
 	 *
 	 * Equidistant measurement layers and thin scatterers, propagation
 	 * with simple jacobian (quadratic in arc length differences).
+	 * Curvilinear system (U,V,T) as local coordinate system.
 	 */
 
 //MP	MilleBinary mille; // for producing MillePede-II binary file
@@ -48,13 +49,13 @@ void example1() {
 	double cosPhi = sqrt(1.0 - sinPhi * sinPhi);
 // tDir = (cosLambda * cosPhi, cosLambda * sinPhi, sinLambda)
 // U = Z x T / |Z x T|, V = T x U
-	TMatrixD uvDirT(3, 2);
-	uvDirT[0][0] = -sinPhi;
-	uvDirT[1][0] = cosPhi;
-	uvDirT[2][0] = 0.;
-	uvDirT[0][1] = -sinLambda * cosPhi;
-	uvDirT[1][1] = -sinLambda * sinPhi;
-	uvDirT[2][1] = cosLambda;
+	TMatrixD uvDir(2, 3);
+	uvDir[0][0] = -sinPhi;
+	uvDir[0][1] = cosPhi;
+	uvDir[0][2] = 0.;
+	uvDir[1][0] = -sinLambda * cosPhi;
+	uvDir[1][1] = -sinLambda * sinPhi;
+	uvDir[1][2] = cosLambda;
 // measurement resolution
 	TVectorD measErr(2);
 	measErr[0] = 0.001;
@@ -73,7 +74,7 @@ void example1() {
 	TVectorD scatPrec(2);
 	scatPrec[0] = 1.0 / (scatErr[0] * scatErr[0]);
 	scatPrec[1] = 1.0 / (scatErr[1] * scatErr[1]);
-// (RMS of) CurvLinear track parameters
+// (RMS of) CurviLinear track parameters (Q/P, slopes, offsets)
 	TVectorD clPar(5);
 	TVectorD clErr(5);
 	clErr[0] = 0.001;
@@ -130,13 +131,16 @@ void example1() {
 //     measurement directions
 			double sinStereo = (iLayer % 2 == 0) ? 0. : 0.5;
 			double cosStereo = sqrt(1.0 - sinStereo * sinStereo);
-			TMatrixD mDir(2, 3);
-			mDir.Zero();
-			mDir[0][0] = sinStereo;
-			mDir[0][1] = cosStereo;
-			mDir[1][2] = 1.;
+			TMatrixD mDirT(3, 2);
+			mDirT.Zero();
+			mDirT[0][0] = sinStereo;
+			mDirT[1][0] = cosStereo;
+			mDirT[2][1] = 1.;
+// projection measurement to local (curvilinear uv) directions (duv/dm)
+			TMatrixD proM2l = uvDir * mDirT;
 // projection local (uv) to measurement directions (dm/duv)
-			TMatrixD proL2m = mDir * uvDirT;
+			TMatrixD proL2m = proM2l;
+			proL2m.Invert();
 // point with (independent) measurements (in measurement system)
 			GblPoint point(jacPointToPoint);
 // measurement - prediction in measurement system with error
@@ -148,9 +152,6 @@ void example1() {
 			point.addMeasurement(proL2m, meas, measPrec);
 			/* point with (correlated) measurements (in local system)
 			 GblPoint point(jacPointToPoint);
-			 // projection measurement to local (uv) directions
-			 TMatrixD proM2l = proL2m;
-			 proM2l.Invert();			 
 			 // measurement - prediction in local system with error
 			 TVectorD meas(2);
 			 for (unsigned int i = 0; i < 2; ++i) {

@@ -54,6 +54,12 @@
 !! \param [in] SIGMA  error of measurement
 
 SUBROUTINE mille(nlc,derlc,ngl,dergl,label,rmeas,sigma) ! add data
+    IMPLICIT NONE
+    INTEGER :: i
+    INTEGER :: icount
+    INTEGER :: isp
+    INTEGER :: nr
+    INTEGER :: nsp
     !     -----------------------------------------------------------------
 
     INTEGER, INTENT(IN)                      :: nlc
@@ -68,8 +74,6 @@ SUBROUTINE mille(nlc,derlc,ngl,dergl,label,rmeas,sigma) ! add data
     REAL :: glder(ndim)      ! real data record array
     INTEGER :: inder(ndim)      ! integer data record array
     !     -----------------------------------------------------------------
-
-
 
     SAVE
     DATA nr/0/                ! initial record length
