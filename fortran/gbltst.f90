@@ -3,29 +3,37 @@
 ! Code converted using TO_F90 by Alan Miller
 ! Date: 2012-03-03  Time: 17:00:22
 
-! with gcc4 (for RANDOM_NUMBER) or gcc3 (simple uniform distribution)
+!> \file
+!! Test program.
 
-! simple track model: - initial direction (COSL,0.,SINL)
-!                     - solenoidal magnectic field B=(0,0,Bz)
-!                     - simplified jacobian
-!                       (parabolic in arclength)
-!                     - distortions in curvilinear system
-!                     - multiple scattering
+!> Simple tests with GBL.
+!!
+!! Runs with gcc4 (for RANDOM_NUMBER) or gcc3 (simple uniform distribution).
+!!
+!! Simple track model:
+!!      - initial direction (COSL,0.,SINL)
+!!      - solenoidal magnectic field B=(0,0,Bz)
+!!      - simplified jacobian (parabolic in arclength)
+!!      - distortions in curvilinear system
+!!      - multiple scattering
 
 PROGRAM test
+    use gbltraj, only: gblini, gbladp, gbladm, gblads, gbladl, gbladg, gbladx, &
+                       gblfit, gblres, gblmp2
 
     PARAMETER (nloc=2) ! number of 'local' parameters
     PARAMETER (mp=5+nloc)
     PARAMETER (mp2=(mp+1)*mp/2)
     DOUBLE PRECISION :: dpar(mp), dcov(mp2), dpseed(mp2), djac(5,5),daux(15),  &
-    ajacp,ajacn,pl2m
+    ajacp,ajacn,pm2l,pl2m,det
 
     DIMENSION clpar(5),dirt(3),dirm(3,2),tmp(5),sarc(100),  &
     dif(2),sig(2),prec(2),ajacp(5,5),ajacn(5,5),  &
-    dirz(3),diru(3),dirv(3),pl2m(2,2),beta0(2),  &
+    dirz(3),diru(3),dirv(3),pm2l(2,2),pl2m(2,2),beta0(2),  &
     clerr(5),lder(nloc),derlc(2,nloc),thsig(2),thprec(2)
 
     DATA dirz / 0.0, 0.0, 1.0 / ! Z direction
+
 
     ! (type of) local system
 
@@ -106,7 +114,7 @@ PROGRAM test
         sig(2)=1.0E-3         ! 10 mu resolution
         prec(1)=1.0/sig(1)**2 ! diagonal of inverse
         prec(2)=1.0/sig(2)**2 ! covariance matrix
-        CALL gblini(1,0)
+        CALL gblini(1)
         !        CALL GBLINP(1,1)
         !        point at vertex
         !        CALL gbladp(ajacn,ipnt)
@@ -150,11 +158,17 @@ PROGRAM test
             dirm(1,2)=0.0 ! direction of measurement
             dirm(2,2)=eps
             dirm(3,2)=SQRT(1.0-eps**2)
-            ! projection (dm/du: local to measurement)
+            ! projection (du/dm: measurement to local (curvilinear))
             DO l=1,2
-                pl2m(l,1)= DBLE(dirm(1,l)*diru(1)+dirm(2,l)*diru(2)+dirm(3,l)*diru(3))
-                pl2m(l,2)= DBLE(dirm(1,l)*dirv(1)+dirm(2,l)*dirv(2)+dirm(3,l)*dirv(3))
+                pm2l(l,1)= DBLE(dirm(1,l)*diru(1)+dirm(2,l)*diru(2)+dirm(3,l)*diru(3))
+                pm2l(l,2)= DBLE(dirm(1,l)*dirv(1)+dirm(2,l)*dirv(2)+dirm(3,l)*dirv(3))
             END DO
+            ! projection (dm/du: local to measurement)
+            det=pm2l(1,1)*pm2l(2,2)-pm2l(1,2)*pm2l(2,1)
+            pl2m(1,1)= pm2l(2,2)/det
+            pl2m(1,2)=-pm2l(1,2)/det
+            pl2m(2,1)=-pm2l(2,1)/det
+            pl2m(2,2)= pm2l(1,1)/det
             ! measurement - prediction in measurement system with error
             DO m=1,2
                 dif(m)=clpar(4)*SNGL(pl2m(m,1)) +clpar(5)*SNGL(pl2m(m,2))+sig(m)*unrm()
@@ -201,7 +215,7 @@ PROGRAM test
             clpar(3)=clpar(3)+thsig(2)*unrm()
             ! propagate by STEP1
             CALL gbltjc(itype,step2,bfac,cosl,ajacn)
-    
+
             DO k=1,5
                 tmp(k)=clpar(k)
             END DO
@@ -215,7 +229,7 @@ PROGRAM test
         END DO
   
         npnt=ipnt
-        !        CALL GBLADX(IPNT1,DPSEED)
+               CALL GBLADX(IPNT1,DPSEED)
   
         !        CALL GBLDMP
         CALL gblfit('',mrank,np,ndf,chi2,wls)
@@ -243,7 +257,7 @@ PROGRAM test
 
 END PROGRAM test
 
-!     simplified jacobian (quadratic in DS)
+!> Simplified jacobian (quadratic in DS)
 
 SUBROUTINE gbltjc(itype,ds,bfac,cosl,ajac)
 
@@ -293,7 +307,7 @@ SUBROUTINE gbltjc(itype,ds,bfac,cosl,ajac)
     RETURN
 END SUBROUTINE gbltjc
 
-!     simplified transformation local to curvilinear
+!> Simplified transformation local to curvilinear
 
 SUBROUTINE gbll2c(itype,cosl,djac)
 
@@ -328,7 +342,8 @@ SUBROUTINE gbll2c(itype,cosl,djac)
     RETURN
 END SUBROUTINE gbll2c
 
-FUNCTION unrm() ! simple unit normal
+!> Simple unit normal
+FUNCTION unrm()
     DIMENSION r(12)
     !      DATA IX / 4711 /      ! use for gcc3
     CALL random_number(r) ! comment out for gcc3
@@ -339,6 +354,7 @@ FUNCTION unrm() ! simple unit normal
     END DO
 END
 
+!> Simple uniform random numbers
 FUNCTION unif(ix)
     ! portable random number generator using the recursion:
     ! IX = 16807 * IX MOD (2**31-1)

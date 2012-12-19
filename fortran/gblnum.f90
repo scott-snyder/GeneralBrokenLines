@@ -56,7 +56,19 @@
 !! \param [out]    NEXT  integer aux array
 
 SUBROUTINE sqminv(v,b,n,nrank,diag,next)
-
+    IMPLICIT NONE
+    INTEGER :: i
+    INTEGER :: ij
+    INTEGER :: j
+    INTEGER :: jj
+    INTEGER :: jk
+    INTEGER :: jl
+    INTEGER :: k
+    INTEGER :: kk
+    INTEGER :: l
+    INTEGER :: last
+    INTEGER :: lk
+    INTEGER :: next0
 
     DOUBLE PRECISION, INTENT(IN OUT)         :: v(*)
     DOUBLE PRECISION, INTENT(OUT)            :: b(n)
@@ -65,7 +77,8 @@ SUBROUTINE sqminv(v,b,n,nrank,diag,next)
     DOUBLE PRECISION, INTENT(OUT)            :: diag(n)
     INTEGER, INTENT(OUT)                     :: next(n)
 
-    DOUBLE PRECISION :: vkk,vjk
+    DOUBLE PRECISION :: vkk
+    DOUBLE PRECISION ::vjk
 
     DOUBLE PRECISION, PARAMETER :: eps=1.0D-10
     !     ..
@@ -77,13 +90,13 @@ SUBROUTINE sqminv(v,b,n,nrank,diag,next)
     next(n)=-1                  ! end flag
 
     nrank=0
-    DO i=1,n                    ! start of loop
+    loop: DO i=1,n                    ! start of loop
         k  =0
         vkk=0.0D0
   
         j=next0
         last=0
-05      IF(j > 0) THEN
+        DO WHILE (j > 0)
             jj=(j*j+j)/2
             IF(ABS(v(jj)) > MAX(ABS(vkk),eps*diag(j))) THEN
                 vkk=v(jj)
@@ -92,8 +105,7 @@ SUBROUTINE sqminv(v,b,n,nrank,diag,next)
             END IF
             last=j
             j=next(last)
-            GO TO 05
-        END IF
+        END DO
   
         IF(k /= 0) THEN            ! pivot found
             kk=(k*k+k)/2
@@ -147,10 +159,10 @@ SUBROUTINE sqminv(v,b,n,nrank,diag,next)
                     END DO
                 END IF
             END DO
-            GO TO 10
+            EXIT loop
         END IF
-    END DO             ! end of loop
-    10   DO ij=1,(n*n+n)/2
+    END DO loop           ! end of loop
+    DO ij=1,(n*n+n)/2
         v(ij)=-v(ij)      ! finally reverse sign of all matrix elements
     END DO
 END SUBROUTINE sqminv
@@ -177,14 +189,29 @@ SUBROUTINE devrot(n,diag,u,v,work,iwork)
     DOUBLE PRECISION, INTENT(OUT)            :: work(n)
     INTEGER, INTENT(OUT)                     :: iwork(n)
 
-
     INTEGER, PARAMETER :: itmax=30
     DOUBLE PRECISION, PARAMETER :: tol=1.0D-16
     DOUBLE PRECISION, PARAMETER :: eps=1.0D-16
 
-    DOUBLE PRECISION :: f,g,h,sh,hh,b,p,r,s,c,workd
+    DOUBLE PRECISION :: f
+    DOUBLE PRECISION :: g
+    DOUBLE PRECISION :: h
+    DOUBLE PRECISION :: sh
+    DOUBLE PRECISION :: hh
+    DOUBLE PRECISION :: b
+    DOUBLE PRECISION :: p
+    DOUBLE PRECISION :: r
+    DOUBLE PRECISION :: s
+    DOUBLE PRECISION :: c
+    DOUBLE PRECISION :: workd
 
-    INTEGER :: ij,i,j,k,l,m,ll
+    INTEGER :: ij
+    INTEGER :: i
+    INTEGER :: j
+    INTEGER :: k
+    INTEGER :: l
+    INTEGER :: m
+    INTEGER :: ll
     !     ...
     !     1. part: symmetric matrix V reduced to tridiagonal from
     ij=0
@@ -398,14 +425,16 @@ END SUBROUTINE devrot
 !! \param [in]  N columns of A
 
 SUBROUTINE dbgax(a,x,y,m,n)
-
+    IMPLICIT NONE
+    INTEGER :: i
+    INTEGER :: ij
+    INTEGER :: j
 
     DOUBLE PRECISION, INTENT(IN)             :: a(*)
     DOUBLE PRECISION, INTENT(IN)             :: x(*)
     DOUBLE PRECISION, INTENT(OUT)            :: y(*)
     INTEGER, INTENT(IN)                      :: m
     INTEGER, INTENT(IN)                      :: n
-
 
     !     ...
     ij=0
@@ -432,7 +461,17 @@ END SUBROUTINE dbgax
 !!
 
 SUBROUTINE dbavat(v,a,w,n,m)
-
+    IMPLICIT NONE
+    INTEGER :: i
+    INTEGER :: ij
+    INTEGER :: ijs
+    INTEGER :: il
+    INTEGER :: j
+    INTEGER :: jk
+    INTEGER :: k
+    INTEGER :: l
+    INTEGER :: lk
+    INTEGER :: lkl
 
     DOUBLE PRECISION, INTENT(IN)             :: v(*)
     DOUBLE PRECISION, INTENT(IN)             :: a(*)
@@ -483,6 +522,26 @@ END SUBROUTINE dbavat
 !! For band part root-free Cholesky decomposition and forward/backward
 !! substitution is used.
 !!
+!! Use decomposition in border and band part for block matrix algebra:
+!!
+!!     | A  Ct |   | x1 |   | b1 |        , A  is the border part
+!!     |       | * |    | = |    |        , Ct is the mixed part
+!!     | C  D  |   | x2 |   | b2 |        , D  is the band part
+!!
+!! Explicit inversion of D is avoided by using solution X of D*X=C (X=D^-1*C,
+!! obtained from Cholesky decomposition and forward/backward substitution)
+!!
+!!     | x1 |   | E*b1 - E*Xt*b2 |        , E^-1 = A-Ct*D^-1*C = A-Ct*X
+!!     |    | = |                |
+!!     | x2 |   |  x   - X*x1    |        , x is solution of D*x=b2 (x=D^-1*b2)
+!!
+!! Inverse matrix is:
+!!
+!!     |  E   -E*Xt          |
+!!     |                     |            , only band part of (D^-1 + X*E*Xt)
+!!     | -X*E  D^-1 + X*E*Xt |              is calculated for inv=1
+!!
+!!
 !! \param [in,out] V symmetric N-by-N matrix in symmetric storage mode
 !!                   (V(1) = V11, V(2) = V12, V(3) = V22, V(4) = V13, ...),
 !!                   replaced by inverse matrix
@@ -504,8 +563,25 @@ SUBROUTINE sqmibb(v,b,n,nbdr,nbnd,inv,nrank)
 
     ! cost[dot ops] ~= (N-NBDR)*(NBDR+NBND+1)**2 + NBDR**3/3 (leading term, solution only)
 
-    use gblmod, only: mxpar, mxbnd, mxbdr
-
+    USE gbltraj, ONLY: maxFitPar, maxBandWidth, maxBorderSize
+    IMPLICIT NONE
+    INTEGER :: i
+    INTEGER :: ib
+    INTEGER :: ij
+    INTEGER :: ioff
+    INTEGER :: ip
+    INTEGER :: ip1
+    INTEGER :: ip2
+    INTEGER :: is
+    INTEGER :: j
+    INTEGER :: j0
+    INTEGER :: jb
+    INTEGER :: joff
+    INTEGER :: mp1
+    INTEGER :: nb1
+    INTEGER :: nmb
+    INTEGER :: npri
+    INTEGER :: nrankb
 
     DOUBLE PRECISION, INTENT(IN OUT)         :: v(*)
     DOUBLE PRECISION, INTENT(OUT)            :: b(n)
@@ -515,11 +591,13 @@ SUBROUTINE sqmibb(v,b,n,nbdr,nbnd,inv,nrank)
     INTEGER, INTENT(IN)                      :: inv
     INTEGER, INTENT(OUT)                     :: nrank
 
-
-
-    DOUBLE PRECISION :: vbnd(mxpar*(mxbnd+1)),vbdr(mxpar*mxbdr),  &
-    aux(mxpar*mxbdr),vbk((mxbdr*mxbdr+mxbdr)/2), vzru(mxbdr),scdiag(mxbdr)
-    INTEGER :: scflag(mxbdr)
+    DOUBLE PRECISION :: vbnd(maxFitPar*(maxBandWidth+1))
+    DOUBLE PRECISION :: vbdr(maxFitPar*maxBorderSize)
+    DOUBLE PRECISION :: aux(maxFitPar*maxBorderSize)
+    DOUBLE PRECISION :: vbk((maxBorderSize*maxBorderSize+maxBorderSize)/2)
+    DOUBLE PRECISION :: vzru(maxBorderSize)
+    DOUBLE PRECISION ::scdiag(maxBorderSize)
+    INTEGER :: scflag(maxBorderSize)
 
     SAVE npri
     DATA npri / 100 /
@@ -708,13 +786,17 @@ END SUBROUTINE sqmibb
 !!
 
 SUBROUTINE dbprv(lun,v,n)
-
+    IMPLICIT NONE
+    INTEGER :: i
+    INTEGER :: ip
+    INTEGER :: ipe
+    INTEGER :: ipn
+    INTEGER :: ips
+    INTEGER :: k
 
     INTEGER, INTENT(IN OUT)                  :: lun
     DOUBLE PRECISION, INTENT(IN OUT)         :: v(*)
     INTEGER, INTENT(IN)                      :: n
-
-
 
     INTEGER, PARAMETER :: istp=6
 

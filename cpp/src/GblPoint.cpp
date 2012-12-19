@@ -146,6 +146,8 @@ void GblPoint::getMeasurement(SMatrix55 &aProjection, SVector5 &aResiduals,
 
 /// Add a (thin) scatterer to a point.
 /**
+ * Changes local track direction.
+ *
  * \param [in] aResiduals Scatterer residuals
  * \param [in] aPrecision Scatterer precision (diagonal of inverse covariance matrix)
  */
