@@ -661,7 +661,7 @@ class GblTrajectory(object):
     
     @param aLabel: label of point with external seed
     @type aLabel: int 
-    @param aSeed: seed (covariance matrix of track parameters at point)
+    @param aSeed: seed (precision matrix of track parameters at point)
     @type aSeed: matrix(float) 
     '''
     self.__externalPoint = aLabel
@@ -838,11 +838,12 @@ class GblTrajectory(object):
 #     local slope and curvature
       if (labSlope >= 0):
         matW, matWJ, vecWd = aPoint.getDerivatives(nJacobian) # W, W * J, W * d
+        sign = 2 * nJacobian - 1
         if (nCurv > 0):
-          aJacobian[labSlope:labOffset, 0:1] = -vecWd # from curvature
+          aJacobian[labSlope:labOffset, 0:1] = -sign * vecWd # from curvature
           anIndex[0] = nLocals + 1
-        aJacobian[labSlope:labOffset, index1:index1 + 2] = -matWJ
-        aJacobian[labSlope:labOffset, index2:index2 + 2] = matW
+        aJacobian[labSlope:labOffset, index1:index1 + 2] = -sign * matWJ
+        aJacobian[labSlope:labOffset, index2:index2 + 2] = sign * matW
         for i in range(nDim):
           anIndex[index2 + aDim[i]] = iOff2 + i  
           
