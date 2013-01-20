@@ -460,13 +460,14 @@ void GblTrajectory::getFitToLocalJacobian(std::vector<unsigned int> &anIndex,
 			SMatrix22 matW, matWJ;
 			SVector2 vecWd;
 			aPoint.getDerivatives(nJacobian, matW, matWJ, vecWd); // W, W * J, W * d
+			double sign = (nJacobian > 0) ? 1. : -1.;
 			if (nCurv > 0) {
 				aJacobian(0, 0) = 1.0;
-				aJacobian.Place_in_col(-vecWd, 1, 0); // from curvature
+				aJacobian.Place_in_col(-sign * vecWd, 1, 0); // from curvature
 				anIndex[0] = nLocals + 1;
 			}
-			aJacobian.Place_at(-matWJ, 1, index1); // from 1st Offset
-			aJacobian.Place_at(matW, 1, index2); // from 2nd Offset
+			aJacobian.Place_at(-sign * matWJ, 1, index1); // from 1st Offset
+			aJacobian.Place_at(sign * matW, 1, index2); // from 2nd Offset
 			for (unsigned int i = 0; i < nDim; ++i) {
 				anIndex[index2 + theDimension[i]] = iOff2 + i;
 			}
