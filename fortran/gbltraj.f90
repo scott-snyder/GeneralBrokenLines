@@ -1204,6 +1204,7 @@ CONTAINS
         DOUBLE PRECISION :: dpp(2)
         DOUBLE PRECISION :: dpn(2)
         DOUBLE PRECISION :: det
+        DOUBLE PRECISION :: sgn
 
         indx(i,j)=((i-1)*np+j)*(1-itrans)+((j-1)*mp+i)*itrans
 
@@ -1233,23 +1234,25 @@ CONTAINS
                 ioff2=koff
                 ip1=numCurv+numAddLocPar
                 ip2=numCurv+numAddLocPar+offsetDimension
+                sgn=1.0
             ELSE
                 ioff2=joff
                 ioff1=koff
                 ip2=numCurv+numAddLocPar
                 ip1=numCurv+numAddLocPar+offsetDimension
+                sgn=-1.0
             END IF
   
             DO l=1,offsetDimension
-                jacTrackToFit(indx(2  ,ip1+l))=-wj(1,l+l0)
-                jacTrackToFit(indx(3  ,ip1+l))=-wj(2,l+l0)
-                jacTrackToFit(indx(2  ,ip2+l))= w(1,l+l0)
-                jacTrackToFit(indx(3  ,ip2+l))= w(2,l+l0)
+                jacTrackToFit(indx(2  ,ip1+l))=-sgn*wj(1,l+l0)
+                jacTrackToFit(indx(3  ,ip1+l))=-sgn*wj(2,l+l0)
+                jacTrackToFit(indx(2  ,ip2+l))= sgn*w(1,l+l0)
+                jacTrackToFit(indx(3  ,ip2+l))= sgn*w(2,l+l0)
                 jacTrackToFit(indx(3+l,ip1+l))= 1.0D0
             END DO
             IF (numCurv > 0) THEN                        ! correct for curvature
-                jacTrackToFit(indx(2,1)) = -dw(1)
-                jacTrackToFit(indx(3,1)) = -dw(2)
+                jacTrackToFit(indx(2,1)) = -sgn*dw(1)
+                jacTrackToFit(indx(3,1)) = -sgn*dw(2)
             END IF
   
         ELSE
@@ -1271,8 +1274,8 @@ CONTAINS
             FORALL (i=1:2) dip(i)=sum(wji(i,:)*dwp(:))           !  N * W- * d-
             FORALL (i=1:2) din(i)=sum(wji(i,:)*dwn(:))           !  N * W+ * d+
             !        derivatives for alpha_int
-            FORALL (i=1:2,j=1:2) wpp(i,j)=sum(wjn(i,:)*wpp(:,j)) !  W+ * J+ * N * W-
-            FORALL (i=1:2,j=1:2) wpn(i,j)=sum(wjp(i,:)*wpn(:,j)) !  W- * J- * N * W+
+            FORALL (i=1:2,j=1:2) wpp(i,j)=sum(wjn(i,:)*wip(:,j)) !  W+ * J+ * N * W-
+            FORALL (i=1:2,j=1:2) wpn(i,j)=sum(wjp(i,:)*win(:,j)) !  W- * J- * N * W+
             FORALL (i=1:2) dpp(i)=sum(wjn(i,:)*dip(:))           !  W+ * J+ * N * W- * d-
             FORALL (i=1:2) dpn(i)=sum(wjp(i,:)*din(:))           !  W- * J- * N * W+ * d+
 

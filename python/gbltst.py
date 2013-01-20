@@ -62,9 +62,10 @@ def example1():
   scatPrec = 1.0 / scatErr ** 2
 # RMS of CurviLinear track parameters (Q/P, slopes, offsets)
   clErr = np.array([0.001, -0.1, 0.2, -0.15, 0.25])
-  clSeed = np.eye(5)
-  for i in range(5):
-    clSeed[i, i] = 1.0 / clErr[i] ** 2
+  clSeed = None
+  seedLabel = 0 # label of point with seed
+  if seedLabel != 0:
+    print " external seed at label ", seedLabel
 #
   bfac = 0.2998 # Bz*c for Bz=1
   step = 1.5 / cosLambda # constant steps in RPhi
@@ -79,6 +80,10 @@ def example1():
 # generate (CurviLinear) track parameters 
     clNorm = np.random.normal(0., 1., 5)  
     clPar = clErr * clNorm
+    # covariance matrix
+    clCov = np.eye(5)
+    for i in range(5):
+      clCov[i, i] = clErr[i] ** 2
 # arclength
     s = 0.
     sPoint = []
@@ -113,9 +118,12 @@ def example1():
 # add point to trajectory      
       iLabel = traj.addPoint(point)
       sPoint.append(s)
+      if iLabel == abs(seedLabel):
+        clSeed = np.linalg.inv(clCov)
 # propagate to scatterer
       jacPointToPoint = gblSimpleJacobian(step, cosLambda, bfac)
       clPar = np.dot(jacPointToPoint, clPar)
+      clCov = np.dot(jacPointToPoint, np.dot(clCov, jacPointToPoint.T))
       s += step
       if (iLayer < nLayer - 1):
         scat = np.array([0., 0.])
@@ -124,15 +132,20 @@ def example1():
         point.addScatterer([scat, scatPrec])
         iLabel = traj.addPoint(point)
         sPoint.append(s)
+        if iLabel == abs(seedLabel):
+          clSeed = np.linalg.inv(clCov)
+
 # scatter a little    
         scatNorm = np.random.normal(0., 1., 2)  
         clPar[1:3] = clPar[1:3] + scatErr * scatNorm
 # propagate to next measurement layer    
         clPar = np.dot(jacPointToPoint, clPar)
+        clCov = np.dot(jacPointToPoint, np.dot(clCov, jacPointToPoint.T))
         s += step
  
-# add external seed    
-    traj.addExternalSeed(1, clSeed)
+# add external seed
+    if clSeed is not None:    
+      traj.addExternalSeed(seedLabel, clSeed)
 # dump trajectory
 #    traj.dump()
   
@@ -152,7 +165,7 @@ def example1():
         print " Point< ", i
         print " locPar ", locPar
         print " locCov ", locCov      
-        traj.getResults(-i)
+        locPar, locCov = traj.getResults(-i)
         print " Point> ", i
         print " locPar ", locPar
         print " locCov ", locCov  
