@@ -733,7 +733,10 @@ void GblTrajectory::prepare() {
 				unsigned int iOff = 5 - measDim; // first active component
 				std::vector<unsigned int> labDer(5);
 				SMatrix55 matDer, matPDer;
-				getFitToLocalJacobian(labDer, matDer, *itPoint, measDim);
+				unsigned int nJacobian =
+						(itPoint < thePoints[iTraj].end() - 1) ? 1 : 0; // last point needs backward propagation
+				getFitToLocalJacobian(labDer, matDer, *itPoint, measDim,
+						nJacobian);
 				if (measDim > 2) {
 					matPDer = matP * matDer;
 				} else { // 'shortcut' for position measurements
