@@ -983,7 +983,8 @@ class GblTrajectory(object):
           globalLab = aPoint.getGlobalLabels()
           globalDer = aPoint.getGlobalDerivatives()
           matP, aMeas, aPrec = aPoint.getMeasurement()
-          labDer, matDer = self.__getFitToLocalJacobian(aPoint, measDim)
+          nJacobian = 1 if aPoint.getOffset() < self.__numOffsets - 1 else 0 # last point needs backward propagation
+          labDer, matDer = self.__getFitToLocalJacobian(aPoint, measDim, nJacobian)
           matPDer = np.dot(matP, matDer)
           for i in range(measDim):
             if (aPrec[i] > 0.):
