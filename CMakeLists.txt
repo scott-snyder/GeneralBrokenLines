@@ -20,21 +20,21 @@ FIND_PACKAGE(ROOT REQUIRED)
 ADD_DEFINITIONS( "-Wall -g -ansi -pedantic -Wno-long-long" )
 
 # include directories
-INCLUDE_DIRECTORIES( BEFORE ./include ${ROOT_INCLUDE_DIRS})
-INSTALL( DIRECTORY ./include DESTINATION . PATTERN ".svn" EXCLUDE )
+INCLUDE_DIRECTORIES( BEFORE ./cpp/include ${ROOT_INCLUDE_DIRS})
+INSTALL( DIRECTORY ./cpp/include DESTINATION . PATTERN ".svn" EXCLUDE )
 
 # declare the stupid ROOT library path
 LINK_DIRECTORIES(${ROOT_LIBRARY_DIR})
 
 # add library
-AUX_SOURCE_DIRECTORY( ./src library_sources )
+AUX_SOURCE_DIRECTORY( ./cpp/src library_sources )
 ADD_SHARED_LIBRARY( ${PROJECT_NAME} ${library_sources} )
 INSTALL( TARGETS ${PROJECT_NAME} DESTINATION lib )
 
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${ROOT_LIBS})
 
 # the examples, build with "make examples"
-ADD_SUBDIRECTORY( examples/ )
+ADD_SUBDIRECTORY( cpp/examples/ )
   
 # add a target to generate API documentation with Doxygen
 FIND_PACKAGE(Doxygen)
@@ -43,7 +43,7 @@ if(DOXYGEN_FOUND)
 
     INCLUDE(GlobalSVNRevision)
     
-    CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/doc/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile @ONLY)
+    CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/cpp/doc/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}doc/Doxyfile @ONLY)
 
     ADD_CUSTOM_TARGET(doc
         ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile
