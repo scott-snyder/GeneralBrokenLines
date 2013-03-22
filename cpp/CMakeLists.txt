@@ -5,34 +5,19 @@ CMAKE_MINIMUM_REQUIRED( VERSION 2.6 )
 PROJECT(GBL)
 
 # project version
-SET( ${PROJECT_NAME}_VERSION_MAJOR 0 )
-SET( ${PROJECT_NAME}_VERSION_MINOR 0 )
+SET( ${PROJECT_NAME}_VERSION_MAJOR 1 )
+SET( ${PROJECT_NAME}_VERSION_MINOR 15 )
 SET( ${PROJECT_NAME}_VERSION_PATCH 0 )
-SET ( ${PROJECT_NAME}_SOVERSION ${${PROJECT_NAME}_VERSION_MAJOR}.${${PROJECT_NAME}_VERSION_MINOR} )
-SET ( ${PROJECT_NAME}_VERSION ${${PROJECT_NAME}_SOVERSION}.${${PROJECT_NAME}_VERSION_PATCH} )
 
 # make life easier and simply use the ilcsoft default settings
 # load default ilcsoft settings (install prefix, build type, rpath, etc.)
 LIST( APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake )
-
-# include helper macros by ilcsoft/Jan Engels, DESY
-INCLUDE( MacroDisplayStandardVariables )
-INCLUDE( MacroGeneratePackageConfigFiles )
-
-# set default install prefix to project root directory
-# instead of the cmake default /usr/local
-IF( CMAKE_INSTALL_PREFIX STREQUAL "/usr/local" )
-    SET( CMAKE_INSTALL_PREFIX "${PROJECT_SOURCE_DIR}" )
-ENDIF()
-
-# write this variable to cache
-SET( CMAKE_INSTALL_PREFIX "${CMAKE_INSTALL_PREFIX}" CACHE PATH "Where to install ${PROJECT_NAME}" FORCE )
-
+INCLUDE( ilcsoft_default_settings )
 
 FIND_PACKAGE(ROOT REQUIRED)
 
 # require proper c++
-ADD_DEFINITIONS( "-Wall -g -O0 -ansi -pedantic -Wno-long-long" )
+ADD_DEFINITIONS( "-Wall -g -ansi -pedantic -Wno-long-long" )
 
 # include directories
 INCLUDE_DIRECTORIES( BEFORE ./include ${ROOT_INCLUDE_DIRS})
@@ -43,17 +28,7 @@ LINK_DIRECTORIES(${ROOT_LIBRARY_DIR})
 
 # add library
 AUX_SOURCE_DIRECTORY( ./src library_sources )
-ADD_LIBRARY( ${PROJECT_NAME} SHARED ${library_sources} )
-SET_TARGET_PROPERTIES( ${PROJECT_NAME} PROPERTIES
-        # create *nix style library versions + symbolic links
-        VERSION ${${PROJECT_NAME}_VERSION}
-        SOVERSION ${${PROJECT_NAME}_SOVERSION}
-    )
-
-# add library install path to the rpath list for properly linked executables
-SET( CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib" )
-MARK_AS_ADVANCED( CMAKE_INSTALL_RPATH )
-
+ADD_SHARED_LIBRARY( ${PROJECT_NAME} ${library_sources} )
 INSTALL( TARGETS ${PROJECT_NAME} DESTINATION lib )
 
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${ROOT_LIBS})
