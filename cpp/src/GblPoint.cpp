@@ -320,6 +320,7 @@ void GblPoint::getDerivatives(int aDirection, SMatrix22 &matW, SMatrix22 &matWJ,
 	if (!matW.InvertFast()) {
 		std::cout << " GblPoint::getDerivatives failed to invert matrix: "
 				<< matW << std::cout;
+		std::cout << " Possible reason for singular matrix: multiple GblPoints at same arc-length";
 		throw std::overflow_error("Singular matrix inversion exception");
 	}
 	matWJ = matW * matJ;

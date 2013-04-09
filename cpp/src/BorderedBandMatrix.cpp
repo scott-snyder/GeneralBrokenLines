@@ -11,7 +11,7 @@
 namespace gbl {
 
 /// Create bordered band matrix.
-BorderedBandMatrix::BorderedBandMatrix() {
+BorderedBandMatrix::BorderedBandMatrix() : numSize(0), numBorder(0), numBand(0), numCol(0) {
 }
 
 BorderedBandMatrix::~BorderedBandMatrix() {
