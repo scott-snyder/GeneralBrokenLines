@@ -102,6 +102,7 @@ void example1() {
 	double Chi2Sum = 0.;
 	int NdfSum = 0;
 	double LostSum = 0.;
+	int numFit = 0;
 
 	for (unsigned int iTry = 1; iTry <= nTry; ++iTry) {
 		// curvilinear track parameters
@@ -205,6 +206,10 @@ void example1() {
 		// create trajectory
 		//GblTrajectory traj(listOfPoints);
 		GblTrajectory traj(listOfPoints, seedLabel, clSeed); // with external seed
+		if (not traj.isValid()) {
+			std::cout << " Invalid GblTrajectory -> skip" << std::endl;
+			continue;
+		}
 // fit trajectory
 		double Chi2;
 		int Ndf;
@@ -227,11 +232,13 @@ void example1() {
 		Chi2Sum += Chi2;
 		NdfSum += Ndf;
 		LostSum += lostWeight;
+		numFit++;
 	}
 	clock_t endTime = clock();
 	double diff = endTime - startTime;
 	double cps = CLOCKS_PER_SEC;
 	std::cout << " Time elapsed " << diff / cps << " s" << std::endl;
 	std::cout << " Chi2/Ndf = " << Chi2Sum / NdfSum << std::endl;
+	std::cout << " Tracks fitted " << numFit << std::endl;
 }
 
