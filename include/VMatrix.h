@@ -31,6 +31,7 @@ public:
 	unsigned int getNumRows() const;
 	void print() const;
 	VVector operator-(const VVector &aVector) const;
+	VVector &operator=(const VVector &aVector);
 private:
 	unsigned int numRows; ///< Number of rows
 	std::vector<double> theVec; ///< Data
@@ -52,6 +53,7 @@ public:
 	VVector operator*(const VVector &aVector) const;
 	VMatrix operator*(const VMatrix &aMatrix) const;
 	VMatrix operator+(const VMatrix &aMatrix) const;
+	VMatrix &operator=(const VMatrix &aMatrix);
 private:
 	unsigned int numRows; ///< Number of rows
 	unsigned int numCols; ///< Number of columns

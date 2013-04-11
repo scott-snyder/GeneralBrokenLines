@@ -37,6 +37,7 @@ public:
 			const TMatrixD &extDerivatives, const TVectorD &extMeasurements,
 			const TVectorD &extPrecisions);
 	virtual ~GblTrajectory();
+	bool isValid() const;
 	unsigned int getNumPoints() const;
 	unsigned int getResults(int aSignedLabel, TVectorD &localPar,
 			TMatrixDSym &localCov) const;
@@ -66,6 +67,7 @@ private:
 	unsigned int numLocals; ///< Total number of (additional) local parameters
 	unsigned int numMeasurements; ///< Total number of measurements
 	unsigned int externalPoint; ///< Label of external point (or 0)
+	bool constructOK; ///< Trajectory has been successfully constructed (ready for fit/output)
 	bool fitOK; ///< Trajectory has been successfully fitted (results are valid)
 	std::vector<unsigned int> theDimension; ///< List of active dimensions (0=u1, 1=u2) in fit
 	std::vector<std::vector<GblPoint> > thePoints; ///< (list of) List of points on trajectory

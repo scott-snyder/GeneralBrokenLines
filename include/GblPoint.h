@@ -73,8 +73,8 @@ public:
 	void setOffset(int anOffset);
 	int getOffset() const;
 	const SMatrix55& getP2pJacobian() const;
-	void addPrevJacobian(const SMatrix55 aJac);
-	void addNextJacobian(const SMatrix55 aJac);
+	void addPrevJacobian(const SMatrix55 &aJac);
+	void addNextJacobian(const SMatrix55 &aJac);
 	void getDerivatives(int aDirection, SMatrix22 &matW, SMatrix22 &matWJ,
 			SVector2 &vecWd) const;
 	void printPoint(unsigned int level = 0) const;
