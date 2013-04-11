@@ -271,7 +271,7 @@ const SMatrix55& GblPoint::getP2pJacobian() const {
 /**
  * \param [in] aJac Jacobian
  */
-void GblPoint::addPrevJacobian(const SMatrix55 aJac) {
+void GblPoint::addPrevJacobian(const SMatrix55 &aJac) {
 	int ifail = 0;
 // to optimize: need only two last rows of inverse
 //	prevJacobian = aJac.InverseFast(ifail);
@@ -288,7 +288,7 @@ void GblPoint::addPrevJacobian(const SMatrix55 aJac) {
 /**
  * \param [in] aJac Jacobian
  */
-void GblPoint::addNextJacobian(const SMatrix55 aJac) {
+void GblPoint::addNextJacobian(const SMatrix55 &aJac) {
 	nextJacobian = aJac;
 }
 
@@ -319,8 +319,8 @@ void GblPoint::getDerivatives(int aDirection, SMatrix22 &matW, SMatrix22 &matWJ,
 
 	if (!matW.InvertFast()) {
 		std::cout << " GblPoint::getDerivatives failed to invert matrix: "
-				<< matW << std::cout;
-		std::cout << " Possible reason for singular matrix: multiple GblPoints at same arc-length";
+				<< matW << std::endl;
+		std::cout << " Possible reason for singular matrix: multiple GblPoints at same arc-length" << std::endl;
 		throw std::overflow_error("Singular matrix inversion exception");
 	}
 	matWJ = matW * matJ;

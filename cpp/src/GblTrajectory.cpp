@@ -66,6 +66,8 @@
  *            <tt>traj = gbl::GblTrajectory (list)</tt>
  *    -# Optionally with external seed:\n
  *            <tt>traj = gbl::GblTrajectory (list,seed)</tt>
+ *    -# Optionally check validity of trajectory:\n
+ *            <tt>if (not traj.isValid()) .. //abort</tt>
  *    -# Fit trajectory, return error code,
  *       get Chi2, Ndf (and weight lost by M-estimators):\n
  *            <tt>ierr = traj.fit(..)</tt>
@@ -205,6 +207,11 @@ GblTrajectory::GblTrajectory(
 GblTrajectory::~GblTrajectory() {
 }
 
+/// Retrieve validity of trajectory
+bool GblTrajectory::isValid() const {
+	return constructOK;
+}
+
 /// Retrieve number of point from trajectory
 unsigned int GblTrajectory::getNumPoints() const {
 	return numAllPoints;
@@ -216,6 +223,7 @@ unsigned int GblTrajectory::getNumPoints() const {
  */
 void GblTrajectory::construct() {
 
+	constructOK = false;
 	fitOK = false;
 	unsigned int aLabel = 0;
 	// loop over trajectories
@@ -232,7 +240,14 @@ void GblTrajectory::construct() {
 	}
 	defineOffsets();
 	calcJacobians();
-	prepare();
+	try {
+		prepare();
+	} catch (std::overflow_error &e) {
+		std::cout << " GblTrajectory construction failed: " << e.what()
+				<< std::endl;
+		return;
+	}
+	constructOK = true;
 	// number of fit parameters
 	numParameters = (numOffsets - 2 * numInnerTrans) * theDimension.size()
 			+ numCurvature + numLocals;
@@ -926,6 +941,12 @@ unsigned int GblTrajectory::fit(double &Chi2, int &Ndf, double &lostWeight,
 	const double normChi2[4] = { 1.0, 0.8737, 0.9326, 0.8228 };
 	const std::string methodList = "TtHhCc";
 
+	Chi2 = 0.;
+	Ndf = -1;
+	lostWeight = 0.;
+	if (not constructOK)
+		return 10;
+
 	unsigned int aMethod = 0;
 
 	buildLinearEquationSystem();
@@ -957,9 +978,6 @@ unsigned int GblTrajectory::fit(double &Chi2, int &Ndf, double &lostWeight,
 
 	} catch (int e) {
 		std::cout << " GblTrajectory::fit exception " << e << std::endl;
-		Chi2 = 0.;
-		Ndf = -1;
-		lostWeight = 0.;
 		ierr = e;
 	}
 	return ierr;
@@ -973,6 +991,9 @@ void GblTrajectory::milleOut(MilleBinary &aMille) {
 	std::vector<double>* derLocal;
 	std::vector<int>* labGlobal;
 	std::vector<double>* derGlobal;
+
+	if (not constructOK)
+		return;
 
 //   data: measurements, kinks and external seed
 	std::vector<GblData>::iterator itData;
@@ -1013,6 +1034,9 @@ void GblTrajectory::printTrajectory(unsigned int level) {
 	if (externalPoint) {
 		std::cout << " Label of point with ext. seed: " << externalPoint
 				<< std::endl;
+	}
+	if (constructOK) {
+		std::cout << " Constructed OK " << std::endl;
 	}
 	if (fitOK) {
 		std::cout << " Fitted OK " << std::endl;
