@@ -124,12 +124,14 @@ VMatrix VMatrix::operator+(const VMatrix &aMatrix) const {
 
 /// Assignment Matrix=Matrix.
 VMatrix &VMatrix::operator=(const VMatrix &aMatrix) {
-	numRows = aMatrix.getNumRows();
-	numCols = aMatrix.getNumCols();
-	theVec.resize(numRows * numCols);
-	for (unsigned int i = 0; i < numRows; ++i) {
-		for (unsigned int j = 0; j < numCols; ++j) {
-			theVec[numCols * i + j] = aMatrix(i, j);
+	if (this != &aMatrix) {   // Gracefully handle self assignment
+		numRows = aMatrix.getNumRows();
+		numCols = aMatrix.getNumCols();
+		theVec.resize(numRows * numCols);
+		for (unsigned int i = 0; i < numRows; ++i) {
+			for (unsigned int j = 0; j < numCols; ++j) {
+				theVec[numCols * i + j] = aMatrix(i, j);
+			}
 		}
 	}
 	return *this;
@@ -295,10 +297,12 @@ VVector VVector::operator-(const VVector &aVector) const {
 
 /// Assignment Vector=Vector.
 VVector &VVector::operator=(const VVector &aVector) {
-	numRows = aVector.getNumRows();
-	theVec.resize(numRows);
-	for (unsigned int i = 0; i < numRows; ++i) {
-		theVec[i] = aVector(i);
+	if (this != &aVector) {   // Gracefully handle self assignment
+		numRows = aVector.getNumRows();
+		theVec.resize(numRows);
+		for (unsigned int i = 0; i < numRows; ++i) {
+			theVec[i] = aVector(i);
+		}
 	}
 	return *this;
 }
