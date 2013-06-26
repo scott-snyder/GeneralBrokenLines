@@ -20,6 +20,15 @@ def example1():
   Equidistant measurement layers and thin scatterers, propagation 
   with simple jacobian (quadratic in arc length differences).
   Curvilinear system (U,V,T) as local coordinate system.
+  
+  This example simulates and refits tracks in a system of planar detectors
+  with 2D measurements in a constant magnet field in Z direction using
+  the curvilinear system as local system. The true track parameters are
+  randomly smeared with respect to a (constant and straight) reference
+  trajectory with direction (lambda, phi) and are used (only) for the
+  on-the-fly simulation of the measurements and scatterers. The predictions
+  from the reference trajectory are therefore always zero and the residuals
+   needed (by addMeasurement) are equal to the measurements.
   '''  
   def gblSimpleJacobian(ds, cosl, bfac):
     '''
@@ -86,7 +95,6 @@ def example1():
       clCov[i, i] = clErr[i] ** 2
 # arclength
     s = 0.
-    sPoint = []
 # point-to-point jacobian (from previous point)    
     jacPointToPoint = np.eye(5)
 # additional (local or global) derivatives    
@@ -97,9 +105,9 @@ def example1():
     
     for iLayer in range(nLayer):
 #     measurement directions   
-      sinStereo = (0. if iLayer % 2 == 0 else 0.5) 
+      sinStereo = (0. if iLayer % 2 == 0 else 0.1) 
       cosStereo = math.sqrt(1.0 - sinStereo ** 2)    
-      mDir = np.array([[sinStereo, cosStereo, 0.0], [0., 0, 1.]])
+      mDir = np.array([[0., cosStereo, sinStereo], [0., -sinStereo, cosStereo]])
 # projection measurement to local (curvilinear uv) directions (duv/dm)
       proM2l = np.dot(uvDir, mDir.T)
 # projection local (uv) to measurement directions (dm/duv)
@@ -117,7 +125,6 @@ def example1():
       addDer = -addDer # locDer flips sign every measurement      
 # add point to trajectory      
       iLabel = traj.addPoint(point)
-      sPoint.append(s)
       if iLabel == abs(seedLabel):
         clSeed = np.linalg.inv(clCov)
 # propagate to scatterer
@@ -131,7 +138,6 @@ def example1():
         point = GblPoint(jacPointToPoint)
         point.addScatterer([scat, scatPrec])
         iLabel = traj.addPoint(point)
-        sPoint.append(s)
         if iLabel == abs(seedLabel):
           clSeed = np.linalg.inv(clCov)
 
