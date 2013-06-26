@@ -16,7 +16,7 @@
  *  trajectory points are defined with can describe a measurement
  *  or a (thin) scatterer or both. Measurements are arbitrary
  *  functions of the local track parameters at a point (e.g. 2D:
- *  position, 4D: slope+position). The refit provides corrections
+ *  position, 4D: direction+position). The refit provides corrections
  *  to the local track parameters (in the local system) and the
  *  corresponding covariance matrix at any of those points.
  *  Outliers can be down-weighted by use of M-estimators.
@@ -76,6 +76,14 @@
  *            <tt>[..] = traj.getResults(label)</tt>
  *    -# Optionally write trajectory to MP binary file:\n
  *            <tt>traj.milleOut(..)</tt>
+ *
+ *  \section loc_sec Local system and local parameters
+ *  At each point on the trajectory a local coordinate system with local track
+ *  parameters has to be defined. The first of the five parameters describes
+ *  the bending, the next two the direction and the last two the position (offsets).
+ *  The covariance matrix due to multiple scattering for the direction parameters
+ *  has to be diagonal. The curvilinear system (T,U,V) with parameters
+ *  (q/p, lambda, phi, x_t, y_t) is well suited.
  *
  *  \section impl_sec Implementation
  *
