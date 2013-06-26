@@ -13,7 +13,13 @@
 using namespace gbl;
 
 TMatrixD gblSimpleJacobian(double ds, double cosl, double bfac) {
-	/* Simple jacobian: quadratic in arc length difference */
+	/// Simple jacobian: quadratic in arc length difference
+	/**
+	 * \param [in] ds    (3D) arc-length
+	 * \param [in] cosl  cos(lambda)
+	 * \param [in] bfac  Bz*c
+	 * \return jacobian
+	 */
 	TMatrixD jac(5, 5);
 	jac.UnitMatrix();
 	jac[1][0] = -bfac * ds * cosl;
@@ -24,7 +30,8 @@ TMatrixD gblSimpleJacobian(double ds, double cosl, double bfac) {
 }
 
 void example1() {
-	/*
+	/// Simple example.
+	/**
 	 * Create points on initial trajectory, create trajectory from points,
 	 * fit and write trajectory to MP-II binary file,
 	 * get track parameter corrections and covariance matrix at points.
@@ -32,6 +39,15 @@ void example1() {
 	 * Equidistant measurement layers and thin scatterers, propagation
 	 * with simple jacobian (quadratic in arc length differences).
 	 * Curvilinear system (U,V,T) as local coordinate system.
+	 *
+	 * This example simulates and refits tracks in a system of planar detectors
+	 * with 2D measurements in a constant magnet field in Z direction using
+	 * the curvilinear system as local system. The true track parameters are
+	 * randomly smeared with respect to a (constant and straight) reference
+	 * trajectory with direction (lambda, phi) and are used (only) for the
+	 * on-the-fly simulation of the measurements and scatterers. The predictions
+	 * from the reference trajectory are therefore always zero and the residuals
+	 * needed (by addMeasurement) are equal to the measurements.
 	 */
 
 //MP	MilleBinary mille; // for producing MillePede-II binary file
@@ -120,7 +136,6 @@ void example1() {
 		addDer[1][1] = 1.;
 // arclength
 		double s = 0.;
-		std::vector<double> sPoint;
 		TMatrixD jacPointToPoint(5, 5);
 		jacPointToPoint.UnitMatrix();
 // create list of points
@@ -130,13 +145,14 @@ void example1() {
 		for (unsigned int iLayer = 0; iLayer < nLayer; ++iLayer) {
 //			std::cout << " Layer " << iLayer << ", " << s << std::endl;
 //     measurement directions
-			double sinStereo = (iLayer % 2 == 0) ? 0. : 0.5;
+			double sinStereo = (iLayer % 2 == 0) ? 0. : 0.1;
 			double cosStereo = sqrt(1.0 - sinStereo * sinStereo);
 			TMatrixD mDirT(3, 2);
 			mDirT.Zero();
-			mDirT[0][0] = sinStereo;
 			mDirT[1][0] = cosStereo;
-			mDirT[2][1] = 1.;
+			mDirT[2][0] = sinStereo;
+			mDirT[1][1] = -sinStereo;
+			mDirT[2][1] = cosStereo;
 // projection measurement to local (curvilinear uv) directions (duv/dm)
 			TMatrixD proM2l = uvDir * mDirT;
 // projection local (uv) to measurement directions (dm/duv)
@@ -170,7 +186,6 @@ void example1() {
 // add point to trajectory
 			listOfPoints.push_back(point);
 			unsigned int iLabel = listOfPoints.size();
-			sPoint.push_back(s);
 			if (iLabel == seedLabel) {
 				clSeed = clCov.Invert();
 			}
@@ -187,7 +202,6 @@ void example1() {
 				point.addScatterer(scat, scatPrec);
 				listOfPoints.push_back(point);
 				iLabel = listOfPoints.size();
-				sPoint.push_back(s);
 				if (iLabel == seedLabel) {
 					clSeed = clCov.Invert();
 				}
