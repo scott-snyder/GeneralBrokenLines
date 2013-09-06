@@ -128,7 +128,7 @@ void GblData::addDerivatives(const std::vector<unsigned int> &index,
 	}
 }
 
-/// Calculate prediction for data from fit.
+/// Calculate prediction for data from fit (by GblTrajectory::fit).
 void GblData::setPrediction(const VVector &aVector) {
 
 	thePrediction = 0.;
@@ -137,7 +137,7 @@ void GblData::setPrediction(const VVector &aVector) {
 	}
 }
 
-/// Outlier down weighting with M-estimators.
+/// Outlier down weighting with M-estimators (by GblTrajectory::fit).
 /**
  * \param [in] aMethod M-estimator (1: Tukey, 2:Huber, 3:Cauchy)
  */

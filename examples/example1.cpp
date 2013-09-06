@@ -42,7 +42,8 @@ void example1() {
 	 *
 	 * This example simulates and refits tracks in a system of planar detectors
 	 * with 2D measurements in a constant magnet field in Z direction using
-	 * the curvilinear system as local system. The true track parameters are
+	 * the curvilinear system as local system and (Q/P, slopes, offsets) as
+	 * local track parameters. The true track parameters are
 	 * randomly smeared with respect to a (constant and straight) reference
 	 * trajectory with direction (lambda, phi) and are used (only) for the
 	 * on-the-fly simulation of the measurements and scatterers. The predictions
@@ -220,6 +221,7 @@ void example1() {
 		// create trajectory
 		//GblTrajectory traj(listOfPoints);
 		GblTrajectory traj(listOfPoints, seedLabel, clSeed); // with external seed
+		//traj.printPoints();
 		if (not traj.isValid()) {
 			std::cout << " Invalid GblTrajectory -> skip" << std::endl;
 			continue;
@@ -237,6 +239,15 @@ void example1() {
 		 aCorrection.Print();
 		 std::cout << " cov " << std::endl;
 		 aCovariance.Print(); */
+    /* look at residuals
+     for (unsigned int label=1; label<=listOfPoints.size(); ++label) {
+       unsigned int numData=0;
+       std::cout << " measResults, label " << label << std::endl;
+       TVectorD residuals(2), measErr(2), resErr(2), downWeights(2);
+       traj.getMeasResults(label, numData, residuals, measErr, resErr, downWeights);
+       std::cout << " measResults, numData " << numData << std::endl;
+       // residuals.Print(); measErr.Print(); resErr.Print();
+     } */
 // debug printout
 		//traj.printTrajectory();
 		//traj.printPoints();
