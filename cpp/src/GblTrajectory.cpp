@@ -19,6 +19,7 @@
  *  position, 4D: direction+position). The refit provides corrections
  *  to the local track parameters (in the local system) and the
  *  corresponding covariance matrix at any of those points.
+ *  Non-diagonal covariance matrices will be diagonalized internally.
  *  Outliers can be down-weighted by use of M-estimators.
  *
  *  The broken lines trajectory is defined by (2D) offsets at the
@@ -81,9 +82,8 @@
  *  At each point on the trajectory a local coordinate system with local track
  *  parameters has to be defined. The first of the five parameters describes
  *  the bending, the next two the direction and the last two the position (offsets).
- *  The covariance matrix due to multiple scattering for the direction parameters
- *  has to be diagonal. The curvilinear system (T,U,V) with parameters
- *  (q/p, lambda, phi, x_t, y_t) is well suited.
+ *  The curvilinear system (T,U,V) with parameters (q/p, lambda, phi, x_t, y_t)
+ *  is well suited.
  *
  *  \section impl_sec Implementation
  *
@@ -567,8 +567,9 @@ unsigned int GblTrajectory::getResults(int aSignedLabel, TVectorD &localPar,
 
 /// Get residuals at point from measurement.
 /**
- * Get residual, error of measurement and residual and down-weighting
+ * Get (diagonalized) residual, error of measurement and residual and down-weighting
  * factor for measurement at point
+ *
  * \param [in]  aLabel Label of point on trajectory
  * \param [out] numData Number of data blocks from measurement at point
  * \param [out] aResiduals Measurements-Predictions
@@ -595,8 +596,9 @@ unsigned int GblTrajectory::getMeasResults(unsigned int aLabel,
 
 /// Get (kink) residuals at point from scatterer.
 /**
- * Get residual, error of measurement and residual and down-weighting
+ * Get (diagonalized) residual, error of measurement and residual and down-weighting
  * factor for scatterering kinks at point
+ *
  * \param [in]  aLabel Label of point on trajectory
  * \param [out] numData Number of data blocks from scatterer at point
  * \param [out] aResiduals (kink)Measurements-(kink)Predictions
@@ -812,6 +814,7 @@ void GblTrajectory::prepare() {
 	}
 
 	// pseudo measurements from kinks
+	SMatrix22 matT;
 	scatDataIndex[0] = nData;
 	scatDataIndex[1] = nData;
 	// loop over trajectories
@@ -821,12 +824,12 @@ void GblTrajectory::prepare() {
 			SVector2 aMeas, aPrec;
 			unsigned int nLabel = itPoint->getLabel();
 			if (itPoint->hasScatterer()) {
-				itPoint->getScatterer(aMeas, aPrec);
+				itPoint->getScatterer(matT, aMeas, aPrec);
 				TMatrixD transDer;
 				std::vector<unsigned int> labDer(7);
-				SMatrix27 matDer;
+				SMatrix27 matDer, matTDer;
 				getFitToKinkJacobian(labDer, matDer, *itPoint);
-
+				matTDer = matT * matDer;
 				if (numInnerTrans > 0) {
 					// transform for external parameters
 					TMatrixD proDer(nDim, 5);
@@ -845,7 +848,7 @@ void GblTrajectory::prepare() {
 								// match
 								labDer[ilabel] = 0; // mark as related to external parameters
 								for (unsigned int k = 0; k < nDim; ++k) {
-									proDer(k, ifirst) = matDer(k, ilabel);
+									proDer(k, ifirst) = matTDer(k, ilabel);
 								}
 							}
 						}
@@ -858,7 +861,7 @@ void GblTrajectory::prepare() {
 					unsigned int iDim = theDimension[i];
 					if (aPrec(iDim) > 0.) {
 						GblData aData(nLabel, aMeas(iDim), aPrec(iDim));
-						aData.addDerivatives(iDim, labDer, matDer, numLocals,
+						aData.addDerivatives(iDim, labDer, matTDer, numLocals,
 								transDer);
 						theData.push_back(aData);
 						nData++;
