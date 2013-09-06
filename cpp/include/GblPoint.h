@@ -52,14 +52,21 @@ public:
 			const TVectorD &aPrecision, double minPrecision = 0.);
 	void addMeasurement(const TMatrixD &aProjection, const TVectorD &aResiduals,
 			const TMatrixDSym &aPrecision, double minPrecision = 0.);
+	void addMeasurement(const TVectorD &aResiduals, const TVectorD &aPrecision,
+			double minPrecision = 0.);
 	void addMeasurement(const TVectorD &aResiduals,
 			const TMatrixDSym &aPrecision, double minPrecision = 0.);
 	unsigned int hasMeasurement() const;
 	void getMeasurement(SMatrix55 &aProjection, SVector5 &aResiduals,
 			SVector5 &aPrecision) const;
+	void getMeasTransformation(TMatrixD &aTransformation) const;
 	void addScatterer(const TVectorD &aResiduals, const TVectorD &aPrecision);
+	void addScatterer(const TVectorD &aResiduals,
+			const TMatrixDSym &aPrecision);
 	bool hasScatterer() const;
-	void getScatterer(SVector2 &aResiduals, SVector2 &aPrecision) const;
+	void getScatterer(SMatrix22 &aTransformation, SVector2 &aResiduals,
+			SVector2 &aPrecision) const;
+	void getScatTransformation(TMatrixD &aTransformation) const;
 	void addLocals(const TMatrixD &aDerivatives);
 	unsigned int getNumLocals() const;
 	const TMatrixD& getLocalDerivatives() const;
@@ -90,8 +97,9 @@ private:
 	SVector5 measResiduals; ///< Measurement residuals
 	SVector5 measPrecision; ///< Measurement precision (diagonal of inverse covariance matrix)
 	bool transFlag; ///< Transformation exists?
-	TMatrixD measTransformation; ///< Transformation of diagonalization (of precision matrix)
+	TMatrixD measTransformation; ///< Transformation of diagonalization (of meas. precision matrix)
 	bool scatFlag; ///< Scatterer present?
+	SMatrix22 scatTransformation; ///< Transformation of diagonalization (of scat. precision matrix)
 	SVector2 scatResiduals; ///< Scattering residuals (initial kinks if iterating)
 	SVector2 scatPrecision; ///< Scattering precision (diagonal of inverse covariance matrix)
 	TMatrixD localDerivatives; ///< Derivatives of measurement vs additional local (fit) parameters

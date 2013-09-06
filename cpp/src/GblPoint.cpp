@@ -35,11 +35,11 @@ GblPoint::GblPoint(const SMatrix55 &aJacobian) :
 GblPoint::~GblPoint() {
 }
 
-/// Add a mesurement to a point.
+/// Add a measurement to a point.
 /**
- * Add measurement with diagonal precision (inverse covariance) matrix.
+ * Add measurement (in meas. system) with diagonal precision (inverse covariance) matrix.
  * ((up to) 2D: position, 4D: slope+position, 5D: curvature+slope+position)
- * \param [in] aProjection Projection from measurement to local system
+ * \param [in] aProjection Projection from local to measurement system
  * \param [in] aResiduals Measurement residuals
  * \param [in] aPrecision Measurement precision (diagonal)
  * \param [in] minPrecision Minimal precision to accept measurement
@@ -59,12 +59,12 @@ void GblPoint::addMeasurement(const TMatrixD &aProjection,
 	}
 }
 
-/// Add a mesurement to a point.
+/// Add a measurement to a point.
 /**
- * Add measurement on local system with arbitrary precision (inverse covariance) matrix.
+ * Add measurement (in meas. system) with arbitrary precision (inverse covariance) matrix.
  * Will be diagonalized.
  * ((up to) 2D: position, 4D: slope+position, 5D: curvature+slope+position)
- * \param [in] aProjection Projection from measurement to local system
+ * \param [in] aProjection Projection from local to measurement system
  * \param [in] aResiduals Measurement residuals
  * \param [in] aPrecision Measurement precision (matrix)
  * \param [in] minPrecision Minimal precision to accept measurement
@@ -92,9 +92,29 @@ void GblPoint::addMeasurement(const TMatrixD &aProjection,
 	}
 }
 
-/// Add a mesurement to a point.
+/// Add a measurement to a point.
 /**
- * Add measurement on local system with arbitrary precision (inverse covariance) matrix.
+ * Add measurement in local system with diagonal precision (inverse covariance) matrix.
+ * ((up to) 2D: position, 4D: slope+position, 5D: curvature+slope+position)
+ * \param [in] aResiduals Measurement residuals
+ * \param [in] aPrecision Measurement precision (diagonal)
+ * \param [in] minPrecision Minimal precision to accept measurement
+ */
+void GblPoint::addMeasurement(const TVectorD &aResiduals,
+		const TVectorD &aPrecision, double minPrecision) {
+	measDim = aResiduals.GetNrows();
+	unsigned int iOff = 5 - measDim;
+	for (unsigned int i = 0; i < measDim; ++i) {
+		measResiduals(iOff + i) = aResiduals[i];
+		measPrecision(iOff + i) = (
+				aPrecision[i] >= minPrecision ? aPrecision[i] : 0.);
+	}
+	measProjection = ROOT::Math::SMatrixIdentity();
+}
+
+/// Add a measurement to a point.
+/**
+ * Add measurement in local system with arbitrary precision (inverse covariance) matrix.
  * Will be diagonalized.
  * ((up to) 2D: position, 4D: slope+position, 5D: curvature+slope+position)
  * \param [in] aResiduals Measurement residuals
@@ -144,8 +164,22 @@ void GblPoint::getMeasurement(SMatrix55 &aProjection, SVector5 &aResiduals,
 	aPrecision = measPrecision;
 }
 
+/// Get measurement transformation (from diagonalization).
+/**
+ * \param [out] aTransformation Transformation matrix
+ */
+void GblPoint::getMeasTransformation(TMatrixD &aTransformation) const {
+	aTransformation.ResizeTo(measDim, measDim);
+	if (transFlag) {
+		aTransformation = measTransformation;
+	} else {
+		aTransformation.UnitMatrix();
+	}
+}
+
 /// Add a (thin) scatterer to a point.
 /**
+ * Add scatterer with diagonal precision (inverse covariance) matrix.
  * Changes local track direction.
  *
  * \param [in] aResiduals Scatterer residuals
@@ -158,6 +192,40 @@ void GblPoint::addScatterer(const TVectorD &aResiduals,
 	scatResiduals(1) = aResiduals[1];
 	scatPrecision(0) = aPrecision[0];
 	scatPrecision(1) = aPrecision[1];
+	scatTransformation = ROOT::Math::SMatrixIdentity();
+}
+
+/// Add a (thin) scatterer to a point.
+/**
+ * Add scatterer with arbitrary precision (inverse covariance) matrix.
+ * Will be diagonalized. Changes local track direction.
+ *
+ * The precision matrix for the local slopes is defined by the
+ * angular scattering error theta_0 and the scalar products c_1, c_2 of the
+ * offset directions in the local frame with the track direction:
+ *
+ *            (1 - c_1*c_1 - c_2*c_2)   |  1 - c_1*c_1     - c_1*c_2  |
+ *       P =  ~~~~~~~~~~~~~~~~~~~~~~~ * |                             |
+ *                theta_0*theta_0       |    - c_1*c_2   1 - c_2*c_2  |
+ *
+ * \param [in] aResiduals Scatterer residuals
+ * \param [in] aPrecision Scatterer precision (matrix)
+ */
+void GblPoint::addScatterer(const TVectorD &aResiduals,
+		const TMatrixDSym &aPrecision) {
+	scatFlag = true;
+	TMatrixDSymEigen scatEigen(aPrecision);
+	TMatrixD aTransformation = scatEigen.GetEigenVectors();
+	aTransformation.T();
+	TVectorD transResiduals = aTransformation * aResiduals;
+	TVectorD transPrecision = scatEigen.GetEigenValues();
+	for (unsigned int i = 0; i < 2; ++i) {
+		scatResiduals(i) = transResiduals[i];
+		scatPrecision(i) = transPrecision[i];
+		for (unsigned int j = 0; j < 2; ++j) {
+			scatTransformation(i, j) = aTransformation(i, j);
+		}
+	}
 }
 
 /// Check for scatterer at a point.
@@ -167,12 +235,32 @@ bool GblPoint::hasScatterer() const {
 
 /// Retrieve scatterer of a point.
 /**
+ * \param [out] aTransformation Scatterer transformation from diagonalization
  * \param [out] aResiduals Scatterer residuals
  * \param [out] aPrecision Scatterer precision (diagonal)
  */
-void GblPoint::getScatterer(SVector2 &aResiduals, SVector2 &aPrecision) const {
+void GblPoint::getScatterer(SMatrix22 &aTransformation, SVector2 &aResiduals,
+		SVector2 &aPrecision) const {
+	aTransformation = scatTransformation;
 	aResiduals = scatResiduals;
 	aPrecision = scatPrecision;
+}
+
+/// Get scatterer transformation (from diagonalization).
+/**
+ * \param [out] aTransformation Transformation matrix
+ */
+void GblPoint::getScatTransformation(TMatrixD &aTransformation) const {
+	aTransformation.ResizeTo(2, 2);
+	if (scatFlag) {
+		for (unsigned int i = 0; i < 2; ++i) {
+			for (unsigned int j = 0; j < 2; ++j) {
+				aTransformation(i, j) = scatTransformation(i, j);
+			}
+		}
+	} else {
+		aTransformation.UnitMatrix();
+	}
 }
 
 /// Add local derivatives to a point.
@@ -236,7 +324,7 @@ const TMatrixD& GblPoint::getGlobalDerivatives() const {
 	return globalDerivatives;
 }
 
-/// Define label of point
+/// Define label of point (by GBLTrajectory constructor)
 /**
  * \param [in] aLabel Label identifying point
  */
@@ -249,7 +337,7 @@ unsigned int GblPoint::getLabel() const {
 	return theLabel;
 }
 
-/// Define offset for point
+/// Define offset for point (by GBLTrajectory constructor)
 /**
  * \param [in] anOffset Offset number
  */
@@ -267,7 +355,7 @@ const SMatrix55& GblPoint::getP2pJacobian() const {
 	return p2pJacobian;
 }
 
-/// Define jacobian to previous scatterer
+/// Define jacobian to previous scatterer (by GBLTrajectory constructor)
 /**
  * \param [in] aJac Jacobian
  */
@@ -284,7 +372,7 @@ void GblPoint::addPrevJacobian(const SMatrix55 &aJac) {
 	prevJacobian.Place_at(-DCAB * CA, 3, 0);
 }
 
-/// Define jacobian to next scatterer
+/// Define jacobian to next scatterer (by GBLTrajectory constructor)
 /**
  * \param [in] aJac Jacobian
  */
@@ -320,7 +408,9 @@ void GblPoint::getDerivatives(int aDirection, SMatrix22 &matW, SMatrix22 &matWJ,
 	if (!matW.InvertFast()) {
 		std::cout << " GblPoint::getDerivatives failed to invert matrix: "
 				<< matW << std::endl;
-		std::cout << " Possible reason for singular matrix: multiple GblPoints at same arc-length" << std::endl;
+		std::cout
+				<< " Possible reason for singular matrix: multiple GblPoints at same arc-length"
+				<< std::endl;
 		throw std::overflow_error("Singular matrix inversion exception");
 	}
 	matWJ = matW * matJ;
