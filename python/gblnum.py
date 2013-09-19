@@ -6,86 +6,77 @@ Created on Jul 27, 2011
 @author: kleinwrt
 '''
 
+## \file
+# Bordered band matrix.
+
 import numpy as np
 
+##  (Symmetric) Bordered Band Matrix. 
+#    
+#  Separate storage of border, mixed and band parts. 
+#
+#\verbatim
+#  Example for matrix size=8 with border size and band width of two:
+#  
+#     +-                                 -+
+#     |  B11 B12 M13 M14 M15 M16 M17 M18  |
+#     |  B12 B22 M23 M24 M25 M26 M27 M28  |
+#     |  M13 M23 C33 C34 C35  0.  0.  0.  |
+#     |  M14 M24 C34 C44 C45 C46  0.  0.  |
+#     |  M15 M25 C35 C45 C55 C56 C57  0.  |
+#     |  M16 M26  0. C46 C56 C66 C67 C68  |
+#     |  M17 M27  0.  0. C57 C67 C77 C78  |
+#     |  M18 M28  0.  0.  0. C68 C78 C88  |
+#     +-                                 -+
+#     
+#  Is stored as: 
+#  
+#     +-         -+     +-                         -+
+#     |  B11 B12  |     |  M13 M14 M15 M16 M17 M18  | 
+#     |  B12 B22  |     |  M23 M24 M25 M26 M27 M28  |
+#     +-         -+     +-                         -+
+#     
+#                       +-                         -+
+#                       |  C33 C44 C55 C66 C77 C88  |
+#                       |  C34 C45 C56 C67 C78  0.  |
+#                       |  C35 C46 C57 C68  0.  0.  |
+#                       +-                         -+
+#\endverbatim
+#
 class BorderedBandMatrix(object):
-  '''
-  (Symmetric) Bordered Band Matrix. 
-    
-  Separate storage of border, mixed and band parts. 
-  Example for matrix size=8 with border size and band width of two::
-  
-     +-                                 -+
-     |  B11 B12 M13 M14 M15 M16 M17 M18  |
-     |  B12 B22 M23 M24 M25 M26 M27 M28  |
-     |  M13 M23 C33 C34 C35  0.  0.  0.  |
-     |  M14 M24 C34 C44 C45 C46  0.  0.  |
-     |  M15 M25 C35 C45 C55 C56 C57  0.  |
-     |  M16 M26  0. C46 C56 C66 C67 C68  |
-     |  M17 M27  0.  0. C57 C67 C77 C78  |
-     |  M18 M28  0.  0.  0. C68 C78 C88  |
-     +-                                 -+
-     
-  Is stored as::
-  
-     +-         -+     +-                         -+
-     |  B11 B12  |     |  M13 M14 M15 M16 M17 M18  | 
-     |  B12 B22  |     |  M23 M24 M25 M26 M27 M28  |
-     +-         -+     +-                         -+
-     
-                       +-                         -+
-                       |  C33 C44 C55 C66 C77 C88  |
-                       |  C34 C45 C56 C67 C78  0.  |
-                       |  C35 C46 C57 C68  0.  0.  |
-                       +-                         -+
-  '''
+
+  ## Create new BBmatrix.
+  #  
+  #  @param nSize  size of matrix; int
+  #  @param nBorder  size of border (default: 1, 'curvature'); int
+  #  @param nBand  (maximal) band width (5); int
+  #
   def __init__(self, nSize, nBorder=1, nBand=5):
-    '''
-    Create new BBmatrix.
-    
-    @param nSize: size of matrix
-    @type nSize: int
-    @param nBorder: size of border (default: 1, 'curvature')
-    @type nBorder: int
-    @param nBand: (maximal) band width (5) 
-    @type nBand: int
-    '''
     nSizeBand = nSize - nBorder
+    ## size of matrix; int
     self.__numSize = nSize
-    '''@ivar: size of matrix
-       @type: int'''
+    ## size of border; int
     self.__numBorder = nBorder
-    '''@ivar: size of border
-       @type: int'''
+    ## size of border; int
     self.__numBand = 0        # actual band width
-    '''@ivar: (actual) band width
-       @type: int'''
+    ## size of band part of matrix; int
     self.__numCol = nSizeBand
-    '''@ivar: size of band part of matrix
-       @type: int'''
+    ## border part B; matrix(float)
     self.__border = np.zeros((nBorder, nBorder))
-    '''@ivar: border part B
-       @type: matrix(float)'''
+    ## mixed part M; matrix(float)
     self.__mixed = np.zeros((nBorder, nSizeBand))
-    '''@ivar: mixed part M
-       @type: matrix(float)'''
+    ## band part C; matrix(float)
     self.__band = np.zeros((nBand + 1, nSizeBand))
-    '''@ivar: band part C
-       @type: matrix(float)'''
 #    print " new BBM ", self.__border__.shape, self.__mixed__.shape, self.__band__.shape
-    
-# add symmetric block matrix (with 'expansion' according to index)  
+      
+  ## Add (compressed) block to BBmatrix: 
+  #
+  #  BBmatrix(aIndex(i),aIndex(j)) += aMatrix(i,j)
+  #  
+  #  @param aIndex  list of indices; list(int)
+  #  @param aMatrix  (compressed) matrix; matrix(float)
+  #
   def addBlockMatrix(self, aIndex, aMatrix):
-    '''
-    Add (compressed) block to BBmatrix::
-    
-      BBmatrix(aIndex(i),aIndex(j)) += aMatrix(i,j)
-    
-    @param aIndex: list of indices
-    @type aIndex: list(int)
-    @param aMatrix: (compressed) matrix
-    @type aMatrix: matrix(float)
-    '''
     nBorder = self.__numBorder
     for i in range(len(aIndex)):
       iIndex = aIndex[i] - 1
@@ -103,18 +94,15 @@ class BorderedBandMatrix(object):
 
           self.__numBand = max(self.__numBand, nBand)
     return self.__numBand 
-    
+
+  ## Retrieve (compressed) block from BBmatrix: 
+  #  
+  #  aMatrix(i,j) = BBmatrix(aIndex(i),aIndex(j))
+  #  
+  #  @param aIndex list of indices; list(int)
+  #  @return (compressed) matrix; matrix(float)  
+  #  
   def getBlockMatrix(self, aIndex):
-    '''
-    Retrieve (compressed) block from BBmatrix::
-    
-      aMatrix(i,j) = BBmatrix(aIndex(i),aIndex(j))
-    
-    @param aIndex: list of indices
-    @type aIndex: list(int)
-    @return: (compressed) matrix
-    @rtype: matrix(float)
-    '''
     nBorder = self.__numBorder
     nSize = len(aIndex)
     aMatrix = np.empty((nSize, nSize))  
@@ -133,11 +121,10 @@ class BorderedBandMatrix(object):
           aMatrix[i, j] = self.__band[nBand, jIndex - nBorder]
         aMatrix[j, i] = aMatrix[i, j]
     return aMatrix    
-          
+ 
+  ## Print BBmatrix.
+  #         
   def printMatrix(self):
-    '''
-    Print BBmatrix.
-    '''
     print " block part "
     nRow = self.__numBorder
     for i in range(nRow):  
@@ -150,28 +137,22 @@ class BorderedBandMatrix(object):
     for i in range(nRow):
       print " diagonal ", i, self.__band[i]
       
-# solve BorderedBandMatrix * aSolution = aRightHandSide,
-# calculate bordered band part of inverse of BorderedBandMatrix
+  ## Solve linear equation A*x=b system with BBmatrix A, calculate BB part of inverse of A.
+  #  
+  #  @param aRightHandSide right hand side 'b' of linear equation system; vector(float)
+  #  @return solution; vector(float)
+  #  @exception ZeroDivisionError Band matrix is not positive definite
+  #  @note BBmatrix is replaced by BB part of it's inverse
+  #
   def solveAndInvertBorderedBand(self, aRightHandSide):
-    '''
-    Solve linear equation A*x=b system with BBmatrix A, calculate BB part of inverse of A.
-    
-    @param aRightHandSide: right hand side 'b' of linear equation system
-    @type aRightHandSide: vector(float)
-    @return: solution
-    @rtype: vector(float)
-    @raise ZeroDivisionError: Band matrix is not positive definite
-    @note: BBmatrix is replaced by BB part of it's inverse
-    '''
 #============================================================================
 ## from Dbandmatrix.F (MillePede-II by V. Blobel, Univ. Hamburg) 
 #============================================================================
+    ##(root free) Cholesky decomposition of band part: C=LDL^T
+    #  
+    #  @note  band part (C) is replaced by its decomposition (D,L)
+    #
     def decomposeBand():
-      '''
-      (root free) Cholesky decomposition of band part: C=LDL^T
-      
-      @note: band part (C) is replaced by its decomposition (D,L)
-      '''
       nRow = self.__numBand + 1
       nCol = self.__numCol
       auxVec = np.copy(self.__band[0]) * 16.0 # save diagonal elements
@@ -186,16 +167,12 @@ class BorderedBandMatrix(object):
             self.__band[k, i + j + 1] -= self.__band[k + j + 1, i] * rxw
           self.__band[j + 1, i] = rxw  
 
-# solve band * aSolution = aRightHandSide
+    ## Solve linear equation system for band part.
+    # 
+    #  @param aRightHandSide  right hand side; aRightHandSide vector(float)
+    #  @return  solution; vector(float)
+    #
     def solveBand(aRightHandSide):
-      '''
-      Solve linear equation system for band part.
-     
-      @param aRightHandSide: right hand side
-      @type aRightHandSide:vector(float)
-      @return: solution
-      @rtype: vector(float)
-      '''
       nRow = self.__numBand + 1
       nCol = self.__numCol  
       aSolution = np.copy(aRightHandSide)
@@ -209,14 +186,11 @@ class BorderedBandMatrix(object):
         aSolution[i] = rxw       
       return aSolution
 
-# invert band part
+    ## Invert band part.
+    #  
+    #  @return  band part; matrix(float)
+    #
     def invertBand():
-      '''
-      Invert band part.
-      
-      @return: band part
-      @rtype: matrix(float)
-      '''
       nRow = self.__numBand + 1
       nCol = self.__numCol       
       inverseBand = np.zeros((nRow, nCol))
@@ -228,19 +202,14 @@ class BorderedBandMatrix(object):
           inverseBand[i - j, j] = rxw
           rxw = 0.0
       return inverseBand
-    
-# band part of: anArray * aSymArray * anArray.T
-    def bandOfAVAT(anArray, aSymArray):
-      '''
-      Calculate band part of A*V*A^T.
 
-      @param anArray: matrix A
-      @type anArray: matrix(float)
-      @param aSymArray: symmetric matrix V
-      @type aSymArray: matrix(float)
-      @return: band part
-      @rtype: matrix(float)      
-      '''
+    ## Calculate band part of A*V*A^T.
+    #
+    #  @param anArray  matrix A; matrix(float)
+    #  @param aSymArray  symmetric matrix V; matrix(float)
+    #  @return  band part; matrix(float)          
+    # 
+    def bandOfAVAT(anArray, aSymArray):
       nCol = self.__numCol
       nBand = self.__numBand
       aBand = np.empty((nBand + 1, nCol))
