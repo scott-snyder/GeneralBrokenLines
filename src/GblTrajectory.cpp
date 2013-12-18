@@ -234,9 +234,14 @@ void GblTrajectory::construct() {
 	constructOK = false;
 	fitOK = false;
 	unsigned int aLabel = 0;
+	if (numAllPoints < 2) {
+		std::cout << " GblTrajectory construction failed: too few GblPoints "
+				<< std::endl;
+		return;
+	}
 	// loop over trajectories
 	numTrajectories = thePoints.size();
-	//std::cout << " numTrajectories: " << numTrajectories << ", "<< innerTransformations.size()  << std::endl;
+	//std::cout << " numTrajectories: " << numTrajectories << ", " << innerTransformations.size() << std::endl;
 	for (unsigned int iTraj = 0; iTraj < numTrajectories; ++iTraj) {
 		std::vector<GblPoint>::iterator itPoint;
 		for (itPoint = thePoints[iTraj].begin();
