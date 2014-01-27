@@ -8,14 +8,16 @@
 #ifndef VMATRIX_H_
 #define VMATRIX_H_
 
+#include<iostream>
+#include<iomanip>
 #include<vector>
+#include<cstring>
+#include<math.h>
 
 //! Namespace for the general broken lines package
-namespace gbl 
-{
+namespace gbl {
 
 /// Simple Vector based on std::vector<double>
-
 class VVector {
 public:
 	VVector(const unsigned int nRows = 0);
@@ -29,6 +31,7 @@ public:
 	unsigned int getNumRows() const;
 	void print() const;
 	VVector operator-(const VVector &aVector) const;
+	VVector &operator=(const VVector &aVector);
 private:
 	unsigned int numRows; ///< Number of rows
 	std::vector<double> theVec; ///< Data
@@ -50,6 +53,7 @@ public:
 	VVector operator*(const VVector &aVector) const;
 	VMatrix operator*(const VMatrix &aMatrix) const;
 	VMatrix operator+(const VMatrix &aMatrix) const;
+	VMatrix &operator=(const VMatrix &aMatrix);
 private:
 	unsigned int numRows; ///< Number of rows
 	unsigned int numCols; ///< Number of columns

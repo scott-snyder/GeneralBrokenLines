@@ -5,12 +5,10 @@
  *      Author: kleinwrt
  */
 
-#include <iostream>
-#include <iomanip>
-#include <cstring>
-#include <cmath>
 #include "VMatrix.h"
-using namespace gbl;
+
+//! Namespace for the general broken lines package
+namespace gbl {
 
 /*********** simple Matrix based on std::vector<double> **********/
 
@@ -122,6 +120,21 @@ VMatrix VMatrix::operator+(const VMatrix &aMatrix) const {
 		}
 	}
 	return aResult;
+}
+
+/// Assignment Matrix=Matrix.
+VMatrix &VMatrix::operator=(const VMatrix &aMatrix) {
+	if (this != &aMatrix) {   // Gracefully handle self assignment
+		numRows = aMatrix.getNumRows();
+		numCols = aMatrix.getNumCols();
+		theVec.resize(numRows * numCols);
+		for (unsigned int i = 0; i < numRows; ++i) {
+			for (unsigned int j = 0; j < numCols; ++j) {
+				theVec[numCols * i + j] = aMatrix(i, j);
+			}
+		}
+	}
+	return *this;
 }
 
 /*********** simple symmetric Matrix based on std::vector<double> **********/
@@ -282,6 +295,18 @@ VVector VVector::operator-(const VVector &aVector) const {
 	return aResult;
 }
 
+/// Assignment Vector=Vector.
+VVector &VVector::operator=(const VVector &aVector) {
+	if (this != &aVector) {   // Gracefully handle self assignment
+		numRows = aVector.getNumRows();
+		theVec.resize(numRows);
+		for (unsigned int i = 0; i < numRows; ++i) {
+			theVec[i] = aVector(i);
+		}
+	}
+	return *this;
+}
+
 /*============================================================================
  from mpnum.F (MillePede-II by V. Blobel, Univ. Hamburg)
  ============================================================================*/
@@ -402,4 +427,4 @@ unsigned int VSymMatrix::invert() {
 	}
 	return nrank;
 }
-
+}

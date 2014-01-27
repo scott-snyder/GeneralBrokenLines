@@ -8,13 +8,17 @@
 #ifndef BORDEREDBANDMATRIX_H_
 #define BORDEREDBANDMATRIX_H_
 
+#include<iostream>
 #include<vector>
+#include<math.h>
+#include<cstdlib>
+#include "TVectorD.h"
+#include "TMatrixD.h"
 #include "TMatrixDSym.h"
 #include "VMatrix.h"
 
 //! Namespace for the general broken lines package
-namespace gbl 
-{
+namespace gbl {
 
 /// (Symmetric) Bordered Band Matrix.
 /**

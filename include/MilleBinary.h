@@ -12,8 +12,7 @@
 #include<vector>
 
 //! Namespace for the general broken lines package
-namespace gbl 
-{
+namespace gbl {
 
 ///  Millepede-II (binary) record.
 /**
@@ -42,7 +41,6 @@ namespace gbl
  *         global derivative       label of global derivative
  *\endverbatim
  */
-
 class MilleBinary {
 public:
 	MilleBinary(const std::string fileName = "milleBinaryISN.dat",
