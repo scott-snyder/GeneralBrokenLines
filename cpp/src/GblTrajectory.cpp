@@ -75,7 +75,7 @@
  *    -# For any point on initial trajectory:
  *        - Get corrections and covariance matrix for track parameters:\n
  *            <tt>[..] = traj.getResults(label)</tt>
- *    -# Optionally write trajectory to MP binary file:\n
+ *    -# Optionally write trajectory to MP binary file (doesn't needs to be fitted):\n
  *            <tt>traj.milleOut(..)</tt>
  *
  *  \section loc_sec Local system and local parameters
@@ -999,7 +999,7 @@ unsigned int GblTrajectory::fit(double &Chi2, int &Ndf, double &lostWeight,
 	return ierr;
 }
 
-/// Write trajectory to Millepede-II binary file.
+/// Write valid trajectory to Millepede-II binary file.
 void GblTrajectory::milleOut(MilleBinary &aMille) {
 	float fValue;
 	float fErr;
