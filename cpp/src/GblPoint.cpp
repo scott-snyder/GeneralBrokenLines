@@ -205,7 +205,7 @@ void GblPoint::addScatterer(const TVectorD &aResiduals,
  * offset directions in the local frame with the track direction:
  *
  *            (1 - c_1*c_1 - c_2*c_2)   |  1 - c_1*c_1     - c_1*c_2  |
- *       P =  ~~~~~~~~~~~~~~~~~~~~~~~ * |                             |
+ *       P =  ----------------------- * |                             |
  *                theta_0*theta_0       |    - c_1*c_2   1 - c_2*c_2  |
  *
  * \param [in] aResiduals Scatterer residuals
