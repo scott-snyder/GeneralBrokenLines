@@ -6,7 +6,7 @@ PROJECT(GBL)
 
 # project version
 SET( ${PROJECT_NAME}_VERSION_MAJOR 1 )
-SET( ${PROJECT_NAME}_VERSION_MINOR 15 )
+SET( ${PROJECT_NAME}_VERSION_MINOR 16 )
 SET( ${PROJECT_NAME}_VERSION_PATCH 0 )
 
 # make life easier and simply use the ilcsoft default settings
