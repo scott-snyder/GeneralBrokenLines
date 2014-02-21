@@ -52,7 +52,7 @@ public:
 	void getLocalData(double &aValue, double &aWeight,
 			std::vector<unsigned int>* &indLocal,
 			std::vector<double>* &derLocal);
-	void getAllData(float &fValue, float &fErr,
+	void getAllData(double &aValue, double &aErr,
 			std::vector<unsigned int>* &indLocal,
 			std::vector<double>* &derLocal, std::vector<int>* &labGlobal,
 			std::vector<double>* &derGlobal);

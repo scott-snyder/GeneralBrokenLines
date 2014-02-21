@@ -15,9 +15,11 @@ import array, math
 #  
 #  Containing information for local (track) and global fit.
 # 
-#  The data blocks are collected in two arrays, a real array and
-#  an integer array, of same length.  The content of the arrays::
-#
+#  The data blocks are collected in two arrays, a real array
+#  (containing float or double values) and integer array, of same length.
+#  A positive record length indicate _float_ and a negative one _double_ values.
+#  The content of the record is:
+# 
 #\verbatim
 #         real array              integer array    
 #     0   0.0                     error count (this record)  
@@ -43,7 +45,9 @@ class MilleRecord(object):
 
   ## Create MP-II binary record.
   #
-  def __init__(self):
+  def __init__(self, doublePrec=False):
+    ## flag for storage in as *double* values
+    self.__doublePrecision = doublePrec
     ## position in record, usually start of next data block; int
     self.__position = 1 
     ## number of data blocks in record; int
@@ -56,15 +60,15 @@ class MilleRecord(object):
     self.__iErr = 0     
     ## array with markers (0) and labels; array(int32)
     self.__inder = array.array('i') 
-    ## array with values, errors and derivatives; (float32)
-    self.__glder = array.array('f') 
+    ## array with values, errors and derivatives; (float32 or float64)
+    self.__glder = array.array('d' if doublePrec else 'f') 
  
   ## Add data block to (end of) record.
   #  
   #  @param dataList list with measurement, error, labels and derivatives; list 
   #  
   def addData(self, dataList):
-    if (self.__numData == 0): # first word is error counter
+    if (self.__numData == 0):  # first word is error counter
       self.__inder.append(0)
       self.__glder.append(0.) 
     self.__numData += 1     
@@ -75,7 +79,7 @@ class MilleRecord(object):
     self.__inder.fromlist(indLocal)
     self.__glder.fromlist(derLocal)    
     self.__inder.append(0)
-    self.__glder.append(1.0 / math.sqrt(aPrec)) # convert to error
+    self.__glder.append(1.0 / math.sqrt(aPrec))  # convert to error
     self.__inder.fromlist(labGlobal)
     self.__glder.fromlist(derGlobal)
 
@@ -90,7 +94,7 @@ class MilleRecord(object):
     for i in range(self.__iMeas + 1, self.__iErr):
       indLocal.append(self.__inder[i])
       derLocal.append(self.__glder[i])
-    aPrec = 1.0 / self.__glder[self.__iErr] ** 2 # convert to precision 
+    aPrec = 1.0 / self.__glder[self.__iErr] ** 2  # convert to precision 
     indGlobal = []
     derGlobal = []
     for i in range(self.__iErr + 1, self.__position):
@@ -110,8 +114,8 @@ class MilleRecord(object):
   #  @param aFile (binary) file
   #
   def writeRecord(self, aFile):
-    header = array.array('i') # header with number of words
-    header.append(len(self.__inder) * 2)
+    header = array.array('i')  # header with number of words
+    header.append(-len(self.__inder) * 2 if self.__doublePrecision else len(self.__inder) * 2)
     header.tofile(aFile)
     self.__glder.tofile(aFile)
     self.__inder.tofile(aFile)
@@ -121,9 +125,11 @@ class MilleRecord(object):
   #  @param aFile (binary) file
   #    
   def readRecord(self, aFile):
-    header = array.array('i') # header with number of words
+    header = array.array('i')  # header with number of words
     header.fromfile(aFile, 1)
-    self.__recLen = header[0] / 2
+    self.__recLen = abs(header[0] / 2)
+    if header[0] < 0:
+      self.__glder = array.array('d')
     self.__glder.fromfile(aFile, self.__recLen)
     self.__inder.fromfile(aFile, self.__recLen)
  
