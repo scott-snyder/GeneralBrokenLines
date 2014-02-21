@@ -1001,8 +1001,8 @@ unsigned int GblTrajectory::fit(double &Chi2, int &Ndf, double &lostWeight,
 
 /// Write valid trajectory to Millepede-II binary file.
 void GblTrajectory::milleOut(MilleBinary &aMille) {
-	float fValue;
-	float fErr;
+	double aValue;
+	double aErr;
 	std::vector<unsigned int>* indLocal;
 	std::vector<double>* derLocal;
 	std::vector<int>* labGlobal;
@@ -1014,9 +1014,9 @@ void GblTrajectory::milleOut(MilleBinary &aMille) {
 //   data: measurements, kinks and external seed
 	std::vector<GblData>::iterator itData;
 	for (itData = theData.begin(); itData != theData.end(); ++itData) {
-		itData->getAllData(fValue, fErr, indLocal, derLocal, labGlobal,
+		itData->getAllData(aValue, aErr, indLocal, derLocal, labGlobal,
 				derGlobal);
-		aMille.addData(fValue, fErr, *indLocal, *derLocal, *labGlobal,
+		aMille.addData(aValue, aErr, *indLocal, *derLocal, *labGlobal,
 				*derGlobal);
 	}
 	aMille.writeRecord();

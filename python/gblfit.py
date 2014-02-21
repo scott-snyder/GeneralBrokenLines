@@ -585,12 +585,13 @@ class GblTrajectory(object):
     for d in self.__data:
       d.printData() 
  
-  ## Write (data blocks of) trajectory to MP (binary) file.
+  ## Write (data blocks of) trajectory to MP (binary) file (as *float* or *double* values).
   #  
   #  @param aFile MP file
+  #  @param doublePrec flag for storage in as *double* values
   #     
-  def milleOut(self, aFile):
-    rec = MilleRecord()
+  def milleOut(self, aFile, doublePrec=False):
+    rec = MilleRecord(doublePrec)
 #   data measurements and kinks        
     for aData in self.__data:       
       rec.addData(aData.toRecord())
