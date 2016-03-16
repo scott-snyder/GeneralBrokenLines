@@ -851,9 +851,9 @@ class GblTrajectory(object):
   
   ## Get results (corrections, covarinace matrix) at point in forward or backward direction.
   #  
-  #  The point is identified by its label (1..number(points)), the sign distinguised the 
+  #  The point is identified by its label (1..number(points)), the sign distinguishes the 
   #  backward (facing previous point) and forward 'side' (facing next point). 
-  #  For scatterers the track direction may change inbetween.
+  #  For scatterers the track direction may change in between.
   #   
   #  @param aLabel signed label of point (<0 backward, >0 forward); int
   #  @return correction vector, covarinace matrix for track parameters; list
