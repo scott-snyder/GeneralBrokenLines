@@ -8,6 +8,24 @@ Created on Jul 27, 2011
 
 ## \file
 # GBL objects
+#
+# \author Claus Kleinwort, DESY, 2011 (Claus.Kleinwort@desy.de)
+#
+#  \copyright
+#  Copyright (c) 2011 - 2016 Deutsches Elektronen-Synchroton,
+#  Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
+#  This library is free software; you can redistribute it and/or modify
+#  it under the terms of the GNU Library General Public License as
+#  published by the Free Software Foundation; either version 2 of the
+#  License, or (at your option) any later version. \n\n
+#  This library is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU Library General Public License for more details. \n\n
+#  You should have received a copy of the GNU Library General Public
+#  License along with this program (see the file COPYING.LIB for more
+#  details); if not, write to the Free Software Foundation, Inc.,
+#  675 Mass Ave, Cambridge, MA 02139, USA.
 
 import numpy as np
 import math
@@ -475,7 +493,6 @@ class GblData(object):
 #  A. Strandlie, W. Wittek, NIM A, 566 (2006) 687-698.
 #  
 #  \section seq_sec Calling sequence:
-#
 #    -# Create trajectory:\n
 #            <tt>traj = GblTrajectory()</tt>
 #    -# For all points on initial trajectory 
@@ -505,7 +522,6 @@ class GblData(object):
 #  points (corrections, covariance matrix) are not available.
 #  
 #  \section ref_sec References:
-#  
 #    - V. Blobel, C. Kleinwort, F. Meier,
 #      Fast alignment of a complex tracking detector using advanced track models,
 #      Computer Phys. Communications (2011), doi:10.1016/j.cpc.2011.03.017
