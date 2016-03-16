@@ -528,9 +528,9 @@ class GblData(object):
 #    -# For any point on inital trajectory
 #        - Get corrections and covariance matrix for track parameters:\n
 #            <tt>[..] = traj.getResults(label) </tt>
-#        - Optionally get resdiduals with errors for measurements:\n
+#        - Optionally get residuals with errors for measurements:\n
 #            <tt>[..] = traj.getMeasResults(label) </tt>
-#        - Optionally get resdiduals with errors for scatterers:\n
+#        - Optionally get residuals with errors for scatterers:\n
 #            <tt>[..] = traj.getScatResults(label) </tt>
 #    -# Optionally write trajectory to MP binary file:\n
 #            <tt>traj.milleOut(..)</tt>
