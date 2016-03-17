@@ -58,6 +58,10 @@ public:
 			const std::vector<std::pair<std::vector<GblPoint>, TMatrixD> > &aPointaAndTransList,
 			const TMatrixD &extDerivatives, const TVectorD &extMeasurements,
 			const TVectorD &extPrecisions);
+	GblTrajectory(
+			const std::vector<std::pair<std::vector<GblPoint>, TMatrixD> > &aPointaAndTransList,
+			const TMatrixD &extDerivatives, const TVectorD &extMeasurements,
+			const TMatrixDSym &extPrecisions);
 	virtual ~GblTrajectory();
 	bool isValid() const;
 	unsigned int getNumPoints() const;
@@ -69,8 +73,8 @@ public:
 	unsigned int getScatResults(unsigned int aLabel, unsigned int &numRes,
 			TVectorD &aResiduals, TVectorD &aMeasErrors, TVectorD &aResErrors,
 			TVectorD &aDownWeights);
-	void getLabels(std::vector<unsigned int> &aLabelList);
-	void getLabels(std::vector<std::vector< unsigned int> > &aLabelList);
+	unsigned int getLabels(std::vector<unsigned int> &aLabelList);
+	unsigned int getLabels(std::vector<std::vector<unsigned int> > &aLabelList);
 	unsigned int fit(double &Chi2, int &Ndf, double &lostWeight,
 			std::string optionList = "");
 	void milleOut(MilleBinary &aMille);

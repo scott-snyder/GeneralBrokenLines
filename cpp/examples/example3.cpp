@@ -5,28 +5,6 @@
  *      Author: kleinwrt
  */
 
-/** \file
- *  Example application.
- *
- *  \author Claus Kleinwort, DESY, 2011 (Claus.Kleinwort@desy.de)
- *
- *  \copyright
- *  Copyright (c) 2011 - 2016 Deutsches Elektronen-Synchroton,
- *  Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
- *  This library is free software; you can redistribute it and/or modify
- *  it under the terms of the GNU Library General Public License as
- *  published by the Free Software Foundation; either version 2 of the
- *  License, or (at your option) any later version. \n\n
- *  This library is distributed in the hope that it will be useful,
- *  but WITHOUT ANY WARRANTY; without even the implied warranty of
- *  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
- *  GNU Library General Public License for more details. \n\n
- *  You should have received a copy of the GNU Library General Public
- *  License along with this program (see the file COPYING.LIB for more
- *  details); if not, write to the Free Software Foundation, Inc.,
- *  675 Mass Ave, Cambridge, MA 02139, USA.
- */
-
 #include <time.h>
 #include "example1.h"
 #include "TRandom3.h"
@@ -34,7 +12,7 @@
 
 using namespace gbl;
 
-TMatrixD gblSimpleJacobian(double ds, double cosl, double bfac) {
+TMatrixD gblSimpleJacobian3(double ds, double cosl, double bfac) {
 	/// Simple jacobian: quadratic in arc length difference
 	/**
 	 * \param [in] ds    (3D) arc-length
@@ -51,7 +29,7 @@ TMatrixD gblSimpleJacobian(double ds, double cosl, double bfac) {
 	return jac;
 }
 
-void example1() {
+void example3() {
 	/// Simple example.
 	/**
 	 * Create points on initial trajectory, create trajectory from points,
@@ -71,12 +49,15 @@ void example1() {
 	 * on-the-fly simulation of the measurements and scatterers. The predictions
 	 * from the reference trajectory are therefore always zero and the residuals
 	 * needed (by addMeasurement) are equal to the measurements.
+	 *
+	 * This variant "measures" the scattering (variance) in layer 4 by adding two local
+	 * parameters to describe the multiple scattering angle (without Chi2 bias).
 	 */
 
 //MP	MilleBinary mille; // for producing MillePede-II binary file
 	unsigned int nTry = 10000; //: number of tries
 	unsigned int nLayer = 10; //: number of detector layers
-	std::cout << " Gbltst $Rev$ " << nTry << ", " << nLayer << std::endl;
+	std::cout << " Gbltst $Rev: 115 $ " << nTry << ", " << nLayer << std::endl;
 
 	TRandom *r = new TRandom3();
 
@@ -108,8 +89,8 @@ void example1() {
 	measInvCov[1][1] = measPrec[1];
 // scattering error
 	TVectorD scatErr(2);
-	scatErr[0] = 0.001;
-	scatErr[1] = 0.001;
+	scatErr[0] = 0.003;
+	scatErr[1] = 0.003;
 	TVectorD scatPrec(2);
 	scatPrec[0] = 1.0 / (scatErr[0] * scatErr[0]);
 	scatPrec[1] = 1.0 / (scatErr[1] * scatErr[1]);
@@ -135,6 +116,7 @@ void example1() {
 	 globalLabels[0] = 11;
 	 globalLabels[1] = 12; */
 
+	double scatVar[2] = { }; // measured scattering variance (in layer 4)
 	double bfac = 0.2998; // Bz*c for Bz=1
 	double step = 1.5 / cosLambda; // constant steps in RPhi
 
@@ -153,12 +135,9 @@ void example1() {
 			clCov[i][i] = 1.0 * (clErr[i] * clErr[i]);
 		}
 //		std::cout << " Try " << iTry << ":" << clPar << std::endl;
-		TMatrixD addDer(2, 2);
-		addDer.Zero();
-		addDer[0][0] = 1.;
-		addDer[1][1] = 1.;
 // arclength
 		double s = 0.;
+		double sScat = 0.;
 		TMatrixD jacPointToPoint(5, 5);
 		jacPointToPoint.UnitMatrix();
 // create list of points
@@ -185,27 +164,29 @@ void example1() {
 			GblPoint point(jacPointToPoint);
 // measurement - prediction in measurement system with error
 			TVectorD meas = proL2m * clPar.GetSub(3, 4);
-//MP			meas += addDer * addPar; // additional parameters
 			for (unsigned int i = 0; i < 2; ++i) {
 				meas[i] += measErr[i] * r->Gaus();
 			}
 			point.addMeasurement(proL2m, meas, measPrec);
+
 			/* point with (correlated) measurements (in local system)
 			 GblPoint point(jacPointToPoint);
 			 // measurement - prediction in local system with error
 			 TVectorD meas(2);
 			 for (unsigned int i = 0; i < 2; ++i) {
-			 meas[i] = measErr[i] * r->Gaus() + addDer(i,0) * 0.0075;
 			 }
 			 meas = proM2l * meas + clPar.GetSub(3, 4);
 			 TMatrixDSym localInvCov = measInvCov;
 			 localInvCov.SimilarityT(proL2m);
-			 point.addMeasurement(meas, localInvCov);
+			 point.addMeasurement(meas, localInvCov); */
 
-			 // additional local parameters? */
-//			point.addLocals(addDer);
-//MP			point.addGlobals(globalLabels, addDer);
-			addDer *= -1.; // Der flips sign every measurement
+			// additional local parameters?
+			if (iLayer > 4) {
+				//std::cout << " scat " << sScat << " " << s << std::endl;
+				TMatrixD addDer = proL2m * (s - sScat);
+				point.addLocals(addDer);
+			}
+
 // add point to trajectory
 			listOfPoints.push_back(point);
 			unsigned int iLabel = listOfPoints.size();
@@ -213,7 +194,7 @@ void example1() {
 				clSeed = clCov.Invert();
 			}
 // propagate to scatterer
-			jacPointToPoint = gblSimpleJacobian(step, cosLambda, bfac);
+			jacPointToPoint = gblSimpleJacobian3(step, cosLambda, bfac);
 			clPar = jacPointToPoint * clPar;
 			clCov = clCov.Similarity(jacPointToPoint);
 			s += step;
@@ -222,7 +203,15 @@ void example1() {
 				scat.Zero();
 				// point with scatterer
 				GblPoint point(jacPointToPoint);
-				point.addScatterer(scat, scatPrec);
+				if (iLayer != 4) {
+					point.addScatterer(scat, scatPrec);
+				} else {
+					// measure scattering (with 2 local parameters, no scatterer)
+					sScat = s;
+				}
+				/*TMatrixD ms;
+				 point.getScatTransformation(ms);
+				 ms.Print();*/
 				listOfPoints.push_back(point);
 				iLabel = listOfPoints.size();
 				if (iLabel == seedLabel) {
@@ -253,27 +242,30 @@ void example1() {
 		int Ndf;
 		double lostWeight;
 		traj.fit(Chi2, Ndf, lostWeight);
-//		std::cout << " Fit: " << Chi2 << ", " << Ndf << ", " << lostWeight << std::endl;
-		/*		 TVectorD aCorrection(5);
-		 TMatrixDSym aCovariance(5);
-		 traj.getResults(1, aCorrection, aCovariance);
-		 std::cout << " cor " << std::endl;
+		//std::cout << " Fit: " << Chi2 << ", " << Ndf << ", " << lostWeight << std::endl;
+		TVectorD aCorrection(7);
+		TMatrixDSym aCovariance(7);
+		traj.getResults(10, aCorrection, aCovariance);
+		// measured scattering parameters
+		scatVar[0] += aCorrection[5] * aCorrection[5];
+		scatVar[1] += aCorrection[6] * aCorrection[6];
+		// contribution from fit
+		scatVar[0] -= aCovariance[5][5];
+		scatVar[1] -= aCovariance[6][6];
+		/*std::cout << " cor " << std::endl;
 		 aCorrection.Print();
 		 std::cout << " cov " << std::endl;
 		 aCovariance.Print(); */
-		// look at residuals
-		for (unsigned int label = 1; label <= listOfPoints.size(); ++label) {
-			unsigned int numData = 0;
-			//std::cout << " measResults, label " << label << std::endl;
-			TVectorD residuals(2), measErr(2), resErr(2), downWeights(2);
-			traj.getMeasResults(label, numData, residuals, measErr, resErr,
-					downWeights);
-			//std::cout << " measResults, numData " << numData << std::endl;
-			/* residuals.Print(); measErr.Print(); resErr.Print();
-			 for (unsigned int i = 0; i < numData; ++i) {
-			 std::cout << " measResults " << label << " " << i << " " << residuals[i] << " " << measErr[i] << " " << resErr[i] << std::endl;
-			 } */
-		}
+		/* look at residuals
+		 for (unsigned int label = 1; label <= listOfPoints.size(); ++label) {
+		 unsigned int numData = 0;
+		 std::cout << " measResults, label " << label << std::endl;
+		 TVectorD residuals(2), measErr(2), resErr(2), downWeights(2);
+		 traj.getMeasResults(label, numData, residuals, measErr, resErr,
+		 downWeights);
+		 std::cout << " measResults, numData " << numData << std::endl;
+		 // residuals.Print(); measErr.Print(); resErr.Print();
+		 } */
 // debug printout
 		//traj.printTrajectory();
 		//traj.printPoints();
@@ -291,5 +283,7 @@ void example1() {
 	std::cout << " Time elapsed " << diff / cps << " s" << std::endl;
 	std::cout << " Chi2/Ndf = " << Chi2Sum / NdfSum << std::endl;
 	std::cout << " Tracks fitted " << numFit << std::endl;
+	std::cout << " scatErr " << sqrt(scatVar[0] / numFit) << " "
+			<< sqrt(scatVar[1] / numFit) << std::endl;
 }
 
