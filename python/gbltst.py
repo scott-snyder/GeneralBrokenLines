@@ -177,12 +177,13 @@ def example1():
 # add external seed
     if locSeed is not None:    
       traj.addExternalSeed(seedLabel, locSeed)
-# dump trajectory
-#    traj.dump()
   
 # fit trajectory
     Chi2, Ndf, Lost = traj.fit()
     print " Record, Chi2, Ndf, Lost", iTry, Chi2, Ndf, Lost
+# dump trajectory
+    #traj.printPoints()
+    #traj.printData()
 # write to MP binary file    
 #    traj.milleOut(binaryFile)
 # sum up    
