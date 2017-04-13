@@ -205,7 +205,7 @@ void example1() {
 			}
 			pointMeas.addMeasurement(proL2m, meas, measPrec);
 			/* point with (correlated) measurements (in local system)
-			 GblPoint point(jacPointToPoint);
+			 GblPoint pointMeas(jacPointToPoint);
 			 // measurement - prediction in local system with error
 			 Vector2d meas;
 			 for (unsigned int i = 0; i < 2; ++i) {
@@ -213,7 +213,7 @@ void example1() {
 			 }
 			 meas = proM2l * meas + clPar.tail<2>();
 			 Matrix2d localInvCov = proL2m.adjoint() * measInvCov * proL2m;
-			 point.addMeasurement(meas, localInvCov); */
+			 pointMeas.addMeasurement(meas, localInvCov); */
 
 			// additional local parameters?
 //			point.addLocals(addDer);
