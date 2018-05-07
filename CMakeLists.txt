@@ -14,22 +14,19 @@ SET( ${PROJECT_NAME}_VERSION_PATCH 3 )
 LIST( APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake )
 INCLUDE( ilcsoft_default_settings )
 
+FIND_PACKAGE(Eigen3 REQUIRED)
+
 # enable ROOT support
 OPTION( SUPPORT_ROOT "Support ROOT for user I/O" True )
 IF( SUPPORT_ROOT )
   FIND_PACKAGE(ROOT REQUIRED)
   ADD_DEFINITIONS(-DGBL_EIGEN_SUPPORT_ROOT)
+  INCLUDE_DIRECTORIES(SYSTEM ${ROOT_INCLUDE_DIRS})
 ENDIF()
-
-FIND_PACKAGE(Eigen3 REQUIRED)
 
 # require proper c++
 #ADD_DEFINITIONS( "-Wall -g -ansi -pedantic -Wno-long-long" )
 
-# include directories
-IF( SUPPORT_ROOT )
-  INCLUDE_DIRECTORIES( BEFORE ./include ${ROOT_INCLUDE_DIRS})
-ENDIF()
 INSTALL( DIRECTORY ./include DESTINATION . )
 
 # declare the stupid ROOT library path
@@ -40,7 +37,7 @@ AUX_SOURCE_DIRECTORY( ./src library_sources )
 ADD_SHARED_LIBRARY( ${PROJECT_NAME} ${library_sources} )
 INSTALL( TARGETS ${PROJECT_NAME} DESTINATION lib )
 
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${ROOT_LIBS} Eigen3::Eigen)
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${ROOT_LIBRARIES} ${ROOT_COMPONENT_LIBRARIES} Eigen3::Eigen)
 
 # the examples, build with "make examples"
 ADD_SUBDIRECTORY( examples/ )
