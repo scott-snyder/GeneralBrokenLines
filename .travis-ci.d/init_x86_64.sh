@@ -26,11 +26,6 @@ if [ ! -d "/cvmfs/clicdp.cern.ch" ]; then
     exit 1
 fi
 
-if [ ! -d "/cvmfs/sft.cern.ch" ]; then
-    echo "No sft CVMFS repository detected, please add it."
-    exit 1
-fi
-
 
 # Determine which compiler to use
 if [ -z ${COMPILER_TYPE} ]; then
@@ -53,7 +48,6 @@ fi
 
 # General variables
 CLICREPO=/cvmfs/clicdp.cern.ch
-SFTREPO=/cvmfs/sft.cern.ch
 export BUILD_FLAVOUR=x86_64-${OS}-${COMPILER_VERSION}-${BUILD_TYPE}
 
 #--------------------------------------------------------------------------------
@@ -103,5 +97,5 @@ export CMAKE_PREFIX_PATH="$Eigen3_DIR:$CMAKE_PREFIX_PATH"
 #     Doxygen
 #--------------------------------------------------------------------------------
 
-export Doxygen_HOME=${SFTREPO}/lcg/releases/doxygen/1.8.11-68a7c/x86_64-centos7-gcc7-opt/bin/
+export Doxygen_HOME=${CLICREPO}/software/Doxygen/1.8.14/${BUILD_FLAVOUR}/bin/
 export PATH="$Doxygen_HOME:$PATH"
