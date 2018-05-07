@@ -3,6 +3,12 @@
 # General Broken Lines
 ### Track refitting with broken lines in 3D
 
+There are three versions of GBL provided:
+* A Python version, located in the `python/` directory
+* A FORTRAN version in the `fortran/` directory, here a simple Makefile is included
+* A C++ version which can be compiled and installed as described below
+
+
 ## C++ Version
 
 ### Dependencies
