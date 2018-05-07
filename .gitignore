@@ -31,3 +31,5 @@ obj/
 *.so
 *.pcm
 
+# Ignore CMake config created when using source folder for installation:
+GBLConfig.cmake
