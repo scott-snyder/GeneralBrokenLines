@@ -1,5 +1,3 @@
-$Rev$
-$Date$
 C. Kleinwort, DESY 
 ===========================================================
                                Helmholtz Terascale Alliance
