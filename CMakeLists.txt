@@ -1,6 +1,11 @@
 # #require a certain version
 CMAKE_MINIMUM_REQUIRED( VERSION 3.1 )
 
+# Set default build type
+IF(NOT CMAKE_BUILD_TYPE)
+  SET(CMAKE_BUILD_TYPE "RelWithDebInfo" CACHE STRING "Choose the type of build, options are: Debug Release RelWithDebInfo MinSizeRel." FORCE)
+ENDIF(NOT CMAKE_BUILD_TYPE)
+
 # declare the project name
 PROJECT(GBL VERSION "2.1.3" LANGUAGES CXX)
 
