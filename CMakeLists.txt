@@ -29,8 +29,9 @@ ENDIF()
 
 INSTALL( DIRECTORY ./include DESTINATION . )
 
-# declare the stupid ROOT library path
 LINK_DIRECTORIES(${ROOT_LIBRARY_DIR})
+
+INCLUDE_DIRECTORIES(include)
 
 # add library
 AUX_SOURCE_DIRECTORY( ./src library_sources )
