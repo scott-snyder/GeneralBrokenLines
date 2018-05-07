@@ -9,6 +9,7 @@ language: cpp
 env:
   matrix:
     - COMPILER=llvm
+    - COMPILER=gcc
 
 before_install:
   - wget https://ecsft.cern.ch/dist/cvmfs/cvmfs-release/cvmfs-release-latest_all.deb
