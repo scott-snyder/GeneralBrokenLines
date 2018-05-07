@@ -94,7 +94,7 @@ IF(DOXYGEN_FOUND)
         COMMENT "Generating API documentation with Doxygen" VERBATIM
     )
 ELSE()
-    MESSAGE( STATUS "Doxygen not installed or found -- API documentation can't be generatred!" )
+    MESSAGE( STATUS "Doxygen not installed or found, no API documentation can be generated" )
 ENDIF()
 
 # generate and install following configuration files
