@@ -2,17 +2,46 @@
 CMAKE_MINIMUM_REQUIRED( VERSION 3.1 )
 
 # declare the project name
-PROJECT(GBL)
+PROJECT(GBL VERSION "2.1.3" LANGUAGES CXX)
 
-# project version
-SET( ${PROJECT_NAME}_VERSION_MAJOR 2 )
-SET( ${PROJECT_NAME}_VERSION_MINOR 1 )
-SET( ${PROJECT_NAME}_VERSION_PATCH 3 )
+###############################
+# Setup the build environment #
+###############################
 
-# make life easier and simply use the ilcsoft default settings
-# load default ilcsoft settings (install prefix, build type, rpath, etc.)
-LIST( APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake )
-INCLUDE( ilcsoft_default_settings )
+# Additional packages to be searched for by cmake
+LIST(APPEND CMAKE_MODULE_PATH ${PROJECT_SOURCE_DIR}/cmake)
+
+# Configure the installation prefix to allow both local as system-wide installation
+IF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+    SET(CMAKE_INSTALL_PREFIX "${PROJECT_SOURCE_DIR}" CACHE PATH "Prefix prepended to install directories" FORCE)
+ENDIF()
+
+# Set up the RPATH so executables find the libraries even when installed in non-default location
+SET(CMAKE_MACOSX_RPATH TRUE)
+SET(CMAKE_SKIP_BUILD_RPATH FALSE)
+SET(CMAKE_BUILD_WITH_INSTALL_RPATH FALSE)
+
+# Add the automatically determined parts of the RPATH which point to directories outside the build tree to the install RPATH
+SET(CMAKE_INSTALL_RPATH_USE_LINK_PATH TRUE)
+
+# The RPATH to be used when installing, but only if it's not a system directory
+LIST(FIND CMAKE_PLATFORM_IMPLICIT_LINK_DIRECTORIES "${CMAKE_INSTALL_PREFIX}/lib" IsSystemDir)
+IF("${IsSystemDir}" STREQUAL "-1")
+   SET(CMAKE_INSTALL_RPATH "${CMAKE_INSTALL_PREFIX}/lib")
+ENDIF("${IsSystemDir}" STREQUAL "-1")
+
+######################
+# Define build flags #
+######################
+
+# Require a C++11 compiler but do allow extensions
+SET(CMAKE_CXX_STANDARD 11)
+SET(CMAKE_CXX_STANDARD_REQUIRED ON)
+SET(CMAKE_CXX_EXTENSIONS OFF)
+
+############################
+# Check for Prerequisistes #
+############################
 
 FIND_PACKAGE(Eigen3 REQUIRED)
 
@@ -24,18 +53,13 @@ IF( SUPPORT_ROOT )
   INCLUDE_DIRECTORIES(SYSTEM ${ROOT_INCLUDE_DIRS})
 ENDIF()
 
-# require proper c++
-#ADD_DEFINITIONS( "-Wall -g -ansi -pedantic -Wno-long-long" )
-
 INSTALL( DIRECTORY ./include DESTINATION . )
-
-LINK_DIRECTORIES(${ROOT_LIBRARY_DIR})
 
 INCLUDE_DIRECTORIES(include)
 
 # add library
 AUX_SOURCE_DIRECTORY( ./src library_sources )
-ADD_SHARED_LIBRARY( ${PROJECT_NAME} ${library_sources} )
+ADD_LIBRARY(${PROJECT_NAME} SHARED ${library_sources} )
 INSTALL( TARGETS ${PROJECT_NAME} DESTINATION lib )
 
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${ROOT_LIBRARIES} ${ROOT_COMPONENT_LIBRARIES} Eigen3::Eigen)
@@ -63,8 +87,5 @@ ELSE()
 
 ENDIF(DOXYGEN_FOUND)
 
-# display some variables and write them to cache
-DISPLAY_STD_VARIABLES()
-
 # generate and install following configuration files
-GENERATE_PACKAGE_CONFIGURATION_FILES( GBLConfig.cmake GBLConfigVersion.cmake )
+#GENERATE_PACKAGE_CONFIGURATION_FILES( GBLConfig.cmake GBLConfigVersion.cmake )
