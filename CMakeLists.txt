@@ -88,4 +88,5 @@ ELSE()
 ENDIF(DOXYGEN_FOUND)
 
 # generate and install following configuration files
-#GENERATE_PACKAGE_CONFIGURATION_FILES( GBLConfig.cmake GBLConfigVersion.cmake )
+INCLUDE("cmake/MacroGeneratePackageConfigFiles.cmake")
+GENERATE_PACKAGE_CONFIGURATION_FILES( GBLConfig.cmake GBLConfigVersion.cmake )
