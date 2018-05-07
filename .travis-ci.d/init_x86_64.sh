@@ -103,5 +103,5 @@ export CMAKE_PREFIX_PATH="$Eigen3_DIR:$CMAKE_PREFIX_PATH"
 #     Doxygen
 #--------------------------------------------------------------------------------
 
-export Doxygen_HOME=${SFTREPO}/lcg/releases/doxygen/1.8.11-ae1d3/${BUILD_FLAVOUR}/bin/
+export Doxygen_HOME=${SFTREPO}/lcg/releases/doxygen/1.8.11-68a7c/x86_64-centos7-gcc7-opt/bin/
 export PATH="$Doxygen_HOME:$PATH"
