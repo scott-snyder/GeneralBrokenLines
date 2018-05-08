@@ -3,6 +3,8 @@
 # General Broken Lines
 ### Track refitting with broken lines in 3D
 
+[![Build Status](https://travis-ci.org/GeneralBrokenLines/GeneralBrokenLines.svg?branch=master)](https://travis-ci.org/GeneralBrokenLines/GeneralBrokenLines)
+
 There are three versions of GBL provided:
 * A Python version, located in the `python/` directory
 * A FORTRAN version in the `fortran/` directory, here a simple Makefile is included
