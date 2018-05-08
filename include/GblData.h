@@ -38,7 +38,7 @@
 #include<math.h>
 #include "VMatrix.h"
 
-#include "Eigen/Core"
+#include <Eigen/Core>
 
 //! Namespace for the general broken lines package
 namespace gbl {

@@ -43,7 +43,7 @@
 #include "TMatrixDSymEigen.h"
 #endif
 
-#include "Eigen/Dense"
+#include <Eigen/Dense>
 
 namespace gbl {
 
