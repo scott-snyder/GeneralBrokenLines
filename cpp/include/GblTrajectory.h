@@ -13,7 +13,7 @@
  *
  *
  *  \copyright
- *  Copyright (c) 2011 - 2017 Deutsches Elektronen-Synchroton,
+ *  Copyright (c) 2011 - 2018 Deutsches Elektronen-Synchroton,
  *  Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
  *  This library is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU Library General Public License as
@@ -186,6 +186,7 @@ private:
 	Eigen::MatrixXd externalDerivatives; // Derivatives for external measurements of composed trajectory
 	Eigen::VectorXd externalMeasurements; // Residuals for external measurements of composed trajectory
 	Eigen::VectorXd externalPrecisions; // Precisions for external measurements of composed trajectory
+	// linear equation system
 	VVector theVector; ///< Vector of linear equation system
 	BorderedBandMatrix theMatrix; ///< (Bordered band) matrix of linear equation system
 

@@ -11,7 +11,7 @@
  *  \author Claus Kleinwort, DESY, 2011 (Claus.Kleinwort@desy.de)
  *
  *  \copyright
- *  Copyright (c) 2011 - 2017 Deutsches Elektronen-Synchroton,
+ *  Copyright (c) 2011 - 2018 Deutsches Elektronen-Synchroton,
  *  Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
  *  This library is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU Library General Public License as
@@ -129,6 +129,10 @@
  *  Internally Matrix<n>d are used for fixed sized and simple matrices
  *  based on std::vector<> for variable sized matrices.
  *  Several GBL methods are implemented as templates to allow more EIGEN compile time optimization.
+ *
+ *  \section example_sec Examples
+ *  Technical examples are given in example1.cpp, example2.cpp and example3.cpp.
+ *  An example silicon tracker is described in exampleSit.cpp.
  *
  *  \section ref_sec References
  *    - V. Blobel, C. Kleinwort, F. Meier,
@@ -591,8 +595,7 @@ void GblTrajectory::getFitToLocalJacobian(std::array<unsigned int, 5>& anIndex,
 
 	int nOffset = aPoint.getOffset();
 
-	for (unsigned int i = 0; i < 5; ++i)
-		anIndex[i] = 0;
+	anIndex = {}; // reset to 0
 	aJacobian.setZero();
 	if (nOffset < 0) // need interpolation
 			{
@@ -687,8 +690,7 @@ void GblTrajectory::getFitToKinkJacobian(std::array<unsigned int, 7>& anIndex,
 
 	int nOffset = aPoint.getOffset();
 
-	for (unsigned int i = 0; i < 7; ++i)
-		anIndex[i] = 0;
+	anIndex = {}; // reset to 0
 	aJacobian.setZero();
 
 	Matrix2d prevW, prevWJ, nextW, nextWJ;
@@ -978,6 +980,7 @@ void GblTrajectory::getResAndErr(unsigned int aData, bool used,
 	}
 	MatrixXd aMat = theMatrix.getBlockMatrix(numLocal, indLocal); // compressed (covariance) matrix
 	double aFitVar = aVec.transpose() * aMat * aVec; // variance from track fit
+	aFitVar *= aDownWeight; // account for down-weighting (of measurement in fit)
 	aMeasError = sqrt(aMeasVar); // error of measurement
 	if (used)
 		aResError = (aFitVar < aMeasVar ? sqrt(aMeasVar - aFitVar) : 0.); // error of (biased) residual
