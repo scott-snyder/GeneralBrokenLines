@@ -1,12 +1,12 @@
 /*
- * exampleSit.h
+ * exampleDc.h
  *
- *  Created on: 11 Oct 2018
+ *  Created on: 6 Nov 2018
  *      Author: kleinwrt
  */
 
 /** \file
- *  Definitions for exampleSit.
+ *  Definitions for exampleDc.
  *
  *  \author Claus Kleinwort, DESY, 2018 (Claus.Kleinwort@desy.de)
  *
@@ -27,20 +27,18 @@
  *  675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef EXAMPLESIT_H_
-#define EXAMPLESIT_H_
+#ifndef SRC_EXAMPLEDC_H_
+#define SRC_EXAMPLEDC_H_
 
 #include "exampleUtil.h"
 
 //! Namespace for the general broken lines package
 namespace gbl {
 
-GblDetectorLayer CreateLayerSit(const std::string aName, double xPos,
-		double yPos, double zPos, double thickness, double uAngle, double uRes); // 1D measurement
-GblDetectorLayer CreateLayerSit(const std::string aName, double xPos,
-		double yPos, double zPos, double thickness, double uAngle, double uRes,
-		double vAngle, double vRes); // 2D measurement
+GblDetectorLayer CreateLayerDc(const std::string aName, double xPos,
+		double yPos, double zPos, double thickness, double xzAngle,
+		double stereoAngle, double uRes);
 
 }
 
-#endif /* EXAMPLESIT_H_ */
+#endif /* SRC_EXAMPLEDC_H_ */

@@ -28,51 +28,11 @@
  */
 
 #include <time.h>
-#include "example1.h"
+#include "exampleUtil.h"
 #include "GblTrajectory.h"
 
 using namespace gbl;
 using namespace Eigen;
-
-Matrix5d gblSimpleJacobian(double ds, double cosl, double bfac) {
-	/// Simple jacobian: quadratic in arc length difference
-	/**
-	 * \param [in] ds    (3D) arc-length
-	 * \param [in] cosl  cos(lambda)
-	 * \param [in] bfac  Bz*c
-	 * \return jacobian
-	 */
-	Matrix5d jac;
-	jac.setIdentity();
-	jac(1, 0) = -bfac * ds * cosl;
-	jac(3, 0) = -0.5 * bfac * ds * ds * cosl;
-	jac(3, 1) = ds;
-	jac(4, 2) = ds;
-	return jac;
-}
-
-double unrm() {
-	///  unit normal distribution, Box-Muller method, polar form
-	static double unrm2 = 0.0;
-	static bool cached = false;
-	if (!cached) {
-		double x, y, r;
-		do {
-			x = 2.0 * rand() / RAND_MAX - 1;
-			y = 2.0 * rand() / RAND_MAX - 1;
-			r = x * x + y * y;
-		} while (r == 0.0 || r > 1.0);
-		// (x,y) in unit circle
-		double d = sqrt(-2.0 * log(r) / r);
-		double unrm1 = x * d;
-		unrm2 = y * d;
-		cached = true;
-		return unrm1;
-	} else {
-		cached = false;
-		return unrm2;
-	}
-}
 
 void example1() {
 	/// Simple technical example (curvilinear as local system).

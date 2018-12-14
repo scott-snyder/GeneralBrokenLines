@@ -132,7 +132,8 @@
  *
  *  \section example_sec Examples
  *  Technical examples are given in example1.cpp, example2.cpp and example3.cpp.
- *  An example silicon tracker is described in exampleSit.cpp.
+ *  An example silicon tracker is described in exampleSit.cpp
+ *  and an example sector of forward drift chambers in exampleDc.cpp.
  *
  *  \section ref_sec References
  *    - V. Blobel, C. Kleinwort, F. Meier,

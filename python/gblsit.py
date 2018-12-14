@@ -44,7 +44,40 @@ from gblfit import GblPoint, GblTrajectory
 #   - Multiple scattering in sensors (air inbetween ignored)
 #   - Curvilinear system (T,U,V) as local coordinate system and (q/p, slopes, offsets) as local track parameters
 #
+#  Local systems.
+#  Up to three (different) local coordinate systems can be defined at each point:
+#    - Track model linearization (propagation, fitting), e.g. curvilinear system
+#    - Measurement, defined by two (optionally non-orthogonal) measurement directions,
+#      normal to detector plane and detector position (offset)
+#    - Alignment, defined by two orthogonal directions in detector plane, normal to that
+#      and detector position (offset)
+# 
 # \remark To exercise (mis)alignment different sets of layers (with different geometry) for simulation and reconstruction can be used.
+#
+# Example steering file for Millepede-II (B=0):
+# \code{.unparsed}
+# Cfiles
+# milleBinary.dat
+# 
+# method inversion 3 0.1
+# chiscut 30. 6.
+# printcounts
+# ! fix first pixel and last stereo layer as reference
+# parameter
+#   1  0.  -1.
+#   2  0.  -1.
+#   3  0.  -1.
+#   4  0.  -1.
+#   5  0.  -1.
+#   6  0.  -1.
+#  61  0.  -1.
+#  62  0.  -1.
+#  63  0.  -1.
+#  64  0.  -1.
+#  65  0.  -1.
+#  66  0.  -1.
+# \endcode
+#
 def exampleSit():
 
   #
@@ -92,7 +125,6 @@ def exampleSit():
     seed = gblSimpleHelix(seedPar)
     sOld = 0.
     cosLambda = 1. / math.sqrt(1. + seedPar[3] ** 2)
-    sinLambda = seedPar[3] * cosLambda
     # construct GBL trajectory
     traj = GblTrajectory(bfac != 0.)
     # add GBL points
@@ -107,24 +139,21 @@ def exampleSit():
       measPrec = np.array(layer.getPrecision())
       # Curvilinear system: track direction T, U = Z x T / |Z x T|, V = T x U
       # as local system
-      phi = seedPar[1] + seedPar[0] * sArc
-      cosPhi = math.cos(phi); sinPhi = math.sin(phi)
-      tuvDir = np.array([[cosLambda * cosPhi, cosLambda * sinPhi, sinLambda], \
-                     [-sinPhi, cosPhi, 0.], \
-                     [-sinLambda * cosPhi, -sinLambda * sinPhi, cosLambda]])
+      curviDirs = pred.getCurvilinearDirs()
       # projection matrix (local to measurement)
-      proL2m = np.linalg.inv(np.dot(tuvDir[1:3, :], np.linalg.inv(pred.getMeasSystemDirs())[:, :2]))
+      proL2m = np.linalg.inv(np.dot(curviDirs, np.linalg.inv(layer.getMeasSystemDirs())[:, :2]))
       # propagation
-      jacPointToPoint = gblSimpleJacobian(sArc - sOld, cosLambda, bfac)
+      jacPointToPoint = gblSimpleJacobian((sArc - sOld) / cosLambda, cosLambda, bfac)
       sOld = sArc
       # point with (independent) measurements (in measurement system)
       point = GblPoint(jacPointToPoint)
       point.addMeasurement([proL2m, res, measPrec])
       # global parameters for rigid body alignment?
       if binaryFile is not None:
+        # local (alignment) system, per layer
         labels = [l * 10 + 1, l * 10 + 2, l * 10 + 3, l * 10 + 4, l * 10 + 5, l * 10 + 6]
         labGlobal = np.array([labels, labels])
-        derGlobal = pred.getRigidBodyDerGlobal(layer.getCenter())[:2]
+        derGlobal = layer.getRigidBodyDerLocal(pred.getPosition(), pred.getDirection())
         point.addGlobals(labGlobal, derGlobal)
       # add scatterer to point
       radlen = layer.getRadiationLength() / abs(pred.getCosIncidence())
@@ -155,8 +184,8 @@ def exampleSit():
 
 ## Simple jacobian.
 #  
-#  Simple jacobian for (q/p, slopes, offsets) in curvilinear system
-#  quadratic in arc length difference.
+#  Simple jacobian for (q/p, slopes, offsets) in curvilinear system,
+#  constant magnetic field in Z direction, quadratic in arc length difference.
 #
 #  @param ds arc length difference; float
 #  @param cosl cos(lambda); float
@@ -208,6 +237,12 @@ class gblSiliconLayer(object):
     self.__uDir = np.array([0., math.cos(uPhi), math.sin(uPhi)])  
     ## measurement direction v
     self.__vDir = np.array([0., math.cos(vPhi), math.sin(vPhi)])
+    ## normal to measurement plane
+    self.__nDir = np.array([1., 0., 0.])
+    ## measurement directions
+    self.__measDirs = np.array([self.__uDir, self.__vDir, self.__nDir]) 
+    ## local alignment system (IJK = YZX)
+    self.__ijkDirs = np.array([[0., 1., 0.], [0., 0., 1.], [1., 0., 0.]])
   
   ## Get radiation length
   def getRadiationLength(self):
@@ -220,10 +255,10 @@ class gblSiliconLayer(object):
   ## Get precision
   def getPrecision(self):
     return self.__precision
-
-  ## Get center
-  def getCenter(self):
-    return self.__center
+  
+  ## Get directions of measurement system
+  def getMeasSystemDirs(self):
+    return self.__measDirs
     
   ## Intersect with helix
   #
@@ -232,6 +267,48 @@ class gblSiliconLayer(object):
   #  
   def intersectWithHelix(self, helix):
     return helix.getPrediction(self.__center, self.__uDir, self.__vDir)  
+
+  ## Get rigid body derivatives in global frame
+  #
+  # @param[in] position   position (of prediction or measurement); vector
+  # @param[in] trackDir   track direction; vector
+  # @return global derivatives; matrix
+  #
+  def getRigidBodyDerGlobal(self, position, trackDir):
+    # lever arms (for rotations)
+    dist = position
+    # dr/dm (residual vs measurement, 1-tdir*ndir^t/tdir*ndir)
+    drdm = np.eye(3) - np.outer(trackDir, self.__nDir) / np.dot(trackDir, self.__nDir)
+    # dm/dg (measurement vs 6 rigid body parameters)
+    dmdg = np.zeros((3, 6))
+    dmdg[0][0] = 1.; dmdg[0][4] = -dist[2]; dmdg[0][5] = dist[1]
+    dmdg[1][1] = 1.; dmdg[1][3] = dist[2]; dmdg[1][5] = -dist[0]
+    dmdg[2][2] = 1.; dmdg[2][3] = -dist[1]; dmdg[2][4] = dist[0]
+    # drl/drg (local vs global residuals)
+    drldrg = self.__measDirs    
+    # drl/dg (local residuals vs rigid body parameters)
+    drldg = np.dot(drldrg, np.dot(drdm, dmdg))
+    return drldg
+
+  ## Get rigid body derivatives in local (alignment) frame
+  #
+  # @param[in] position   position (of prediction or measurement); vector
+  # @param[in] trackDir   track direction; vector
+  # @return global derivatives
+  #
+  def getRigidBodyDerLocal(self, position, trackDir): 
+    # track direction in local system 
+    tLoc = np.dot(self.__ijkDirs, trackDir)
+    # local slopes
+    uSlope = tLoc[0] / tLoc[2]
+    vSlope = tLoc[1] / tLoc[2]
+    # (u,v) lever arms
+    uPos, vPos = np.dot(self.__ijkDirs, position - self.__center)[:2]
+    # wPos = 0 (in detector plane)
+    # drl/dg (local residuals vs rigid body parameters)
+    drldg = np.array([[1.0, 0.0, -uSlope, vPos * uSlope, -uPos * uSlope, vPos], \
+                      [0.0, 1.0, -vSlope, vPos * vSlope, -uPos * vSlope, -uPos]])
+    return drldg  
 
       
 ## Silicon detector
@@ -476,59 +553,24 @@ class gblHelixPrediction(object):
   ## Get Position
   def getPosition(self):
     return self.__pos
-  
-  ## Get directions of measurement system
-  def getMeasSystemDirs(self):
-    return [self.__udir, self.__vdir, self.__ndir]
+ 
+  ## Get (track) direction
+  def getDirection(self):
+    return self.__tdir
   
   ## Get cosine of incidence
   def getCosIncidence(self):
     return np.dot(self.__tdir, self.__ndir)
-
-  ## Get rigid body derivatives in global frame
+  
+  ## Get curvilinear directions (U,V)
   #
-  # @param[in] rotCenter  rotation center; vector
-  # @return global derivatives; matrix
+  # Curvilinear system: track direction T, U = Z x T / |Z x T|, V = T x U
   #
-  # Example steering file for Millepede-II (B=0):
-  # \code{.unparsed}
-  # Cfiles
-  # milleBinaryISN.dat
-  # 
-  # method inversion 3 0.1
-  # chiscut 30. 6.
-  # printcounts
-  # ! fix first pixel and last stereo layer as reference
-  # parameter
-  #   1  0.  -1.
-  #   2  0.  -1.
-  #   3  0.  -1.
-  #   4  0.  -1.
-  #   5  0.  -1.
-  #   6  0.  -1.
-  #  61  0.  -1.
-  #  62  0.  -1.
-  #  63  0.  -1.
-  #  64  0.  -1.
-  #  65  0.  -1.
-  #  66  0.  -1.
-  # \endcode
-  def getRigidBodyDerGlobal(self, rotCenter):
-    # lever arms (for rotations)
-    dist = self.__pos - rotCenter
-    # dr/dm (residual vs measurement, 1-tdir*ndir^t/tdir*ndir)
-    drdm = np.eye(3) - np.outer(self.__tdir, self.__ndir) / np.dot(self.__tdir, self.__ndir)
-    # dm/dg (measurement vs 6 rigid body parameters)
-    dmdg = np.zeros((3, 6))
-    dmdg[0][0] = 1.; dmdg[0][4] = dist[2]; dmdg[0][5] = -dist[1]
-    dmdg[1][1] = 1.; dmdg[1][3] = -dist[2]; dmdg[1][5] = dist[0]
-    dmdg[2][2] = 1.; dmdg[2][3] = dist[1]; dmdg[2][4] = -dist[0]
-    # drl/drg (local vs global residuals)
-    drldrg = np.array([self.__udir, self.__vdir, self.__ndir])    
-    # drl/dg (local residuals vs rigid body parameters)
-    drldg = np.dot(drldrg, np.dot(drdm, dmdg))
-    return drldg
-
+  def getCurvilinearDirs(self):
+    cosTheta = self.__tdir[2]; sinTheta = math.sqrt(self.__tdir[0] ** 2 + self.__tdir[1] ** 2)
+    cosPhi = self.__tdir[0] / sinTheta; sinPhi = self.__tdir[1] / sinTheta
+    return np.array([[-sinPhi, cosPhi, 0.], [-cosPhi * cosTheta, -sinPhi * cosTheta, sinTheta]])
+  
       
 if __name__ == '__main__':
   exampleSit()
