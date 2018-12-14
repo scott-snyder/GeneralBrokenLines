@@ -1237,7 +1237,7 @@ void GblTrajectory::prepare() {
 		std::vector<double> derivatives(numCurvature);
 		for (unsigned int iExt = 0; iExt < nExt; ++iExt) {
 			for (unsigned int iCol = 0; iCol < numCurvature; ++iCol) {
-				index[iCol] = iCol + 1;
+				index[iCol] = numLocals + iCol + 1;
 				derivatives[iCol] = externalDerivatives(iExt, iCol);
 			}
 			GblData aData(1U, ExternalMeasurement, externalMeasurements(iExt),
