@@ -35,8 +35,8 @@
 //! Namespace for the general broken lines package
 namespace gbl {
 
-GblDetectorLayer CreateLayerDc(const std::string aName, double xPos,
-		double yPos, double zPos, double thickness, double xzAngle,
+GblDetectorLayer CreateLayerDc(const std::string aName, unsigned int layer,
+		double xPos, double yPos, double zPos, double thickness, double xzAngle,
 		double stereoAngle, double uRes);
 
 }

@@ -80,6 +80,8 @@ public:
 	GblSimpleHelix(double aRinv, double aPhi0, double aDca, double aDzds,
 			double aZ0);
 	virtual ~GblSimpleHelix();
+	double getPhi(double aRadius) const;
+	double getArcLengthR(double aRadius) const;
 	double getArcLengthXY(double xPos, double yPos) const;
 	void moveToXY(double xPos, double yPos, double& newPhi0, double& newDca,
 			double& newZ0) const;
@@ -104,12 +106,13 @@ private:
  */
 class GblDetectorLayer {
 public:
-	GblDetectorLayer(const std::string aName, const int aDim,
-			const double thickness, Eigen::Vector3d& aCenter,
+	GblDetectorLayer(const std::string aName, const unsigned int aLayer,
+			const int aDim, const double thickness, Eigen::Vector3d& aCenter,
 			Eigen::Vector2d& aResolution, Eigen::Vector2d& aPrecision,
 			Eigen::Matrix3d& measTrafo, Eigen::Matrix3d& alignTrafo);
 	virtual ~GblDetectorLayer();
 	void print() const;
+	unsigned int getLayerID() const;
 	double getRadiationLength() const;
 	Eigen::Vector2d getResolution() const;
 	Eigen::Vector2d getPrecision() const;
@@ -122,7 +125,8 @@ public:
 
 private:
 	std::string name; ///< name
-	int measDim; ///< measurement dimension (1 or 2)
+	unsigned int layer; ///< layer ID
+	unsigned int measDim; ///< measurement dimension (1 or 2)
 	double xbyx0; ///< normalized material thickness
 	Eigen::Vector3d center; ///< center
 	Eigen::Vector2d resolution; ///< measurements resolution

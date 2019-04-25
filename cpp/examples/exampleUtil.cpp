@@ -174,6 +174,43 @@ GblSimpleHelix::GblSimpleHelix(double aRinv, double aPhi0, double aDca,
 GblSimpleHelix::~GblSimpleHelix() {
 }
 
+/// Get phi (of point on circle) for given radius (to ref. point)
+/**
+ * ( |dca| < radius < |rad-2*dca|, from H1/cjfphi, not restricted to -Pi .. +Pi )
+ *
+ * \param[in] aRadius radius
+ */
+double GblSimpleHelix::getPhi(double aRadius) const {
+	double arg = (0.5 * rinv * (aRadius * aRadius + dca * dca) - dca)
+			/ (aRadius * (1.0 - rinv * dca));
+	return asin(arg) + phi0;
+}
+
+/// Get (2D) arc length for given radius (to ref. point)
+/**
+ * ( |dca| < radius < |rad-2*dca|, from H1/cjfsxy )
+ *
+ * \param[in] aRadius radius
+ */
+double GblSimpleHelix::getArcLengthR(double aRadius) const {
+	double arg = (0.5 * rinv * (aRadius * aRadius + dca * dca) - dca)
+			/ (aRadius * (1.0 - rinv * dca));
+	if (fabs(arg) >= 1.) {
+		std::cout << " bad arc " << aRadius << " " << rinv << " " << dca
+				<< std::endl;
+		return 0.;
+	}
+	// line
+	if (rinv == 0)
+		return sqrt(aRadius * aRadius - dca * dca);
+	// helix
+	double sxy = asin(aRadius * rinv * sqrt(1.0 - arg * arg)) / rinv;
+	if (0.5 * rinv * rinv * (aRadius * aRadius - dca * dca) - 1. + rinv * dca
+			> 0.)
+		sxy = M_PI / fabs(rinv) - sxy;
+	return sxy;
+}
+
 /// Get (2D) arc length for given point.
 /**
  * \param [in] xPos   X Position
@@ -299,6 +336,7 @@ GblHelixPrediction GblSimpleHelix::getPrediction(const Eigen::Vector3d& refPos,
 /**
  * Create detector layer with 1D or 2D measurement (u,v)
  * \param [in] aName          name
+ * \param [in] aLayer         layer ID
  * \param [in] aDim           dimension (1,2)
  * \param [in] thickness      thickness / radiation_length
  * \param [in] aCenter        center of detector (origin of local systems)
@@ -307,13 +345,14 @@ GblHelixPrediction GblSimpleHelix::getPrediction(const Eigen::Vector3d& refPos,
  * \param [in] measTrafo      matrix of row vectors defining local measurement system
  * \param [in] alignTrafo     matrix of row vectors defining local alignment system
  */
-GblDetectorLayer::GblDetectorLayer(const std::string aName, const int aDim,
-		const double thickness, Eigen::Vector3d& aCenter,
-		Eigen::Vector2d& aResolution, Eigen::Vector2d& aPrecision,
-		Eigen::Matrix3d& measTrafo, Eigen::Matrix3d& alignTrafo) :
-		name(aName), measDim(aDim), xbyx0(thickness), center(aCenter), resolution(
-				aResolution), precision(aPrecision), global2meas(measTrafo), global2align(
-				alignTrafo) {
+GblDetectorLayer::GblDetectorLayer(const std::string aName,
+		const unsigned int aLayer, const int aDim, const double thickness,
+		Eigen::Vector3d& aCenter, Eigen::Vector2d& aResolution,
+		Eigen::Vector2d& aPrecision, Eigen::Matrix3d& measTrafo,
+		Eigen::Matrix3d& alignTrafo) :
+		name(aName), layer(aLayer), measDim(aDim), xbyx0(thickness), center(
+				aCenter), resolution(aResolution), precision(aPrecision), global2meas(
+				measTrafo), global2align(alignTrafo) {
 	udir = global2meas.row(0);
 	vdir = global2meas.row(1);
 	ndir = global2meas.row(2);
@@ -325,11 +364,16 @@ GblDetectorLayer::~GblDetectorLayer() {
 /// Print GblSiliconlayer.
 void GblDetectorLayer::print() const {
 	IOFormat CleanFmt(4, 0, ", ", "\n", "[", "]");
-	std::cout << " Layer " << name << " " << measDim << "D, " << xbyx0
-			<< " X0, @ " << center.transpose().format(CleanFmt) << ", res "
-			<< resolution.transpose().format(CleanFmt) << ", udir "
+	std::cout << " Layer " << name << " " << layer << " : " << measDim << "D, "
+			<< xbyx0 << " X0, @ " << center.transpose().format(CleanFmt)
+			<< ", res " << resolution.transpose().format(CleanFmt) << ", udir "
 			<< udir.transpose().format(CleanFmt) << ", vdir "
 			<< vdir.transpose().format(CleanFmt) << std::endl;
+}
+
+/// Get layer ID
+unsigned int GblDetectorLayer::getLayerID() const {
+	return layer;
 }
 
 /// Get radiation length.
@@ -391,8 +435,10 @@ const Matrix<double, 3, 6> GblDetectorLayer::getRigidBodyDerGlobal(
 	return global2meas * drdm * dmdg;
 }
 
-/// Get rigid body derivatives in local (measurement) frame.
+/// Get rigid body derivatives in local (alignment) frame (with N=(0,0,1)).
 /**
+ * Normal to measurement plane has to be (0,0,1) in local frame.
+ *
  * \param[in] position   position (of prediction or measurement)
  * \param[in] direction  track direction
  */

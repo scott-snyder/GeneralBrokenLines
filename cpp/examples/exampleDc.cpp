@@ -87,13 +87,13 @@ void exampleDc() {
 	double dist = 200.;
 	for (unsigned int iLayer = 0; iLayer < 6; ++iLayer) {
 		layers.push_back(
-				CreateLayerDc("CH1+", dist * sinTheta, 0.0, dist * cosTheta,
+				CreateLayerDc("CH1+", 1, dist * sinTheta, 0.0, dist * cosTheta,
 						thickness[iLayer], theta, 6., 0.030)); // +6 deg stereo layers
 		dist += 2.;
 	}
 	for (unsigned int iLayer = 6; iLayer < 12; ++iLayer) {
 		layers.push_back(
-				CreateLayerDc("CH1-", dist * sinTheta, 0.0, dist * cosTheta,
+				CreateLayerDc("CH1-", 1, dist * sinTheta, 0.0, dist * cosTheta,
 						thickness[iLayer], theta, -6., 0.030)); // -6 deg stereo layers
 		dist += 2.;
 	}
@@ -101,13 +101,13 @@ void exampleDc() {
 	dist = 300.;
 	for (unsigned int iLayer = 0; iLayer < 6; ++iLayer) {
 		layers.push_back(
-				CreateLayerDc("CH2+", dist * sinTheta, 0.0, dist * cosTheta,
+				CreateLayerDc("CH2+", 2, dist * sinTheta, 0.0, dist * cosTheta,
 						thickness[iLayer], theta, 6., 0.030)); // +6 deg stereo layers
 		dist += 2.;
 	}
 	for (unsigned int iLayer = 6; iLayer < 12; ++iLayer) {
 		layers.push_back(
-				CreateLayerDc("CH2-", dist * sinTheta, 0.0, dist * cosTheta,
+				CreateLayerDc("CH2-", 2, dist * sinTheta, 0.0, dist * cosTheta,
 						thickness[iLayer], theta, -6., 0.030)); // -6 deg stereo layers
 		dist += 2.;
 	}
@@ -115,13 +115,13 @@ void exampleDc() {
 	dist = 400.;
 	for (unsigned int iLayer = 0; iLayer < 6; ++iLayer) {
 		layers.push_back(
-				CreateLayerDc("CH3+", dist * sinTheta, 0.0, dist * cosTheta,
+				CreateLayerDc("CH3+", 3, dist * sinTheta, 0.0, dist * cosTheta,
 						thickness[iLayer], theta, 6., 0.030)); // +6 deg stereo layers
 		dist += 2.;
 	}
 	for (unsigned int iLayer = 6; iLayer < 12; ++iLayer) {
 		layers.push_back(
-				CreateLayerDc("CH3-", dist * sinTheta, 0.0, dist * cosTheta,
+				CreateLayerDc("CH3-", 3, dist * sinTheta, 0.0, dist * cosTheta,
 						thickness[iLayer], theta, -6., 0.030)); // -6 deg stereo layers
 		dist += 2.;
 	}
@@ -240,8 +240,9 @@ void exampleDc() {
 			 Matrix<double, 2, 6> derGlobal = layer.getRigidBodyDerLocal(pos,
 			 dir); */
 			// Chamber alignment in global system (as common system for both stereo orientations)
+			unsigned int layerID = layer.getLayerID();
 			for (int p = 0; p < 6; p++)
-				labGlobal[p] = (iLayer / 12 + 1) * 1000 + p + 1;// chamber alignment
+				labGlobal[p] = layerID * 1000 + p + 1;		// chamber alignment
 			Matrix<double, 2, 6> derGlobal = layer.getRigidBodyDerGlobal(pos,
 					dir).block<2, 6>(0, 0);
 			point.addGlobals(labGlobal, derGlobal);
@@ -290,6 +291,7 @@ namespace gbl {
 /**
  * Create drift chamber layer with 1D measurement (u)
  * \param [in] aName       name
+ * \param [in] layer       layer ID
  * \param [in] xPos        X-position (of center)
  * \param [in] yPos        Y-position (of center)
  * \param [in] zPos        Z-position (of center)
@@ -298,8 +300,8 @@ namespace gbl {
  * \param [in] stereoAngle stereo angle
  * \param [in] uRes        resolution in u-direction
  */
-GblDetectorLayer CreateLayerDc(const std::string aName, double xPos,
-		double yPos, double zPos, double thickness, double xzAngle,
+GblDetectorLayer CreateLayerDc(const std::string aName, unsigned int layer,
+		double xPos, double yPos, double zPos, double thickness, double xzAngle,
 		double stereoAngle, double uRes) {
 	Vector3d aCenter(xPos, yPos, zPos);
 	Vector2d aResolution(uRes, 0.);
@@ -313,7 +315,7 @@ GblDetectorLayer CreateLayerDc(const std::string aName, double xPos,
 			* sinXz, sinXz, 0., cosXz; // U,V,N
 	Matrix3d alignTrafo;
 	alignTrafo << cosXz, 0., -sinXz, 0., 1., 0., sinXz, 0., cosXz; // I,J,K
-	return GblDetectorLayer(aName, 1, thickness, aCenter, aResolution,
+	return GblDetectorLayer(aName, layer, 1, thickness, aCenter, aResolution,
 			aPrecision, measTrafo, alignTrafo);
 }
 

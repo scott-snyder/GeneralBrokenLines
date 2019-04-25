@@ -35,11 +35,12 @@
 //! Namespace for the general broken lines package
 namespace gbl {
 
-GblDetectorLayer CreateLayerSit(const std::string aName, double xPos,
-		double yPos, double zPos, double thickness, double uAngle, double uRes); // 1D measurement
-GblDetectorLayer CreateLayerSit(const std::string aName, double xPos,
-		double yPos, double zPos, double thickness, double uAngle, double uRes,
-		double vAngle, double vRes); // 2D measurement
+GblDetectorLayer CreateLayerSit(const std::string aName, unsigned int layer,
+		double xPos, double yPos, double zPos, double thickness, double uAngle,
+		double uRes); // 1D measurement
+GblDetectorLayer CreateLayerSit(const std::string aName, unsigned int layer,
+		double xPos, double yPos, double zPos, double thickness, double uAngle,
+		double uRes, double vAngle, double vRes); // 2D measurement
 
 }
 

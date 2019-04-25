@@ -82,27 +82,28 @@ void exampleSit() {
 	// name, position (x,y,z), thickness (X/X_0), (1 or 2) measurements (direction in YZ, resolution)
 	std::vector<GblDetectorLayer> layers;
 	layers.push_back(
-			CreateLayerSit("PIX1", 2.0, 0., 0., 0.0033, 0., 0.0010, 90.,
+			CreateLayerSit("PIX1", 0, 2.0, 0., 0., 0.0033, 0., 0.0010, 90.,
 					0.0020)); // pixel
 	layers.push_back(
-			CreateLayerSit("PIX2", 3.0, 0., 0., 0.0033, 0., 0.0010, 90.,
+			CreateLayerSit("PIX2", 1, 3.0, 0., 0., 0.0033, 0., 0.0010, 90.,
 					0.0020)); // pixel
 	layers.push_back(
-			CreateLayerSit("PIX3", 4.0, 0., 0., 0.0033, 0., 0.0010, 90.,
+			CreateLayerSit("PIX3", 2, 4.0, 0., 0., 0.0033, 0., 0.0010, 90.,
 					0.0020)); // pixel
 	layers.push_back(
-			CreateLayerSit("S2D4", 6.0, 0., 0., 0.0033, 0., 0.0025, 5.0,
+			CreateLayerSit("S2D4", 3, 6.0, 0., 0., 0.0033, 0., 0.0025, 5.0,
 					0.0025)); // strip 2D, +5 deg stereo angle
 	layers.push_back(
-			CreateLayerSit("S2D5", 8.0, 0., 0., 0.0033, 0., 0.0025, -5.,
+			CreateLayerSit("S2D5", 4, 8.0, 0., 0., 0.0033, 0., 0.0025, -5.,
 					0.0025)); // strip 2D, -5 deg stereo angle
 	layers.push_back(
-			CreateLayerSit("S2D6", 10., 0., 0., 0.0033, 0., 0.0025, 5.0,
+			CreateLayerSit("S2D6", 5, 10., 0., 0., 0.0033, 0., 0.0025, 5.0,
 					0.0025)); // strip 2D, +5 deg stereo angle
 	layers.push_back(
-			CreateLayerSit("S2D7", 12., 0., 0., 0.0033, 0., 0.0025, -5.,
+			CreateLayerSit("S2D7", 6, 12., 0., 0., 0.0033, 0., 0.0025, -5.,
 					0.0025)); // strip 2D, -5 deg stereo angle
-	layers.push_back(CreateLayerSit("S1D8", 15., 0., 0., 0.0033, 0., 0.0040)); // strip 1D, no sensitivity to Z
+	layers.push_back(
+			CreateLayerSit("S1D8", 7, 15., 0., 0., 0.0033, 0., 0.0040)); // strip 1D, no sensitivity to Z
 
 	/* print layers
 	 for (unsigned int iLayer = 0; iLayer < layers.size(); ++iLayer) {
@@ -210,8 +211,9 @@ void exampleSit() {
 			point.addMeasurement(proL2m, res, measPrecision);
 			// global labels and parameters for rigid body alignment
 			std::vector<int> labGlobal(6);
+			unsigned int layerID = layer.getLayerID();
 			for (int p = 0; p < 6; p++)
-				labGlobal[p] = iLayer * 10 + p + 1;
+				labGlobal[p] = layerID * 10 + p + 1;
 			Vector3d pos = pred.getPosition();
 			Vector3d dir = pred.getDirection();
 			Matrix<double, 2, 6> derGlobal = layer.getRigidBodyDerLocal(pos,
@@ -263,6 +265,7 @@ namespace gbl {
  * Create silicon layer with 1D measurement (u) at fixed X-position.
  *
  * \param [in] aName      name
+ * \param [in] layer      layer ID
  * \param [in] xPos       X-position (of center)
  * \param [in] yPos       Y-position (of center)
  * \param [in] zPos       Z-position (of center)
@@ -270,8 +273,8 @@ namespace gbl {
  * \param [in] uAngle     angle of u-direction in YZ plane
  * \param [in] uRes       resolution in u-direction
  */
-GblDetectorLayer CreateLayerSit(const std::string aName, double xPos,
-		double yPos, double zPos, double thickness, double uAngle,
+GblDetectorLayer CreateLayerSit(const std::string aName, unsigned int layer,
+		double xPos, double yPos, double zPos, double thickness, double uAngle,
 		double uRes) {
 	Vector3d aCenter(xPos, yPos, zPos);
 	Vector2d aResolution(uRes, 0.);
@@ -282,7 +285,7 @@ GblDetectorLayer CreateLayerSit(const std::string aName, double xPos,
 	measTrafo << 0., cosU, sinU, 0., -sinU, cosU, 1., 0., 0.; // U,V,N
 	Matrix3d alignTrafo;
 	alignTrafo << 0., 1., 0., 0., 0., 1., 1., 0., 0.; // Y,Z,X
-	return GblDetectorLayer(aName, 1, thickness, aCenter, aResolution,
+	return GblDetectorLayer(aName, layer, 1, thickness, aCenter, aResolution,
 			aPrecision, measTrafo, alignTrafo);
 }
 
@@ -293,6 +296,7 @@ GblDetectorLayer CreateLayerSit(const std::string aName, double xPos,
  * (but must be different).
  *
  * \param [in] aName      name
+ * \param [in] layer      layer ID
  * \param [in] xPos       X-position (of center)
  * \param [in] yPos       Y-position (of center)
  * \param [in] zPos       Z-position (of center)
@@ -302,9 +306,9 @@ GblDetectorLayer CreateLayerSit(const std::string aName, double xPos,
  * \param [in] vAngle     angle of v-direction in YZ plane
  * \param [in] vRes       resolution in v-direction
  */
-GblDetectorLayer CreateLayerSit(const std::string aName, double xPos,
-		double yPos, double zPos, double thickness, double uAngle, double uRes,
-		double vAngle, double vRes) {
+GblDetectorLayer CreateLayerSit(const std::string aName, unsigned int layer,
+		double xPos, double yPos, double zPos, double thickness, double uAngle,
+		double uRes, double vAngle, double vRes) {
 	Vector3d aCenter(xPos, yPos, zPos);
 	Vector2d aResolution(uRes, vRes);
 	Vector2d aPrecision(1. / (uRes * uRes), 1. / (vRes * vRes));
@@ -316,7 +320,7 @@ GblDetectorLayer CreateLayerSit(const std::string aName, double xPos,
 	measTrafo << 0., cosU, sinU, 0., cosV, sinV, 1., 0., 0.; // U,V,N
 	Matrix3d alignTrafo;
 	alignTrafo << 0., 1., 0., 0., 0., 1., 1., 0., 0.; // Y,Z,X
-	return GblDetectorLayer(aName, 2, thickness, aCenter, aResolution,
+	return GblDetectorLayer(aName, layer, 2, thickness, aCenter, aResolution,
 			aPrecision, measTrafo, alignTrafo);
 }
 
