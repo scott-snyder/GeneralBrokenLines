@@ -116,12 +116,18 @@ public:
 	double getRadiationLength() const;
 	Eigen::Vector2d getResolution() const;
 	Eigen::Vector2d getPrecision() const;
-	const Eigen::Matrix3d& getMeasSystemDirs() const;
+	Eigen::Vector3d getCenter() const;
+	Eigen::Matrix3d getMeasSystemDirs() const;
+	Eigen::Matrix3d getAlignSystemDirs() const;
 	GblHelixPrediction intersectWithHelix(GblSimpleHelix hlx) const;
-	const Eigen::Matrix<double, 3, 6> getRigidBodyDerGlobal(
-			Eigen::Vector3d& position, Eigen::Vector3d& direction) const;
-	const Eigen::Matrix<double, 2, 6> getRigidBodyDerLocal(
-			Eigen::Vector3d& position, Eigen::Vector3d& direction) const;
+	Eigen::Matrix<double, 3, 6> getRigidBodyDerGlobal(Eigen::Vector3d& position,
+			Eigen::Vector3d& direction) const;
+	Eigen::Matrix<double, 2, 6> getRigidBodyDerLocal(Eigen::Vector3d& position,
+			Eigen::Vector3d& direction) const;
+	Eigen::Matrix<double, 6, 6> getTrafoGlobalToLocal(Eigen::Vector3d& offset,
+			Eigen::Matrix3d& rotation) const;
+	Eigen::Matrix<double, 6, 6> getTrafoLocalToGlobal(Eigen::Vector3d& offset,
+			Eigen::Matrix3d& rotation) const;
 
 private:
 	std::string name; ///< name

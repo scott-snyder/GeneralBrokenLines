@@ -6,8 +6,8 @@ PROJECT(GBL)
 
 # project version
 SET( ${PROJECT_NAME}_VERSION_MAJOR 2 )
-SET( ${PROJECT_NAME}_VERSION_MINOR 1 )
-SET( ${PROJECT_NAME}_VERSION_PATCH 6 )
+SET( ${PROJECT_NAME}_VERSION_MINOR 2 )
+SET( ${PROJECT_NAME}_VERSION_PATCH 0 )
 
 # make life easier and simply use the ilcsoft default settings
 # load default ilcsoft settings (install prefix, build type, rpath, etc.)

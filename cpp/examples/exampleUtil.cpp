@@ -361,7 +361,7 @@ GblDetectorLayer::GblDetectorLayer(const std::string aName,
 GblDetectorLayer::~GblDetectorLayer() {
 }
 
-/// Print GblSiliconlayer.
+/// Print GblDetectorLayer.
 void GblDetectorLayer::print() const {
 	IOFormat CleanFmt(4, 0, ", ", "\n", "[", "]");
 	std::cout << " Layer " << name << " " << layer << " : " << measDim << "D, "
@@ -391,12 +391,25 @@ Eigen::Vector2d GblDetectorLayer::getPrecision() const {
 	return precision;
 }
 
+/// Get center.
+Eigen::Vector3d GblDetectorLayer::getCenter() const {
+	return center;
+}
+
 /// Get directions of measurement system.
 /**
  * Matrix from row vectors (transformation from global to measurement system)
  */
-const Eigen::Matrix3d& GblDetectorLayer::getMeasSystemDirs() const {
+Eigen::Matrix3d GblDetectorLayer::getMeasSystemDirs() const {
 	return global2meas;;
+}
+
+/// Get directions of alignment system.
+/**
+ * Matrix from row vectors (transformation from global to alignment system)
+ */
+Eigen::Matrix3d GblDetectorLayer::getAlignSystemDirs() const {
+	return global2align;;
 }
 
 /// Intersect with helix.
@@ -413,7 +426,7 @@ GblHelixPrediction GblDetectorLayer::intersectWithHelix(
  * \param[in] position   position (of prediction or measurement)
  * \param[in] direction  track direction
  */
-const Matrix<double, 3, 6> GblDetectorLayer::getRigidBodyDerGlobal(
+Matrix<double, 3, 6> GblDetectorLayer::getRigidBodyDerGlobal(
 		Eigen::Vector3d& position, Eigen::Vector3d& direction) const {
 // lever arms (for rotations)
 	Vector3d dist = position;
@@ -435,14 +448,20 @@ const Matrix<double, 3, 6> GblDetectorLayer::getRigidBodyDerGlobal(
 	return global2meas * drdm * dmdg;
 }
 
-/// Get rigid body derivatives in local (alignment) frame (with N=(0,0,1)).
+/// Get rigid body derivatives in local (alignment) frame (rotated in measurement plane).
 /**
- * Normal to measurement plane has to be (0,0,1) in local frame.
+ * The orthogonal alignment frame differs from measurement frame only by rotations
+ * around normal to measurement plane.
+ *
+ * Equivalent to:
+ * \code
+ * getRigidBodyDerGlobal(position, direction) * getTrafoLocalToGlobal(center, global2align)
+ * \endcode
  *
  * \param[in] position   position (of prediction or measurement)
  * \param[in] direction  track direction
  */
-const Matrix<double, 2, 6> GblDetectorLayer::getRigidBodyDerLocal(
+Matrix<double, 2, 6> GblDetectorLayer::getRigidBodyDerLocal(
 		Eigen::Vector3d& position, Eigen::Vector3d& direction) const {
 	// track direction in local system
 	Vector3d tLoc = global2align * direction;
@@ -458,7 +477,47 @@ const Matrix<double, 2, 6> GblDetectorLayer::getRigidBodyDerLocal(
 	Matrix<double, 2, 6> drldg;
 	drldg << 1.0, 0.0, -uSlope, vPos * uSlope, -uPos * uSlope, vPos, 0.0, 1.0, -vSlope, vPos
 			* vSlope, -uPos * vSlope, -uPos;
-	return drldg;
+	// local (alignment) to measurement system
+	Matrix3d local2meas = global2meas * global2align.transpose();
+	return local2meas.block<2, 2>(0, 0) * drldg;
+}
+
+/// Get transformation for rigid body derivatives from global to local (alignment) system.
+/**
+ * local = rotation * (global-offset)
+ *
+ * \param[in] offset    offset of alignment system
+ * \param[in] rotation  rotation of alignment system
+ */
+Matrix<double, 6, 6> GblDetectorLayer::getTrafoGlobalToLocal(
+		Eigen::Vector3d& offset, Eigen::Matrix3d& rotation) const {
+	// transformation global to local
+	Matrix<double, 6, 6> glo2loc = Matrix<double, 6, 6>::Zero();
+	Matrix3d leverArms;
+	leverArms << 0., offset[2], -offset[1], -offset[2], 0., offset[0], offset[1], -offset[0], 0.;
+	glo2loc.block<3, 3>(0, 0) = rotation;
+	glo2loc.block<3, 3>(0, 3) = -rotation * leverArms;
+	glo2loc.block<3, 3>(3, 3) = rotation;
+	return glo2loc;
+}
+
+/// Get transformation for rigid body derivatives from local (alignment) to global system.
+/**
+ * local = rotation * (global-offset)
+ *
+ * \param[in] offset    offset of alignment system
+ * \param[in] rotation  rotation of alignment system
+ */
+Matrix<double, 6, 6> GblDetectorLayer::getTrafoLocalToGlobal(
+		Eigen::Vector3d& offset, Eigen::Matrix3d& rotation) const {
+	// transformation local to global
+	Matrix<double, 6, 6> loc2glo = Matrix<double, 6, 6>::Zero();
+	Matrix3d leverArms;
+	leverArms << 0., offset[2], -offset[1], -offset[2], 0., offset[0], offset[1], -offset[0], 0.;
+	loc2glo.block<3, 3>(0, 0) = rotation.transpose();
+	loc2glo.block<3, 3>(0, 3) = leverArms * rotation.transpose();
+	loc2glo.block<3, 3>(3, 3) = rotation.transpose();
+	return loc2glo;
 }
 
 }
