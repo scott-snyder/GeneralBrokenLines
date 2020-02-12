@@ -40,7 +40,7 @@ ENDIF("${IsSystemDir}" STREQUAL "-1")
 ######################
 
 # Set standard build flags
-SET(COMPILER_FLAGS -pedantic -Wall -Wextra -Wcast-align -Wcast-qual -Wuseless-cast -Wctor-dtor-privacy -Wzero-as-null-pointer-constant -Wdisabled-optimization -Wformat=2 -Winit-self -Wlogical-op -Wmissing-declarations -Wmissing-include-dirs -Wnoexcept -Wold-style-cast -Woverloaded-virtual -Wredundant-decls -Wsign-promo -Wstrict-null-sentinel -Wstrict-overflow=5 -Wswitch-default -Wundef -Wshadow -Wformat-security -Wdeprecated -fdiagnostics-color=auto -Wheader-hygiene)
+SET(COMPILER_FLAGS -pedantic -Wall -Wextra -Wcast-align -Wcast-qual   -Wdisabled-optimization -Wformat=2 -Winit-self -Wlogical-op   -Wnoexcept -Woverloaded-virtual -Wredundant-decls -Wsign-promo -Wstrict-null-sentinel  -Wswitch-default -Wundef -Wshadow -Wformat-security -Wdeprecated -Wno-deprecated-copy -Wno-placement-new -Wno-maybe-uninitialized -fdiagnostics-color=auto )
 
 # Set linker flags
 IF("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
@@ -79,7 +79,8 @@ AUX_SOURCE_DIRECTORY( ./src library_sources )
 ADD_LIBRARY(${PROJECT_NAME} SHARED ${library_sources} )
 INSTALL( TARGETS ${PROJECT_NAME} DESTINATION lib )
 
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${ROOT_LIBRARIES} ${ROOT_COMPONENT_LIBRARIES} Eigen3::Eigen)
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${ROOT_LIBRARIES} ${ROOT_COMPONENT_LIBRARIES} )
+TARGET_INCLUDE_DIRECTORIES(${PROJECT_NAME} PUBLIC ${EIGEN3_INCLUDE_DIR} )
 
 # the examples, build with "make examples"
 ADD_SUBDIRECTORY( examples/ )
