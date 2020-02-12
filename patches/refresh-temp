@@ -1,0 +1,80 @@
+Bottom: 395ee6cad85989c6ac922be703f98a7e3c7f0deb
+Top:    b38f6c807a34542bb046b17e1c07dd7e07f82176
+Author: scott snyder <sss@karma>
+Date:   2020-02-12 09:14:28 -0500
+
+Refresh of warn
+
+---
+
+diff --git a/include/BorderedBandMatrix.h b/include/BorderedBandMatrix.h
+index d5fcb5a..5d319da 100644
+--- a/include/BorderedBandMatrix.h
++++ b/include/BorderedBandMatrix.h
+@@ -35,7 +35,14 @@
+ #include<math.h>
+ #include<cstdlib>
+ #include "VMatrix.h"
++#ifdef __GNUC__
++# pragma GCC diagnostic push
++# pragma GCC diagnostic ignored "-Wdeprecated-copy"
++#endif
+ #include <Eigen/Core>
++#ifdef __GNUC__
++# pragma GCC diagnostic pop
++#endif
+ 
+ //! Namespace for the general broken lines package
+ namespace gbl {
+diff --git a/include/GblData.h b/include/GblData.h
+index 4fe4925..07cdcaf 100644
+--- a/include/GblData.h
++++ b/include/GblData.h
+@@ -38,7 +38,14 @@
+ #include<math.h>
+ #include "VMatrix.h"
+ 
++#ifdef __GNUC__
++# pragma GCC diagnostic push
++# pragma GCC diagnostic ignored "-Wdeprecated-copy"
++#endif
+ #include <Eigen/Core>
++#ifdef __GNUC__
++# pragma GCC diagnostic pop
++#endif
+ 
+ //! Namespace for the general broken lines package
+ namespace gbl {
+diff --git a/include/GblPoint.h b/include/GblPoint.h
+index a32011a..c1ca643 100644
+--- a/include/GblPoint.h
++++ b/include/GblPoint.h
+@@ -43,7 +43,14 @@
+ #include "TMatrixDSymEigen.h"
+ #endif
+ 
++#ifdef __GNUC__
++# pragma GCC diagnostic push
++# pragma GCC diagnostic ignored "-Wdeprecated-copy"
++#endif
+ #include <Eigen/Dense>
++#ifdef __GNUC__
++# pragma GCC diagnostic pop
++#endif
+ 
+ namespace gbl {
+ 
+diff --git a/src/GblData.cpp b/src/GblData.cpp
+index a0fa2db..e0a2a42 100644
+--- a/src/GblData.cpp
++++ b/src/GblData.cpp
+@@ -149,7 +149,8 @@ double GblData::getChi2() const {
+ /// Print data block.
+ void GblData::printData() const {
+ 
+-	std::cout << " measurement at label " << theLabel << " of type " << theType
++	std::cout << " measurement at label " << theLabel << " of type "
++                  << static_cast<int>(theType)
+ 			<< " from row " << theRow << ": " << theValue << ", "
+ 			<< thePrecision << std::endl;
+ 	std::cout << "  param " << moreParameters.size() + theNumLocal << ":";
