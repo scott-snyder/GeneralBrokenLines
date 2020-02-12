@@ -35,7 +35,14 @@
 #include<math.h>
 #include<cstdlib>
 #include "VMatrix.h"
+#ifdef __GNUC__
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wdeprecated-copy"
+#endif
 #include <Eigen/Core>
+#ifdef __GNUC__
+# pragma GCC diagnostic pop
+#endif
 
 //! Namespace for the general broken lines package
 namespace gbl {
