@@ -43,7 +43,14 @@
 #include "TMatrixDSymEigen.h"
 #endif
 
+#ifdef __GNUC__
+# pragma GCC diagnostic push
+# pragma GCC diagnostic ignored "-Wdeprecated-copy"
+#endif
 #include <Eigen/Dense>
+#ifdef __GNUC__
+# pragma GCC diagnostic pop
+#endif
 
 namespace gbl {
 
