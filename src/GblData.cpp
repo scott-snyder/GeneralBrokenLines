@@ -149,7 +149,8 @@ double GblData::getChi2() const {
 /// Print data block.
 void GblData::printData() const {
 
-	std::cout << " measurement at label " << theLabel << " of type " << theType
+	std::cout << " measurement at label " << theLabel << " of type "
+                  << static_cast<int>(theType)
 			<< " from row " << theRow << ": " << theValue << ", "
 			<< thePrecision << std::endl;
 	std::cout << "  param " << moreParameters.size() + theNumLocal << ":";
