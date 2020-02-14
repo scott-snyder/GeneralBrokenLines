@@ -12,7 +12,7 @@ Created on Aug 1, 2011
 # \author Claus Kleinwort, DESY, 2011 (Claus.Kleinwort@desy.de)
 #
 #  \copyright
-#  Copyright (c) 2011 - 2016 Deutsches Elektronen-Synchroton,
+#  Copyright (c) 2011 - 2018 Deutsches Elektronen-Synchroton,
 #  Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
 #  This library is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU Library General Public License as
@@ -29,6 +29,7 @@ Created on Aug 1, 2011
 
 import array, math
 
+
 ## Millepede-II (binary) record.
 #  
 #  Containing information for local (track) and global fit.
@@ -44,10 +45,11 @@ import array, math
 #     1   RMEAS, measured value   0                            __iMeas   -+
 #     2   local derivative        index of local derivative               |
 #     3   local derivative        index of local derivative               |
-#     4    ...                                                            | block
-#         SIGMA, error (>0)       0                            __ iErr    |
+#     4   ...                                                             | block
+#         SIGMA, error (>0)       0                            __iErr     |
 #         global derivative       label of global derivative              |
-#         global derivative       label of global derivative             -+
+#         global derivative       label of global derivative              |
+#         ...                                                            -+
 #         RMEAS, measured value   0                            __position
 #         local derivative        index of local derivative
 #         local derivative        index of local derivative
@@ -57,6 +59,18 @@ import array, math
 #         global derivative       label of global derivative
 #         ...
 #         global derivative       label of global derivative   __recLen
+#\endverbatim
+#
+# Special data block (other/debug information).
+# Contains no local derivatives and (error) SIGMA is negative (-Number of SPecial data words).
+#
+#\verbatim
+#         real array              integer array
+#         0.0                     0                 __iMeas   -+
+#         -float(NSP)             0                 __iErr     |
+#         special data            special data                 | special block (2+NSP words)
+#         special data            special data                 |
+#         ...                                                 -+
 #\endverbatim
 #
 class MilleRecord(object):
@@ -119,7 +133,6 @@ class MilleRecord(object):
       indGlobal.append(self.__inder[i])
       derGlobal.append(self.__glder[i])    
     return aMeas, aPrec, indLocal, derLocal, indGlobal, derGlobal   
-    
  
   ## Print record. 
   def printRecord(self):
@@ -165,8 +178,12 @@ class MilleRecord(object):
         self.__position += 1
       self.__iErr = self.__position 
       self.__position += 1
-      while (self.__position < self.__recLen and self.__inder[self.__position] != 0):
-        self.__position += 1
+      # special data?
+      if (self.__iMeas + 1 == self.__iErr and self.__glder[self.__iErr] < 0):
+        self.__position += int(-self.__glder[self.__iErr])
+      else:  
+        while (self.__position < self.__recLen and self.__inder[self.__position] != 0):
+          self.__position += 1
       self.__numData += 1  
       return True
     else:

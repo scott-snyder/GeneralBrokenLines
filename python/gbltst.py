@@ -7,12 +7,12 @@ Created on Jul 27, 2011
 '''
 
 ## \file
-# examples
+# (technical) examples
 #
 # \author Claus Kleinwort, DESY, 2011 (Claus.Kleinwort@desy.de)
 #
 #  \copyright
-#  Copyright (c) 2011 - 2016 Deutsches Elektronen-Synchroton,
+#  Copyright (c) 2011 - 2018 Deutsches Elektronen-Synchroton,
 #  Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
 #  This library is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU Library General Public License as
@@ -32,6 +32,7 @@ import math
 import time
 from gblfit import GblPoint, GblTrajectory
 #
+
 
 ## Create points on initial trajectory, create trajectory from points,
 #  fit and write trajectory to MP-II binary file,
@@ -117,7 +118,7 @@ def example1():
 # measurement directions (J,K) from stereo angle
       sinStereo = (0. if iLayer % 2 == 0 else 0.1) 
       cosStereo = math.sqrt(1.0 - sinStereo ** 2)    
-# measurement system: I, J ,K    
+# (orthogonal) measurement system: I, J ,K    
       ijkDir = np.array([[1., 0., 0.], \
                          [0., cosStereo, sinStereo], \
                          [0., -sinStereo, cosStereo]])
@@ -216,6 +217,7 @@ def example1():
   print " Chi2Sum/NdfSum ", Chi2Sum / NdfSum
   print " LostSum/nTry ", LostSum / nTry
 
+
 ## Read trajectory from MP-II binary file and refit.
 #
 def example2():
@@ -251,6 +253,7 @@ def example2():
   print " Time [s] ", end - start
   print " Chi2Sum/NdfSum ", Chi2Sum / NdfSum
   print " LostSum/nTry ", LostSum / nRec
+
  
 ## Simple jacobian.
 #  
@@ -270,6 +273,7 @@ def gblSimpleJacobian(ds, cosl, bfac):
   jac[4, 2] = ds  
   return jac     
 
+
 ## Measurement system as local system
 #
 # In general the precision matrix for multiple scattering is not diagonal
@@ -278,7 +282,7 @@ class gblMeasSystem(object):
  
   ## Construct local system
   #
-  #  @param  measDir (directions of) measurement system
+  #  @param  measDir (directions of orthogonal) measurement system
   #  @param  curviDir (directions of) curvilinear system
   #  
   def __init__(self, measDir, curviDir):
@@ -324,6 +328,7 @@ class gblMeasSystem(object):
     scatP[1, 0] = fac * (-c1 * c2)
     scatP[1, 1] = fac * (1 - c2 * c2)
     return scatP       
+
  
 ## Curvilinear system as local system
 #
@@ -334,7 +339,7 @@ class gblCurviSystem(object):
 
   ## Construct local system
   #
-  #  @param  measDir (directions of) measurement system
+  #  @param  measDir (directions of orthogonal) measurement system
   #  @param  curviDir (directions of) curvilinear system
   #    
   def __init__(self, measDir, curviDir):
@@ -368,6 +373,7 @@ class gblCurviSystem(object):
   #
   def getScatPrecision(self, scatErr):
     return np.array([1., 1.]) / (scatErr * scatErr)  # diagonal only     
+
         
 # create points on initial trajectory, create trajectory from points,
 # fit and write trajectory to MP-II binary file

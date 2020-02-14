@@ -12,7 +12,7 @@ Created on Jul 27, 2011
 # \author Claus Kleinwort, DESY, 2011 (Claus.Kleinwort@desy.de)
 #
 #  \copyright
-#  Copyright (c) 2011 - 2016 Deutsches Elektronen-Synchroton,
+#  Copyright (c) 2011 - 2018 Deutsches Elektronen-Synchroton,
 #  Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
 #  This library is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU Library General Public License as
@@ -31,6 +31,7 @@ import numpy as np
 import math
 from gblnum import BorderedBandMatrix
 from mille import MilleRecord
+
 
 ## User supplied point on (initial) trajectory.
 #
@@ -62,6 +63,8 @@ class GblPoint(object):
     self.__measurement = None
     ## dimension of measurement (2D, 4D or 5D); int
     self.__measDim = 0
+    ## minimal precision to accept measurement                                                                                <
+    self.__measMinPrec = 0.
     ## transformation (to eigen-vectors of precision matrix); matrix(float)
     self.__measTransformation = None    
     ## scatterer at point: (transformation or None,) initial kinks, precision (inverse covariance matrix); list(matrix(float))
@@ -85,10 +88,12 @@ class GblPoint(object):
   # 
   #  @param aMeasurement measurement (projection (or None), residuals, precision
   #                       (diagonal of or full matrix)); list(matrix(float))
+  #  @param minPrecision Minimal precision to accept measurement
   #
-  def addMeasurement(self, aMeasurement):
+  def addMeasurement(self, aMeasurement, minPrecision=0.):
     self.__measurement = aMeasurement
     self.__measDim = aMeasurement[1].shape[0]
+    self.__measMinPrec = minPrecision
     if (aMeasurement[2].ndim == 2):  # full precision matrix, need to diagonalize
       eigenVal, eigenVec = np.linalg.eigh(aMeasurement[2])
       self.__measTransformation = eigenVec.T
@@ -121,6 +126,13 @@ class GblPoint(object):
   #
   def getMeasDim(self):
     return self.__measDim
+  
+  ## Retrieve minimal precision to accept measurement.
+  #
+  #  @return minimal precision to accept measurement; float
+  #
+  def getMeasMinPrec(self):
+    return self.__measMinPrec
 
   ## Add a (thin) scatterer to a point.
   #  
@@ -292,6 +304,7 @@ class GblPoint(object):
     print " point ", self.__label, self.__offset 
 
 #------------------------------------------------------------------------------ 
+
 
 ## Data (block) containing value, precision and derivatives for measurements, kinks and external seed.
 #  
@@ -578,6 +591,9 @@ class GblData(object):
 #  points (corrections, covariance matrix) are not available and omission of
 #  measurements from a point is not possible.
 #  
+#  \section example_sec Examples
+# Technical examples are given in gbltst.py, an example silicon tracker in gblsit.py.
+#
 #  \section ref_sec References:  
 #    - V. Blobel, C. Kleinwort, F. Meier,
 #      Fast alignment of a complex tracking detector using advanced track models,
@@ -585,6 +601,7 @@ class GblData(object):
 #    - C. Kleinwort, General Broken Lines as advanced track fitting method,
 #      NIM A, 673 (2012), 107-110, doi:10.1016/j.nima.2012.01.024
 # 
+
 
 ## General Broken Lines Trajectory.   
 #      
@@ -664,7 +681,10 @@ class GblTrajectory(object):
     for d in self.__data:
       d.printData() 
 
-  ## Get data of trajectory.          
+  ## Get data of trajectory. 
+  #
+  # @return data blocks; list
+  #         
   def getData(self):
     return self.__data
  
@@ -887,6 +907,7 @@ class GblTrajectory(object):
     aVec = np.array(derLocal)  # compressed vector
     aMat = self.__matrix.getBlockMatrix(indLocal)  # compressed matrix     
     aFitVar = np.dot(aVec, np.dot(aMat, aVec.T))  # variance from track fit
+    aFitVar *= aDownWeight  # account for down-weighting (of measurement in fit)
     aMeasError = math.sqrt(aMeasVar)  # error of measurement
     if used:
       aResError = math.sqrt(aMeasVar - aFitVar) if aFitVar < aMeasVar else 0.  # error of biased residual
@@ -988,7 +1009,7 @@ class GblTrajectory(object):
       self.__points[-1].setOffset(nOffsets)
       self.__numOffsets = nOffsets + 1
       self.__numParameters = self.__numOffsets * len(self.__dimensions) \
-                           + self.__numCurvature + self.__numLocals       
+                           +self.__numCurvature + self.__numLocals       
 
     ## Calculate Jacobians to previous/next scatterer from point to point ones.
     def calcJacobians():
@@ -1024,6 +1045,7 @@ class GblTrajectory(object):
         if (aPoint.hasMeasurement()):
           nLabel = aPoint.getLabel()
           measDim = aPoint.getMeasDim()
+          measPrecision = aPoint.getMeasMinPrec()
           localDer = aPoint.getLocalDerivatives()
           globalLab = aPoint.getGlobalLabels()
           globalDer = aPoint.getGlobalDerivatives()
@@ -1032,7 +1054,7 @@ class GblTrajectory(object):
           labDer, matDer = self.__getFitToLocalJacobian(aPoint, measDim, nJacobian)
           matPDer = matDer if matP is None else np.dot(matP, matDer)
           for i in range(measDim):
-            if (aPrec[i] > 0.):
+            if (aPrec[i] > measPrecision):
               aData = GblData(nLabel, 1, aMeas[i], aPrec[i])
               aData.addDerivatives(i, labDer, matPDer, localDer, \
                                    globalLab, globalDer)

@@ -11,7 +11,7 @@
  *  \author Claus Kleinwort, DESY, 2011 (Claus.Kleinwort@desy.de)
  *
  *  \copyright
- *  Copyright (c) 2011 - 2017 Deutsches Elektronen-Synchroton,
+ *  Copyright (c) 2011 - 2018 Deutsches Elektronen-Synchroton,
  *  Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
  *  This library is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU Library General Public License as
@@ -28,54 +28,14 @@
  */
 
 #include <time.h>
-#include "example1.h"
+#include "exampleUtil.h"
 #include "GblTrajectory.h"
 
 using namespace gbl;
 using namespace Eigen;
 
-Matrix5d gblSimpleJacobian3(double ds, double cosl, double bfac) {
-	/// Simple jacobian: quadratic in arc length difference
-	/**
-	 * \param [in] ds    (3D) arc-length
-	 * \param [in] cosl  cos(lambda)
-	 * \param [in] bfac  Bz*c
-	 * \return jacobian
-	 */
-	Matrix5d jac;
-	jac.setIdentity();
-	jac(1, 0) = -bfac * ds * cosl;
-	jac(3, 0) = -0.5 * bfac * ds * ds * cosl;
-	jac(3, 1) = ds;
-	jac(4, 2) = ds;
-	return jac;
-}
-
-double unrm3() {
-	///  unit normal distribution, Box-Muller method, polar form
-	static double unrm2 = 0.0;
-	static bool cached = false;
-	if (!cached) {
-		double x, y, r;
-		do {
-			x = 2.0 * rand() / RAND_MAX - 1;
-			y = 2.0 * rand() / RAND_MAX - 1;
-			r = x * x + y * y;
-		} while (r == 0.0 || r > 1.0);
-		// (x,y) in unit circle
-		double d = sqrt(-2.0 * log(r) / r);
-		double unrm1 = x * d;
-		unrm2 = y * d;
-		cached = true;
-		return unrm1;
-	} else {
-		cached = false;
-		return unrm2;
-	}
-}
-
 void example3() {
-	/// Simple example.
+	/// Simple technical example (measure scattering).
 	/**
 	 * Create points on initial trajectory, create trajectory from points,
 	 * fit trajectory,
@@ -156,7 +116,7 @@ void example3() {
 	for (unsigned int iTry = 1; iTry <= nTry; ++iTry) {
 		// curvilinear track parameters
 		for (unsigned int i = 0; i < 5; ++i) {
-			clPar[i] = clErr[i] * unrm3();
+			clPar[i] = clErr[i] * unrm();
 		}
 		clCov.setZero();
 		for (unsigned int i = 0; i < 5; ++i) {
@@ -192,7 +152,7 @@ void example3() {
 			// measurement - prediction in measurement system with error
 			Vector2d meas = proL2m * clPar.tail(2);
 			for (unsigned int i = 0; i < 2; ++i) {
-				meas[i] += measErr[i] * unrm3();
+				meas[i] += measErr[i] * unrm();
 			}
 			pointMeas.addMeasurement(proL2m, meas, measPrec);
 			/* point with (correlated) measurements (in local system)
@@ -220,7 +180,7 @@ void example3() {
 				clSeed = clCov.inverse();
 			}
 // propagate to scatterer
-			jacPointToPoint = gblSimpleJacobian3(step, cosLambda, bfac);
+			jacPointToPoint = gblSimpleJacobian(step, cosLambda, bfac);
 			clPar = jacPointToPoint * clPar;
 			clCov = jacPointToPoint * clCov * jacPointToPoint.adjoint();
 			s += step;
@@ -241,7 +201,7 @@ void example3() {
 				}
 				// scatter a little
 				for (unsigned int i = 0; i < 2; ++i) {
-					clPar[i + 1] += scatErr[i] * unrm3();
+					clPar[i + 1] += scatErr[i] * unrm();
 					clCov(i + 1, i + 1) += scatErr[i] * scatErr[i];
 				}
 				// propagate to next measurement layer
