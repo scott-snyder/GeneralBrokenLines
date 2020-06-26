@@ -11,7 +11,7 @@
  *  \author Claus Kleinwort, DESY, 2011 (Claus.Kleinwort@desy.de)
  *
  *  \copyright
- *  Copyright (c) 2011 - 2018 Deutsches Elektronen-Synchroton,
+ *  Copyright (c) 2011 - 2020 Deutsches Elektronen-Synchroton,
  *  Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
  *  This library is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU Library General Public License as
@@ -81,7 +81,8 @@ namespace gbl {
 class MilleBinary {
 public:
 	MilleBinary(const std::string& fileName = "milleBinaryISN.dat",
-			bool doublePrec = false, unsigned int aSize = 2000);
+			bool doublePrec = false, bool keepZeros = false,
+			unsigned int aSize = 2000);
 	virtual ~MilleBinary();
 	void addData(double aMeas, double aErr, unsigned int numLocal,
 			unsigned int* indLocal, double* derLocal,
@@ -95,6 +96,7 @@ private:
 	std::vector<float> floatBuffer; ///< Float buffer
 	std::vector<double> doubleBuffer; ///< Double buffer
 	bool doublePrecision; ///< Flag for storage in as *double* values
+	bool globalDerKeepZeros; ///< Flag for keeping global derivatives with value zero
 };
 }
 #endif /* MILLEBINARY_H_ */
