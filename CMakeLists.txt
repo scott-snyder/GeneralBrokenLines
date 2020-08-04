@@ -7,7 +7,7 @@ IF(NOT CMAKE_BUILD_TYPE)
 ENDIF(NOT CMAKE_BUILD_TYPE)
 
 # declare the project name
-PROJECT(GBL VERSION "2.2.0" LANGUAGES CXX)
+PROJECT(GBL VERSION "2.2.1" LANGUAGES CXX)
 
 ###############################
 # Setup the build environment #

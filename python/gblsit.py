@@ -10,7 +10,7 @@ Created on 28 Sep 2018
 # \author Claus Kleinwort, DESY, 2018 (Claus.Kleinwort@desy.de)
 #
 #  \copyright
-#  Copyright (c) 2018 Deutsches Elektronen-Synchroton,
+#  Copyright (c) 2018-2020 Deutsches Elektronen-Synchroton,
 #  Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
 #  This library is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU Library General Public License as
@@ -40,7 +40,7 @@ from gblfit import GblPoint, GblTrajectory
 #  Setup:
 #   - Beam (mainly) in X direction
 #   - Constant magnetic field in Z direction
-#   - Silicon sensors measuring in YZ plane, orthogonal (pixel) or non-orthogonal (stereo strips) measurement systems
+#   - Silicon sensors measuring in YZ plane, orthogonal (pixel) or non-orthogonal (stereo strips, double sided or composite) measurement systems
 #   - Multiple scattering in sensors (air inbetween ignored)
 #   - Curvilinear system (T,U,V) as local coordinate system and (q/p, slopes, offsets) as local track parameters
 #
@@ -86,14 +86,14 @@ def exampleSit():
   # magnetic field
   bfac = 0.003  # B*c for 1 T
   #bfac = 0.  # B*c for 0 T
-  # detector layers: name, position (x,y,z), thickness (X/X_0), (1 or 2) measurements (direction in YZ, resolution)  
+  # detector layers: name, position (x,y,z), thickness (X/X_0), (1 or 2) measurements (direction in YZ, resolution), spacing for composite layers  
   det = gblSiliconDet([ ['PIX1', (2.0, 0., 0.), 0.0033, [(0., 0.0010), (90., 0.0020)] ],  # pixel
                         ['PIX2', (3.0, 0., 0.), 0.0033, [(0., 0.0010), (90., 0.0020)] ],  # pixel
                         ['PIX3', (4.0, 0., 0.), 0.0033, [(0., 0.0010), (90., 0.0020)] ],  # pixel
-                        ['S2D4', (6.0, 0., 0.), 0.0033, [(0., 0.0025), (5., 0.0025)] ],  # strip 2D, 5 deg stereo angle
-                        ['S2D5', (8.0, 0., 0.), 0.0033, [(0., 0.0025), (-5., 0.0025)] ],  # strip 2D, -5 deg stereo angle
-                        ['S2D6', (10.0, 0., 0.), 0.0033, [(0., 0.0025), (5., 0.0025)] ],  # strip 2D, 5 deg stereo angle
-                        ['S2D7', (12.0, 0., 0.), 0.0033, [(0., 0.0025), (-5., 0.0025)] ],  # strip 2D, -5 deg stereo angle
+                        ['S2D4', (6.0, 0., 0.), 0.0033, [(0., 0.0025), (5., 0.0025)], 0.1 ],  # strip 2D (composite), 5 deg stereo angle
+                        ['S2D5', (8.0, 0., 0.), 0.0033, [(0., 0.0025), (-5., 0.0025)], 0.1 ],  # strip 2D (composite), -5 deg stereo angle
+                        ['S2D6', (10.0, 0., 0.), 0.0033, [(0., 0.0025), (5., 0.0025)] ],  # strip 2D (double sided), 5 deg stereo angle
+                        ['S2D7', (12.0, 0., 0.), 0.0033, [(0., 0.0025), (-5., 0.0025)] ],  # strip 2D (double sided), -5 deg stereo angle
                         ['S1D8', (15.0, 0., 0.), 0.0033, [(0., 0.0040)] ]  # strip 1D
                       ], bfac)
                
@@ -102,7 +102,7 @@ def exampleSit():
   binaryFile = open("milleBinary.dat", "wb")
   #binaryFile = None
   #
-  print " Gblsit $Rev$ ", nTry
+  print " Gblsit $Rev: 151 $ ", nTry
   #
   start = time.clock()
   Chi2Sum = 0.
@@ -147,20 +147,44 @@ def exampleSit():
       sOld = sArc
       # point with (independent) measurements (in measurement system)
       point = GblPoint(jacPointToPoint)
-      point.addMeasurement([proL2m, res, measPrec])
+      # composite?
+      if layer.isComposite():
+        # 2nd prediction
+        pred = layer.intersectWithHelix2(seed)
+        measPred = pred.getMeasPred()
+        # 4D measurement
+        pro4D = np.zeros((4, 4)); pro4D[2:, 2:] = proL2m; pro4D[3, :2] = proL2m[1, :] * layer.getSpacing();
+        res4D = np.array([0., 0., res[0], genHits[l][1] - measPred[1]])
+        prec4D = np.array([0., 0., measPrec[0], measPrec[1]])
+        point.addMeasurement([pro4D, res4D, prec4D]) 
+      else:
+        # 2D measurement  
+        point.addMeasurement([proL2m, res, measPrec])
       # global parameters for rigid body alignment?
       if binaryFile is not None:
         # local (alignment) system, per layer
         labels = [l * 10 + 1, l * 10 + 2, l * 10 + 3, l * 10 + 4, l * 10 + 5, l * 10 + 6]
         labGlobal = np.array([labels, labels])
-        derGlobal = layer.getRigidBodyDerLocal(pred.getPosition(), pred.getDirection())
-        point.addGlobals(labGlobal, derGlobal)
+        derGlobal = layer.getRigidBodyDerLocal(pred.getPos(), pred.getDirection())
+        # composite?
+        if layer.isComposite():
+          # 4D
+          labG4D = np.array([labels, labels, labels, labels])
+          derG4D = np.zeros((4, 6)); derG4D[2:] = derGlobal
+          point.addGlobals(labG4D, derG4D)
+        else:
+          # 2D  
+          point.addGlobals(labGlobal, derGlobal)
       # add scatterer to point
       radlen = layer.getRadiationLength() / abs(pred.getCosIncidence())
       scatErr = gblMultipleScatteringError(qbyp, radlen)  # simple model
       if scatErr > 0.:
         scat = np.array([0., 0.])
         scatP = np.array([1. / scatErr ** 2, 1. / scatErr ** 2])
+        # composite?
+        if layer.isComposite():
+          # two similar sub layers
+          scatP *= 0.5
         point.addScatterer([scat, scatP])
       # add point to trajectory      
       traj.addPoint(point)
@@ -243,7 +267,9 @@ class gblSiliconLayer(object):
     self.__measDirs = np.array([self.__uDir, self.__vDir, self.__nDir]) 
     ## local alignment system (IJK = YZX)
     self.__ijkDirs = np.array([[0., 1., 0.], [0., 0., 1.], [1., 0., 0.]])
-  
+    ## spacing (for composite layers)
+    self.__spacing = layer[4] if len(layer) > 4 else None
+    
   ## Get radiation length
   def getRadiationLength(self):
     return self.__xbyx0
@@ -268,6 +294,22 @@ class gblSiliconLayer(object):
   def intersectWithHelix(self, helix):
     return helix.getPrediction(self.__center, self.__uDir, self.__vDir)  
 
+  ## Intersect with helix (2nd sub layer)
+  #
+  # @param[in]  helix  helix
+  # @return prediction
+  #  
+  def intersectWithHelix2(self, helix):
+    return helix.getPrediction(self.__center + self.__spacing * self.__nDir, self.__uDir, self.__vDir)
+  
+  ## Is composite?
+  def isComposite(self):
+    return self.__spacing is not None  
+  
+  ## Get spacing
+  def getSpacing(self):
+    return self.__spacing
+  
   ## Get rigid body derivatives in global frame
   #
   # @param[in] position   position (of prediction or measurement); vector
@@ -349,11 +391,9 @@ class gblSiliconDet(object):
       hlx = gblSimpleHelix(localPar)
       # prediction from local helix
       pred = layer.intersectWithHelix(hlx)
-      meas = pred.getMeasPred() 
-      sigma = layer.getResolution()
-      hits.append((random.gauss(meas[0], sigma[0]), random.gauss(meas[1], sigma[1])))
+      meas = [pred.getMeasPred()] 
       # scatter at intersection point
-      xPos, yPos = pred.getPosition()[:2]
+      xPos, yPos = pred.getPos()[:2]
       radlen = layer.getRadiationLength() / abs(pred.getCosIncidence())
       errMs = gblMultipleScatteringError(qbyp, radlen)  # simple model
       cosLambda = 1. / math.sqrt(1. + localPar[3] ** 2)
@@ -364,6 +404,25 @@ class gblSiliconDet(object):
       newhlx = gblSimpleHelix(newpar)
       # move back
       localPar = newhlx.moveTo((-xPos, -yPos))
+      # composite layer
+      if layer.isComposite():
+        # 2nd prediction from local helix
+        pred = layer.intersectWithHelix2(hlx)
+        meas.append(pred.getMeasPred())
+        # scatter at intersection point
+        xPos, yPos = pred.getPos()[:2] 
+        cosLambda = 1. / math.sqrt(1. + localPar[3] ** 2)
+        # move to intersection point
+        newpar = hlx.moveTo((xPos, yPos))
+        newpar[1] += random.gauss(0., errMs / cosLambda)  # phi
+        newpar[3] += random.gauss(0., errMs / cosLambda ** 2)  # dzds
+        newhlx = gblSimpleHelix(newpar)
+        # move back
+        localPar = newhlx.moveTo((-xPos, -yPos))
+        
+      # add (smeared) hit
+      sigma = layer.getResolution()
+      hits.append((random.gauss(meas[0][0], sigma[0]), random.gauss(meas[-1][1], sigma[1])))
     
     return hits
 
@@ -551,7 +610,7 @@ class gblHelixPrediction(object):
     return self.__pred
   
   ## Get Position
-  def getPosition(self):
+  def getPos(self):
     return self.__pos
  
   ## Get (track) direction
