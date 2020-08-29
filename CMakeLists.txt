@@ -40,7 +40,7 @@ ENDIF("${IsSystemDir}" STREQUAL "-1")
 ######################
 
 # Set standard build flags
-SET(COMPILER_FLAGS -pedantic -Wall -Wextra -Wcast-align -Wcast-qual   -Wdisabled-optimization -Wformat=2 -Winit-self -Wlogical-op   -Wnoexcept -Woverloaded-virtual -Wredundant-decls -Wsign-promo -Wstrict-null-sentinel  -Wswitch-default -Wundef -Wshadow -Wformat-security -Wdeprecated -fdiagnostics-color=auto )
+SET(COMPILER_FLAGS -pedantic -Wall -Wextra -Wcast-align -Wcast-qual   -Wdisabled-optimization -Wformat=2 -Winit-self -Wlogical-op   -Wnoexcept -Woverloaded-virtual -Wredundant-decls -Wsign-promo -Wstrict-null-sentinel  -Wswitch-default -Wundef -Wshadow -Wformat-security -Wdeprecated -Wno-deprecated-copy -fdiagnostics-color=auto )
 
 # Set linker flags
 IF("${CMAKE_CXX_COMPILER_ID}" STREQUAL "AppleClang")
