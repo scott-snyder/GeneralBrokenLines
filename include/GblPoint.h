@@ -43,12 +43,12 @@
 #include "TMatrixDSymEigen.h"
 #endif
 
-#ifdef __GNUC__
+#if __GNUC__ >= 9
 # pragma GCC diagnostic push
 # pragma GCC diagnostic ignored "-Wdeprecated-copy"
 #endif
 #include <Eigen/Dense>
-#ifdef __GNUC__
+#if __GNUC__ >= 9
 # pragma GCC diagnostic pop
 #endif
 

@@ -38,12 +38,12 @@
 #include<math.h>
 #include "VMatrix.h"
 
-#ifdef __GNUC__
+#if __GNUC__ >= 9
 # pragma GCC diagnostic push
 # pragma GCC diagnostic ignored "-Wdeprecated-copy"
 #endif
 #include <Eigen/Core>
-#ifdef __GNUC__
+#if __GNUC__ >= 9
 # pragma GCC diagnostic pop
 #endif
 
