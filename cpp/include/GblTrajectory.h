@@ -13,7 +13,7 @@
  *
  *
  *  \copyright
- *  Copyright (c) 2011 - 2018 Deutsches Elektronen-Synchroton,
+ *  Copyright (c) 2011 - 2021 Deutsches Elektronen-Synchroton,
  *  Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
  *  This library is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU Library General Public License as
@@ -52,7 +52,7 @@ public:
 	GblTrajectory(const std::vector<GblPoint> &aPointList, bool flagCurv = true,
 			bool flagU1dir = true, bool flagU2dir = true);
 	GblTrajectory(
-			const std::vector<std::pair<std::vector<GblPoint>, Eigen::MatrixXd> >& aPointsAndTransList);
+			const std::vector<std::pair<std::vector<GblPoint>, Eigen::MatrixXd> > &aPointsAndTransList);
 
 	/// Create new (simple) trajectory from list of points with external seed.
 	/**
@@ -69,7 +69,7 @@ public:
 	 */
 	template<typename Seed>
 	GblTrajectory(const std::vector<GblPoint> &aPointList, unsigned int aLabel,
-			const Eigen::MatrixBase<Seed>& aSeed, bool flagCurv = true,
+			const Eigen::MatrixBase<Seed> &aSeed, bool flagCurv = true,
 			bool flagU1dir = true, bool flagU2dir = true);
 
 	/// Create new composed trajectory from list of points and transformations with arbitrary external measurements.
@@ -88,10 +88,10 @@ public:
 			typename std::enable_if<(Precision::ColsAtCompileTime != 1)>::type* =
 					nullptr>
 	GblTrajectory(
-			const std::vector<std::pair<std::vector<GblPoint>, Eigen::MatrixXd> >& aPointsAndTransList,
-			const Eigen::MatrixBase<Derivatives>& extDerivatives,
-			const Eigen::MatrixBase<Measurements>& extMeasurements,
-			const Eigen::MatrixBase<Precision>& extPrecisions);
+			const std::vector<std::pair<std::vector<GblPoint>, Eigen::MatrixXd> > &aPointsAndTransList,
+			const Eigen::MatrixBase<Derivatives> &extDerivatives,
+			const Eigen::MatrixBase<Measurements> &extMeasurements,
+			const Eigen::MatrixBase<Precision> &extPrecisions);
 
 	/// Create new composed trajectory from list of points and transformations with independent external measurements.
 	/**
@@ -110,21 +110,24 @@ public:
 			typename std::enable_if<(Precision::ColsAtCompileTime == 1)>::type* =
 					nullptr>
 	GblTrajectory(
-			const std::vector<std::pair<std::vector<GblPoint>, Eigen::MatrixXd> >& aPointsAndTransList,
-			const Eigen::MatrixBase<Derivatives>& extDerivatives,
-			const Eigen::MatrixBase<Measurements>& extMeasurements,
-			const Eigen::MatrixBase<Precision>& extPrecisions);
+			const std::vector<std::pair<std::vector<GblPoint>, Eigen::MatrixXd> > &aPointsAndTransList,
+			const Eigen::MatrixBase<Derivatives> &extDerivatives,
+			const Eigen::MatrixBase<Measurements> &extMeasurements,
+			const Eigen::MatrixBase<Precision> &extPrecisions);
 
 #ifdef GBL_EIGEN_SUPPORT_ROOT
 	// input from ROOT
 	GblTrajectory(const std::vector<GblPoint> &aPointList, unsigned int aLabel,
 			const TMatrixDSym &aSeed, bool flagCurv = true, bool flagU1dir =
-			true, bool flagU2dir = true);
-	GblTrajectory(const std::vector<std::pair<std::vector<GblPoint>, TMatrixD> > &aPointsAndTransList);
-	GblTrajectory(const std::vector<std::pair<std::vector<GblPoint>, TMatrixD> > &aPointsAndTransList,
+					true, bool flagU2dir = true);
+	GblTrajectory(
+			const std::vector<std::pair<std::vector<GblPoint>, TMatrixD> > &aPointsAndTransList);
+	GblTrajectory(
+			const std::vector<std::pair<std::vector<GblPoint>, TMatrixD> > &aPointsAndTransList,
 			const TMatrixD &extDerivatives, const TVectorD &extMeasurements,
 			const TVectorD &extPrecisions);
-	GblTrajectory(const std::vector<std::pair<std::vector<GblPoint>, TMatrixD> > &aPointsAndTransList,
+	GblTrajectory(
+			const std::vector<std::pair<std::vector<GblPoint>, TMatrixD> > &aPointsAndTransList,
 			const TMatrixD &extDerivatives, const TVectorD &extMeasurements,
 			const TMatrixDSym &extPrecisions);
 #endif
@@ -136,6 +139,8 @@ public:
 	unsigned int getMeasResults(unsigned int aLabel, unsigned int &numData,
 			Eigen::VectorXd &aResiduals, Eigen::VectorXd &aMeasErrors,
 			Eigen::VectorXd &aResErrors, Eigen::VectorXd &aDownWeights);
+	unsigned int getMeasResults(unsigned int aLabel, unsigned int &numData,
+			Eigen::VectorXd &aResiduals, Eigen::VectorXd &aMeasErrors);
 	unsigned int getScatResults(unsigned int aLabel, unsigned int &numData,
 			Eigen::VectorXd &aResiduals, Eigen::VectorXd &aMeasErrors,
 			Eigen::VectorXd &aResErrors, Eigen::VectorXd &aDownWeights);
@@ -154,7 +159,7 @@ public:
 	unsigned int getLabels(
 			std::vector<std::vector<unsigned int> > &aLabelList) const;
 	unsigned int fit(double &Chi2, int &Ndf, double &lostWeight,
-			const std::string& optionList = "", unsigned int aLabel = 0);
+			const std::string &optionList = "", unsigned int aLabel = 0);
 	void milleOut(MilleBinary &aMille);
 	void printTrajectory(unsigned int level = 0) const;
 	void printPoints(unsigned int level = 0) const;
@@ -195,10 +200,10 @@ private:
 
 	std::pair<std::vector<unsigned int>, Eigen::MatrixXd> getJacobian(
 			int aSignedLabel) const;
-	void getFitToLocalJacobian(std::array<unsigned int, 5>& anIndex,
+	void getFitToLocalJacobian(std::array<unsigned int, 5> &anIndex,
 			Matrix5d &aJacobian, const GblPoint &aPoint, unsigned int measDim,
 			unsigned int nJacobian = 1) const;
-	void getFitToKinkJacobian(std::array<unsigned int, 7>& anIndex,
+	void getFitToKinkJacobian(std::array<unsigned int, 7> &anIndex,
 			Matrix27d &aJacobian, const GblPoint &aPoint) const;
 	void construct();
 	void defineOffsets();
@@ -208,12 +213,14 @@ private:
 	void predict();
 	double downWeight(unsigned int aMethod);
 	void getResAndErr(unsigned int aData, bool used, double &aResidual,
-			double &aMeadsError, double &aResError, double &aDownWeight);
+			double &aMeasError, double &aResError, double &aDownWeight);
+	void getResAndErr(unsigned int aData, double &aResidual,
+			double &aMeasError);
 };
 
 template<typename Seed>
 GblTrajectory::GblTrajectory(const std::vector<GblPoint> &aPointList,
-		unsigned int aLabel, const Eigen::MatrixBase<Seed>& aSeed,
+		unsigned int aLabel, const Eigen::MatrixBase<Seed> &aSeed,
 		bool flagCurv, bool flagU1dir, bool flagU2dir) :
 		numAllPoints(aPointList.size()), numPoints(), numOffsets(0), numInnerTransformations(
 				0), numInnerTransOffsets(0), numCurvature(flagCurv ? 1 : 0), numParameters(
@@ -234,10 +241,10 @@ GblTrajectory::GblTrajectory(const std::vector<GblPoint> &aPointList,
 template<typename Derivatives, typename Measurements, typename Precision,
 		typename std::enable_if<(Precision::ColsAtCompileTime != 1)>::type*>
 GblTrajectory::GblTrajectory(
-		const std::vector<std::pair<std::vector<GblPoint>, Eigen::MatrixXd> >& aPointsAndTransList,
-		const Eigen::MatrixBase<Derivatives>& extDerivatives,
-		const Eigen::MatrixBase<Measurements>& extMeasurements,
-		const Eigen::MatrixBase<Precision>& extPrecisions) :
+		const std::vector<std::pair<std::vector<GblPoint>, Eigen::MatrixXd> > &aPointsAndTransList,
+		const Eigen::MatrixBase<Derivatives> &extDerivatives,
+		const Eigen::MatrixBase<Measurements> &extMeasurements,
+		const Eigen::MatrixBase<Precision> &extPrecisions) :
 		numAllPoints(), numPoints(), numOffsets(0), numInnerTransformations(
 				aPointsAndTransList.size()), numParameters(0), numLocals(0), numMeasurements(
 				0), externalPoint(0), skippedMeasLabel(0), maxNumGlobals(0), theDimension(
@@ -279,10 +286,10 @@ GblTrajectory::GblTrajectory(
 template<typename Derivatives, typename Measurements, typename Precision,
 		typename std::enable_if<(Precision::ColsAtCompileTime == 1)>::type*>
 GblTrajectory::GblTrajectory(
-		const std::vector<std::pair<std::vector<GblPoint>, Eigen::MatrixXd> >& aPointsAndTransList,
-		const Eigen::MatrixBase<Derivatives>& extDerivatives,
-		const Eigen::MatrixBase<Measurements>& extMeasurements,
-		const Eigen::MatrixBase<Precision>& extPrecisions) :
+		const std::vector<std::pair<std::vector<GblPoint>, Eigen::MatrixXd> > &aPointsAndTransList,
+		const Eigen::MatrixBase<Derivatives> &extDerivatives,
+		const Eigen::MatrixBase<Measurements> &extMeasurements,
+		const Eigen::MatrixBase<Precision> &extPrecisions) :
 		numAllPoints(), numPoints(), numOffsets(0), numInnerTransformations(
 				aPointsAndTransList.size()), numParameters(0), numLocals(0), numMeasurements(
 				0), externalPoint(0), skippedMeasLabel(0), maxNumGlobals(0), theDimension(

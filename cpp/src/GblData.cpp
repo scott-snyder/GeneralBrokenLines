@@ -11,7 +11,7 @@
  *  \author Claus Kleinwort, DESY, 2011 (Claus.Kleinwort@desy.de)
  *
  *  \copyright
- *  Copyright (c) 2011 - 2016 Deutsches Elektronen-Synchroton,
+ *  Copyright (c) 2011 - 2021 Deutsches Elektronen-Synchroton,
  *  Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
  *  This library is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU Library General Public License as
@@ -41,12 +41,14 @@ namespace gbl {
  * \param [in] aPrec Precision of (scalar) measurement
  * \param [in] aTraj Trajectory number
  * \param [in] aPoint Point number
+ * \param [in] aMeas measurement number
  */
 GblData::GblData(unsigned int aLabel, dataBlockType aType, double aValue,
-		double aPrec, unsigned int aTraj, unsigned int aPoint) :
+		double aPrec, unsigned int aTraj, unsigned int aPoint,
+		unsigned int aMeas) :
 		theLabel(aLabel), theRow(0), theType(aType), theValue(aValue), thePrecision(
-				aPrec), theTrajectory(aTraj), thePoint(aPoint), theDWMethod(0), theDownWeight(
-				1.), thePrediction(0.), theNumLocal(0), moreParameters(), moreDerivatives() {
+				aPrec), theTrajectory(aTraj), thePoint(aPoint), theMeas(aMeas), theDWMethod(
+				0), theDownWeight(1.), thePrediction(0.), theNumLocal(0), moreParameters(), moreDerivatives() {
 
 }
 
@@ -149,9 +151,15 @@ double GblData::getChi2() const {
 /// Print data block.
 void GblData::printData() const {
 
-	std::cout << " measurement at label " << theLabel << " of type " << theType
-			<< " from row " << theRow << ": " << theValue << ", "
-			<< thePrecision << std::endl;
+	if (theType == InternalMeasurement) {
+		std::cout << " measurement at label " << theLabel << " of type "
+				<< theType << " from meas, row " << theMeas << ", " << theRow
+				<< ": " << theValue << ", " << thePrecision << std::endl;
+	} else {
+		std::cout << " measurement at label " << theLabel << " of type "
+				<< theType << " from row " << theRow << ": " << theValue << ", "
+				<< thePrecision << std::endl;
+	}
 	std::cout << "  param " << moreParameters.size() + theNumLocal << ":";
 	for (unsigned int i = 0; i < moreParameters.size(); ++i) {
 		std::cout << " " << moreParameters[i];
@@ -195,7 +203,7 @@ dataBlockType GblData::getType() const {
  * \param [out] derLocal Array of derivatives for used (local) fit parameters
  */
 void GblData::getLocalData(double &aValue, double &aWeight,
-		unsigned int &numLocal, unsigned int* &indLocal, double* &derLocal) {
+		unsigned int &numLocal, unsigned int *&indLocal, double *&derLocal) {
 
 	aValue = theValue;
 	aWeight = thePrecision * theDownWeight;
@@ -219,11 +227,12 @@ void GblData::getLocalData(double &aValue, double &aWeight,
  * \param [out] derLocal Array of derivatives for used (local) fit parameters
  * \param [out] aTraj Trajectory number
  * \param [out] aPoint Point number
+ * \param [out] aMeas Measurements number
  * \param [out] aRow Row number
  */
 void GblData::getAllData(double &aValue, double &aErr, unsigned int &numLocal,
-		unsigned int* &indLocal, double* &derLocal, unsigned int &aTraj,
-		unsigned int &aPoint, unsigned int &aRow) {
+		unsigned int *&indLocal, double *&derLocal, unsigned int &aTraj,
+		unsigned int &aPoint, unsigned int &aMeas, unsigned int &aRow) {
 	aValue = theValue;
 	aErr = 1.0 / sqrt(thePrecision);
 	if (theNumLocal > 0) {
@@ -237,10 +246,11 @@ void GblData::getAllData(double &aValue, double &aErr, unsigned int &numLocal,
 	}
 	aTraj = theTrajectory;
 	aPoint = thePoint;
+	aMeas = theMeas;
 	aRow = theRow;
 }
 
-/// Get data for residual (and errors).
+/// Get data for residual (and errors) "long list".
 /**
  * \param [out] aResidual Measurement-Prediction
  * \param [out] aVariance Variance (of measurement)
@@ -250,8 +260,8 @@ void GblData::getAllData(double &aValue, double &aErr, unsigned int &numLocal,
  * \param [out] derLocal Array of derivatives for used (local) fit parameters
  */
 void GblData::getResidual(double &aResidual, double &aVariance,
-		double &aDownWeight, unsigned int &numLocal, unsigned int* &indLocal,
-		double* &derLocal) {
+		double &aDownWeight, unsigned int &numLocal, unsigned int *&indLocal,
+		double *&derLocal) {
 	aResidual = theValue - thePrediction;
 	aVariance = 1.0 / thePrecision;
 	aDownWeight = theDownWeight;
@@ -264,5 +274,15 @@ void GblData::getResidual(double &aResidual, double &aVariance,
 		indLocal = &moreParameters[0];
 		derLocal = &moreDerivatives[0];
 	}
+}
+
+/// Get data for residual (and errors) "short list".
+/**
+ * \param [out] aResidual Measurement-Prediction
+ * \param [out] aVariance Variance (of measurement)
+ */
+void GblData::getResidual(double &aResidual, double &aVariance) {
+	aResidual = theValue - thePrediction;
+	aVariance = 1.0 / thePrecision;
 }
 }

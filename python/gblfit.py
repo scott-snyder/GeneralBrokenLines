@@ -12,7 +12,7 @@ Created on Jul 27, 2011
 # \author Claus Kleinwort, DESY, 2011 (Claus.Kleinwort@desy.de)
 #
 #  \copyright
-#  Copyright (c) 2011 - 2018 Deutsches Elektronen-Synchroton,
+#  Copyright (c) 2011 - 2021 Deutsches Elektronen-Synchroton,
 #  Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
 #  This library is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU Library General Public License as
@@ -33,71 +33,47 @@ from gblnum import BorderedBandMatrix
 from mille import MilleRecord
 
 
-## User supplied point on (initial) trajectory.
+## User supplied measurement at point on (initial) trajectory.
 #
-#  Must have jacobians for propagation to previous or next point with offsets (first, last
-#  point, points with scatterer). May have:
+#  Must have measurement. May have:
 #  
-#    1. Measurement (1D or 2D)
-#    2. Scatterer (thin, 2D kinks)
-#    3. Additional local parameters (with derivatives). Fitted together with track parameters.
-#    4. Additional global parameters (with labels and derivatives). Not fitted, only passed
+#    1. Additional local parameters (with derivatives). Fitted together with track parameters.
+#    2. Additional global parameters (with labels and derivatives). Not fitted, only passed
 #       on to (binary) file for fitting with Millepede-II. 
 #       
-class GblPoint(object):
+class GblMeasurement(object):
 
-  ## Create new point.
-  #
-  #  @param aJacobian jacobian from previous point; matrix(float)
-  #
-  def __init__(self, aJacobian):
-    ## label for referencing point (0,1,..,number(points)-1); int
-    self.__label = 0
-    ##  >=0: offset number at point, <0: offset number at next point with offset; int
-    self.__offset = 0
-    ## Point-to-point jacobian from previous point; matrix(float)
-    self.__p2pJacobian = aJacobian
-    ## jacobians for propagation to previous or next point with offsets; pair(matrix(float))
-    self.__jacobians = [ [], [] ]
-    ## measurement at point: projection (dm/du), residuals (to initial trajectory), precision; list(matrix(float))
-    self.__measurement = None
-    ## dimension of measurement (2D, 4D or 5D); int
-    self.__measDim = 0
-    ## minimal precision to accept measurement                                                                                <
-    self.__measMinPrec = 0.
-    ## transformation (to eigen-vectors of precision matrix); matrix(float)
-    self.__measTransformation = None    
-    ## scatterer at point: (transformation or None,) initial kinks, precision (inverse covariance matrix); list(matrix(float))
-    self.__scatterer = None
-    ## local derivatives; matrix(float)
-    self.__localDerivatives = None
-    ## global labels; matrix(int)
-    self.__globalLabels = None
-    ## global derivatives; matrix(float)
-    self.__globalDerivatives = None
-      
-# for extension to retrieval of residuals, pulls    
-#    self.__dataMeas = [0, 0]
-# for extension to retrieval of residuals, pulls    
-#    self.__dataScat = [0, 0]
-
-  ## Add a mesurement to a point.
+  ## Create new measurement.
   # 
-  #  Add measurement with arbitrary precision (inverse covariance) matrix.
+  #  Create measurement with arbitrary precision (inverse covariance) matrix.
   #  Will be diagonalized.
   # 
   #  @param aMeasurement measurement (projection (or None), residuals, precision
   #                       (diagonal of or full matrix)); list(matrix(float))
   #  @param minPrecision Minimal precision to accept measurement
   #
-  def addMeasurement(self, aMeasurement, minPrecision=0.):
+  def __init__(self, aMeasurement, minPrecision=0.):
+    ## measurement at point: projection (dm/du), residuals (to initial trajectory), precision; list(matrix(float))
     self.__measurement = aMeasurement
+    ## dimension of measurement (2D, 4D or 5D); int
     self.__measDim = aMeasurement[1].shape[0]
+    ## minimal precision to accept measurement                                                                                <
     self.__measMinPrec = minPrecision
-    if (aMeasurement[2].ndim == 2):  # full precision matrix, need to diagonalize
+    ## transformation (to eigen-vectors of precision matrix); matrix(float)
+    self.__measTransformation = None    
+    ## local derivatives; matrix(float)
+    self.__localDerivatives = None
+    ## global labels; matrix(int)
+    self.__globalLabels = None
+    ## global derivatives; matrix(float)
+    self.__globalDerivatives = None
+       
+    # full precision matrix?
+    if (aMeasurement[2].ndim == 2):
+      # need to diagonalize
       eigenVal, eigenVec = np.linalg.eigh(aMeasurement[2])
       self.__measTransformation = eigenVec.T
-#     transform measurement
+      # transform measurement
       if (aMeasurement[0] is None):
         self.__measurement[0] = self.__measTransformation
       else:
@@ -133,45 +109,6 @@ class GblPoint(object):
   #
   def getMeasMinPrec(self):
     return self.__measMinPrec
-
-  ## Add a (thin) scatterer to a point.
-  #  
-  #  Add scatterer with arbitrary precision (inverse covariance) matrix.
-  #  Will be diagonalized. Changes local track direction.
-  #
-  #  The precision matrix for the local slopes is defined by the
-  #  angular scattering error theta_0 and the scalar products c_1, c_2 of the
-  #  offset directions in the local frame with the track direction:
-  #
-  #             (1 - c_1*c_1 - c_2*c_2)   |  1 - c_1*c_1     - c_1*c_2  |
-  #        P =  ~~~~~~~~~~~~~~~~~~~~~~~ * |                             |
-  #                 theta_0*theta_0       |    - c_1*c_2   1 - c_2*c_2  |
-  #      
-  #  @param aScatterer scatterer (kinks, precision (diagonal of or full matrix)); list(matrix(float))     
-  # 
-  def addScatterer(self, aScatterer):
-    self.__scatterer = [ None ] + aScatterer
-    if (aScatterer[1].ndim == 2):  # full precision matrix, need to diagonalize
-      eigenVal, eigenVec = np.linalg.eigh(aScatterer[1])
-      scatTransformation = eigenVec.T
-#     transform measurement
-      self.__scatterer[0] = scatTransformation
-      self.__scatterer[1] = np.dot(scatTransformation, aScatterer[0])
-      self.__scatterer[2] = eigenVal
- 
-  ## Check point for a scatterer.
-  #
-  # @return flag; bool
-  #  
-  def hasScatterer(self):
-    return (self.__scatterer is not None)
-
-  ## Retrieve scatterer of a point.
-  #  
-  #  @return scatterer (kinks, precision); list(matrix(float))   
-  # 
-  def getScatterer(self):
-    return self.__scatterer
 
   ## Add local derivatives.
   #  
@@ -226,7 +163,129 @@ class GblPoint(object):
   # 
   def getGlobalDerivatives(self):
     return self.__globalDerivatives
+
+  ## Print Measurement. 
+  def printMeasurement(self):
+    print "  measurement ", self.__measDim, len(self.__localDerivatives), len(self.__globalDerivatives)
+
+#------------------------------------------------------------------------------ 
+
+
+## User supplied point on (initial) trajectory.
+#
+#  Must have jacobians for propagation to previous or next point with offsets (first, last
+#  point, points with scatterer). May have:
+#  
+#    1. Measurement(s) (usually 1D or 2D (or 4D or 5D))
+#    2. Scatterer (thin, 2D kinks)
+#       
+class GblPoint(object):
+
+  ## Create new point.
+  #
+  #  @param aJacobian jacobian from previous point; matrix(float)
+  #
+  def __init__(self, aJacobian):
+    ## label for referencing point (0,1,..,number(points)-1); int
+    self.__label = 0
+    ##  >=0: offset number at point, <0: offset number at next point with offset; int
+    self.__offset = 0
+    ## Point-to-point jacobian from previous point; matrix(float)
+    self.__p2pJacobian = aJacobian
+    ## jacobians for propagation to previous or next point with offsets; pair(matrix(float))
+    self.__jacobians = [ [], [] ]
+    ## measurements at point; list(GblMeasurement)
+    self.__measurements = []
+    ## scatterer at point: (transformation or None,) initial kinks, precision (inverse covariance matrix); list(matrix(float))
+    self.__scatterer = None
+      
+# for extension to retrieval of residuals, pulls    
+#    self.__dataMeas = [0, 0]
+# for extension to retrieval of residuals, pulls    
+#    self.__dataScat = [0, 0]
+
+  ## Add a mesurement to a point.
+  # 
+  #  Add measurement with arbitrary precision (inverse covariance) matrix.
+  #  Will be diagonalized.
+  # 
+  #  @param aMeasurement measurement (projection (or None), residuals, precision
+  #                       (diagonal of or full matrix)); list(matrix(float))
+  #  @param minPrecision Minimal precision to accept measurement
+  #
+  def addMeasurement(self, aMeasurement, minPrecision=0.):
+    self.__measurements.append(GblMeasurement(aMeasurement, minPrecision))
+    
+  ## Check point for a measurement.
+  #
+  # @return flag; bool
+  #
+  def hasMeasurement(self):
+    return (self.__measurements <> [])
+
+  ## Retrieve measurements of a point.
+  #  
+  #  @return measurements; list(GblMeasurements)
+  #
+  def getMeasurements(self):
+    return self.__measurements
  
+  ## Add a (thin) scatterer to a point.
+  #  
+  #  Add scatterer with arbitrary precision (inverse covariance) matrix.
+  #  Will be diagonalized. Changes local track direction.
+  #
+  #  The precision matrix for the local slopes is defined by the
+  #  angular scattering error theta_0 and the scalar products c_1, c_2 of the
+  #  offset directions in the local frame with the track direction:
+  #
+  #             (1 - c_1*c_1 - c_2*c_2)   |  1 - c_1*c_1     - c_1*c_2  |
+  #        P =  ~~~~~~~~~~~~~~~~~~~~~~~ * |                             |
+  #                 theta_0*theta_0       |    - c_1*c_2   1 - c_2*c_2  |
+  #      
+  #  @param aScatterer scatterer (kinks, precision (diagonal of or full matrix)); list(matrix(float))     
+  # 
+  def addScatterer(self, aScatterer):
+    self.__scatterer = [ None ] + aScatterer
+    if (aScatterer[1].ndim == 2):  # full precision matrix, need to diagonalize
+      eigenVal, eigenVec = np.linalg.eigh(aScatterer[1])
+      scatTransformation = eigenVec.T
+#     transform measurement
+      self.__scatterer[0] = scatTransformation
+      self.__scatterer[1] = np.dot(scatTransformation, aScatterer[0])
+      self.__scatterer[2] = eigenVal
+ 
+  ## Check point for a scatterer.
+  #
+  # @return flag; bool
+  #  
+  def hasScatterer(self):
+    return (self.__scatterer is not None)
+
+  ## Retrieve scatterer of a point.
+  #  
+  #  @return scatterer (kinks, precision); list(matrix(float))   
+  # 
+  def getScatterer(self):
+    return self.__scatterer
+
+  ## Add local derivatives (to last measurement).
+  #  
+  #  @param derivatives local derivatives; matrix(float)   
+  #   
+  def addLocals(self, derivatives):
+    if self.__measurements <> []:
+      self.__measurements[-1].addLocals(derivatives)
+
+  ## Add global derivatives (to last measurement).
+  #  
+  #  @param labels global labels; matrix(int)
+  #  @param derivatives global derivatives; matrix(float)
+  #
+  def addGlobals(self, labels, derivatives):
+    if self.__measurements <> []:
+      self.__measurements[-1].addGlobals(labels, derivatives)
+
   ## Define label of a point.
   #  
   #  @param aLabel label; int   
@@ -301,7 +360,7 @@ class GblPoint(object):
 
   ## Print point. 
   def printPoint(self):
-    print " point ", self.__label, self.__offset 
+    print " point ", self.__label, self.__offset, len(self.__measurements) 
 
 #------------------------------------------------------------------------------ 
 
@@ -318,12 +377,15 @@ class GblData(object):
   #  @param aType  type of data; int
   #  @param aValue value; float
   #  @param aPrec precision; float
+  #  @param aMeas measurement index; float
   #
-  def __init__(self, aLabel=0, aType=0, aValue=0., aPrec=0.):
+  def __init__(self, aLabel=0, aType=0, aValue=0., aPrec=0., aMeas=0):
     ## label of corresponding point; int
     self.__label = aLabel
     ## type of data (0: none, 1: internal measurement, 2: internal kink, 3: external seed, 4: external measurement); int
     self.__type = aType
+    ## index for internal measurement
+    self.__index = aMeas
     ## value (residual or kink); float
     self.__value = aValue
     ## precision (diagonal element of inverse covariance matrix); float
@@ -367,7 +429,7 @@ class GblData(object):
         self.__derivatives.append(matDer[iRow , i])
         self.__parameters.append(labDer[i])
 
-    if (derGlobal is not None):  
+    if (derGlobal is not None): 
       for i in range(derGlobal.shape[1]):  # global derivatives
         if (derGlobal[iRow, i] != 0.):
           self.__globalLabels.append(labGlobal[iRow, i])
@@ -388,7 +450,7 @@ class GblData(object):
   #  
   #  @return indices, compressed right hand side and matrix; list
   #
-  def getMatrices(self):  
+  def getMatrices(self): 
     aVector = np.array([ self.__derivatives ])
     aMatrix = np.dot(aVector.T, aVector)
     aValue = self.__value
@@ -433,7 +495,7 @@ class GblData(object):
       aWeight = 1.0 / (1.0 + (scaledResidual / 2.3849) ** 2)      
     self.__downWeight = aWeight
     return aWeight
-
+  
   ## Calculate Chi2 (contribution) from data.
   # 
   # For down-weighting with M-estimators the corresponding objective function is used.
@@ -446,7 +508,7 @@ class GblData(object):
     if (self.__dwMethod == 1):  # Tukey
       if (scaledResidual < 4.6851):
         Chi2 = 4.6851 ** 2 / 3. * (1. - (1. - (scaledResidual / 4.6851) ** 2) ** 3)
-      else:  
+      else: 
         Chi2 = 4.6851 ** 2 / 3.
     elif (self.__dwMethod == 2):  # Huber
       if (scaledResidual > 1.345):
@@ -468,6 +530,13 @@ class GblData(object):
   #
   def getType(self):
     return self.__type
+
+  ## Get index.
+  #
+  #  @return type; int   
+  #
+  def getIndex(self):
+    return self.__index
       
   ## Get data for residual (and errors).
   #  
@@ -525,7 +594,9 @@ class GblData(object):
 #  prediction (external seed) the description of multiple scattering
 #  is added by offsets in a local system. Along the initial
 #  trajectory points are defined with can describe a measurement
-#  or a (thin) scatterer or both. The refit provides corrections
+#  or a (thin) scatterer or both. 
+#  Multiple measurements can be added to a point to implement ambiguities.
+#  The refit provides corrections
 #  to the local track parameters (in the local system) and the 
 #  corresponding covariance matrix at any of those points.
 #  Non-diagonal covariance matrices will be diagonalized internally.
@@ -563,7 +634,7 @@ class GblData(object):
 #    -# For all points on initial trajectory 
 #        - Create point (supply jacobian from previous point):\n
 #            <tt>point = \ref gblfit.GblPoint "GblPoint(jacobian)"</tt>
-#        - Optionally add measurement to point:\n    
+#        - Optionally add measurement(s) to point:\n    
 #            <tt>point.addMeasurement(..)</tt>
 #        - Optionally additional local or global parameters for measurement:\n 
 #            <tt>point.addLocals(..)</tt> \n
@@ -650,7 +721,8 @@ class GblTrajectory(object):
     label = self.__numPoints
     point.setLabel(label)
     self.__points.append(point)
-    self.__numLocals = max(self.__numLocals, point.getNumLocals())
+    for m in point.getMeasurements():
+      self.__numLocals = max(self.__numLocals, m.getNumLocals())
     return label
 
   ## Get number of points on trajectory.
@@ -696,7 +768,7 @@ class GblTrajectory(object):
   def milleOut(self, aFile, doublePrec=False):
     rec = MilleRecord(doublePrec)
 #   data measurements and kinks        
-    for aData in self.__data:       
+    for aData in self.__data: 
       rec.addData(aData.toRecord())
                     
     rec.writeRecord(aFile)
@@ -867,7 +939,7 @@ class GblTrajectory(object):
   #  @return labels for fit parameters with non zero derivatives, 
   #           corresponding transformation matrix; list(vector(int), matrix(float))
   #   
-  def __getFitToKinkJacobian(self, aPoint):              
+  def __getFitToKinkJacobian(self, aPoint): 
     aDim = self.__dimensions
     nDim = len(aDim)
     nCurv = self.__numCurvature
@@ -1003,7 +1075,7 @@ class GblTrajectory(object):
         if (aPoint.hasScatterer()):
           aPoint.setOffset(nOffsets)
           nOffsets += 1
-        else:  
+        else: 
           aPoint.setOffset(-nOffsets)
 #     last point is offset    
       self.__points[-1].setOffset(nOffsets)
@@ -1044,21 +1116,24 @@ class GblTrajectory(object):
       for aPoint in self.__points:
         if (aPoint.hasMeasurement()):
           nLabel = aPoint.getLabel()
-          measDim = aPoint.getMeasDim()
-          measPrecision = aPoint.getMeasMinPrec()
-          localDer = aPoint.getLocalDerivatives()
-          globalLab = aPoint.getGlobalLabels()
-          globalDer = aPoint.getGlobalDerivatives()
-          matP, aMeas, aPrec = aPoint.getMeasurement()
-          nJacobian = 1 if aPoint.getOffset() < self.__numOffsets - 1 else 0  # last point needs backward propagation
-          labDer, matDer = self.__getFitToLocalJacobian(aPoint, measDim, nJacobian)
-          matPDer = matDer if matP is None else np.dot(matP, matDer)
-          for i in range(measDim):
-            if (aPrec[i] > measPrecision):
-              aData = GblData(nLabel, 1, aMeas[i], aPrec[i])
-              aData.addDerivatives(i, labDer, matPDer, localDer, \
-                                   globalLab, globalDer)
-              self.__data.append(aData)
+          measIndex = 0
+          for m in aPoint.getMeasurements():
+            measIndex += 1
+            measDim = m.getMeasDim()
+            measPrecision = m.getMeasMinPrec()
+            localDer = m.getLocalDerivatives()
+            globalLab = m.getGlobalLabels()
+            globalDer = m.getGlobalDerivatives()
+            matP, aMeas, aPrec = m.getMeasurement()
+            nJacobian = 1 if aPoint.getOffset() < self.__numOffsets - 1 else 0  # last point needs backward propagation
+            labDer, matDer = self.__getFitToLocalJacobian(aPoint, measDim, nJacobian)
+            matPDer = matDer if matP is None else np.dot(matP, matDer)
+            for i in range(measDim):
+              if (aPrec[i] > measPrecision):
+                aData = GblData(nLabel, 1, aMeas[i], aPrec[i], measIndex)
+                aData.addDerivatives(i, labDer, matPDer, localDer, \
+                                     globalLab, globalDer)
+                self.__data.append(aData)
         self.__measDataIndex.append(len(self.__data))
 #                aPoint.setDataMeas(i, len(self.__data)) 
 # pseudo measurements from kinks

@@ -13,7 +13,7 @@
  *
  *
  *  \copyright
- *  Copyright (c) 2011 - 2016 Deutsches Elektronen-Synchroton,
+ *  Copyright (c) 2011 - 2021 Deutsches Elektronen-Synchroton,
  *  Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
  *  This library is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU Library General Public License as
@@ -57,8 +57,9 @@ enum dataBlockType {
  */
 class GblData {
 public:
-	GblData(unsigned int aLabel, dataBlockType aType, double aMeas,
-			double aPrec, unsigned int aTraj = 0, unsigned int aPoint = 0);
+	GblData(unsigned int aLabel, dataBlockType aType, double aValue,
+			double aPrec, unsigned int aTraj = 0, unsigned int aPoint = 0,
+			unsigned int aMeas = 0);
 	GblData(const GblData&) = default;
 	GblData& operator=(const GblData&) = default;
 	GblData(GblData&&) = default;
@@ -80,11 +81,11 @@ public:
 	 */
 	template<typename LocalDerivative, typename ExtDerivative>
 	void addDerivatives(unsigned int iRow,
-			const std::array<unsigned int, 5>& labDer, const Matrix5d &matDer,
+			const std::array<unsigned int, 5> &labDer, const Matrix5d &matDer,
 			unsigned int iOff,
-			const Eigen::MatrixBase<LocalDerivative>& derLocal,
+			const Eigen::MatrixBase<LocalDerivative> &derLocal,
 			unsigned int extOff,
-			const Eigen::MatrixBase<ExtDerivative>& extDer);
+			const Eigen::MatrixBase<ExtDerivative> &extDer);
 
 	/// Add derivatives from kink.
 	/**
@@ -98,9 +99,9 @@ public:
 	 */
 	template<typename ExtDerivative>
 	void addDerivatives(unsigned int iRow,
-			const std::array<unsigned int, 7>& labDer, const Matrix27d &matDer,
+			const std::array<unsigned int, 7> &labDer, const Matrix27d &matDer,
 			unsigned int extOff,
-			const Eigen::MatrixBase<ExtDerivative>& extDer);
+			const Eigen::MatrixBase<ExtDerivative> &extDer);
 
 	void addDerivatives(const std::vector<unsigned int> &index,
 			const std::vector<double> &derivatives);
@@ -111,14 +112,14 @@ public:
 	void printData() const;
 	unsigned int getLabel() const;
 	dataBlockType getType() const;
-	unsigned int getNumSimple() const;
 	void getLocalData(double &aValue, double &aWeight, unsigned int &numLocal,
-			unsigned int* &indLocal, double* &derLocal);
+			unsigned int *&indLocal, double *&derLocal);
 	void getAllData(double &aValue, double &aErr, unsigned int &numLocal,
-			unsigned int* &indLocal, double* &derLocal, unsigned int &aTraj,
-			unsigned int &aPoint, unsigned int &aRow);
+			unsigned int *&indLocal, double *&derLocal, unsigned int &aTraj,
+			unsigned int &aPoint, unsigned int &aMeas, unsigned int &aRow);
 	void getResidual(double &aResidual, double &aVariance, double &aDownWeight,
-			unsigned int &numLocal, unsigned int* &indLocal, double* &derLocal);
+			unsigned int &numLocal, unsigned int *&indLocal, double *&derLocal);
+	void getResidual(double &aResidual, double &aVariance);
 
 private:
 	unsigned int theLabel; ///< Label (of corresponding point)
@@ -128,6 +129,7 @@ private:
 	double thePrecision; ///< Precision (1/sigma**2)
 	unsigned int theTrajectory; ///< Trajectory number
 	unsigned int thePoint; ///< Point number (on trajectory)
+	unsigned int theMeas; ///< Measurement number (at point)
 	unsigned int theDWMethod; ///< Down-weighting method (0: None, 1: Tukey, 2: Huber, 3: Cauchy)
 	double theDownWeight; ///< Down-weighting factor (0-1)
 	double thePrediction; ///< Prediction from fit
@@ -142,9 +144,9 @@ private:
 
 template<typename LocalDerivative, typename ExtDerivative>
 void GblData::addDerivatives(unsigned int iRow,
-		const std::array<unsigned int, 5>& labDer, const Matrix5d &matDer,
-		unsigned int iOff, const Eigen::MatrixBase<LocalDerivative>& derLocal,
-		unsigned int extOff, const Eigen::MatrixBase<ExtDerivative>& extDer) {
+		const std::array<unsigned int, 5> &labDer, const Matrix5d &matDer,
+		unsigned int iOff, const Eigen::MatrixBase<LocalDerivative> &derLocal,
+		unsigned int extOff, const Eigen::MatrixBase<ExtDerivative> &extDer) {
 
 	unsigned int nParMax = 5 + derLocal.cols() + extDer.cols();
 	theRow = iRow - iOff;
@@ -208,8 +210,8 @@ void GblData::addDerivatives(unsigned int iRow,
 
 template<typename ExtDerivative>
 void GblData::addDerivatives(unsigned int iRow,
-		const std::array<unsigned int, 7>& labDer, const Matrix27d &matDer,
-		unsigned int extOff, const Eigen::MatrixBase<ExtDerivative>& extDer) {
+		const std::array<unsigned int, 7> &labDer, const Matrix27d &matDer,
+		unsigned int extOff, const Eigen::MatrixBase<ExtDerivative> &extDer) {
 
 	unsigned int nParMax = 7 + extDer.cols();
 	theRow = iRow;

@@ -11,7 +11,7 @@
  *  \author Claus Kleinwort, DESY, 2011 (Claus.Kleinwort@desy.de)
  *
  *  \copyright
- *  Copyright (c) 2011 - 2020 Deutsches Elektronen-Synchroton,
+ *  Copyright (c) 2011 - 2021 Deutsches Elektronen-Synchroton,
  *  Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
  *  This library is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU Library General Public License as
@@ -38,7 +38,10 @@
  *  trajectory points are defined with can describe a measurement
  *  or a (thin) scatterer or both. Measurements are arbitrary
  *  functions of the local track parameters at a point (e.g. 2D:
- *  position, 4D: direction+position). The refit provides corrections
+ *  position, 4D: direction+position). Multiple measurements can be
+ *  added to a point (and later disabled) to implement
+ *  (and resolve) ambiguities.
+ *  The refit provides corrections
  *  to the local track parameters (in the local system) and the
  *  corresponding covariance matrix at any of those points.
  *  Non-diagonal covariance matrices of
@@ -183,7 +186,7 @@ GblTrajectory::GblTrajectory(const std::vector<GblPoint> &aPointList,
  * \param [in] aPointsAndTransList List containing pairs with list of points and transformation (at inner (first) point)
  */
 GblTrajectory::GblTrajectory(
-		const std::vector<std::pair<std::vector<GblPoint>, Eigen::MatrixXd> >& aPointsAndTransList) :
+		const std::vector<std::pair<std::vector<GblPoint>, Eigen::MatrixXd> > &aPointsAndTransList) :
 		numAllPoints(), numPoints(), numOffsets(0), numInnerTransformations(
 				aPointsAndTransList.size()), numParameters(0), numLocals(0), numMeasurements(
 				0), externalPoint(0), skippedMeasLabel(0), maxNumGlobals(0), theDimension(
@@ -433,13 +436,20 @@ void GblTrajectory::construct() {
 	}
 	// loop over trajectories
 	numTrajectories = thePoints.size();
+	std::vector<GblMeasurement>::const_iterator itMeas;
+
 	//std::cout << " numTrajectories: " << numTrajectories << ", " << innerTransformations.size() << std::endl;
 	for (unsigned int iTraj = 0; iTraj < numTrajectories; ++iTraj) {
 		std::vector<GblPoint>::iterator itPoint;
 		for (itPoint = thePoints[iTraj].begin();
 				itPoint < thePoints[iTraj].end(); ++itPoint) {
-			numLocals = std::max(numLocals, itPoint->getNumLocals());
-			numMeasurements += itPoint->hasMeasurement();
+			for (itMeas = itPoint->getMeasBegin();
+					itMeas < itPoint->getMeasEnd(); ++itMeas) {
+				if (itMeas->isEnabled()) {
+					numLocals = std::max(numLocals, itMeas->getNumLocals());
+					numMeasurements += itMeas->getMeasDim();
+				}
+			}
 			itPoint->setLabel(++aLabel);
 		}
 	}
@@ -497,7 +507,7 @@ void GblTrajectory::calcJacobians() {
 	// loop over trajectories
 	for (unsigned int iTraj = 0; iTraj < numTrajectories; ++iTraj) {
 		// forward propagation (all)
-		GblPoint* previousPoint = &thePoints[iTraj].front();
+		GblPoint *previousPoint = &thePoints[iTraj].front();
 		unsigned int numStep = 0;
 		std::vector<GblPoint>::iterator itPoint;
 		for (itPoint = thePoints[iTraj].begin() + 1;
@@ -654,7 +664,7 @@ std::pair<std::vector<unsigned int>, MatrixXd> GblTrajectory::getJacobian(
  * (<=2: calculate only offset part, >2: complete matrix)
  * \param [in] nJacobian Direction (0: to previous offset, 1: to next offset)
  */
-void GblTrajectory::getFitToLocalJacobian(std::array<unsigned int, 5>& anIndex,
+void GblTrajectory::getFitToLocalJacobian(std::array<unsigned int, 5> &anIndex,
 		Matrix5d &aJacobian, const GblPoint &aPoint, unsigned int measDim,
 		unsigned int nJacobian) const {
 
@@ -664,7 +674,7 @@ void GblTrajectory::getFitToLocalJacobian(std::array<unsigned int, 5>& anIndex,
 
 	int nOffset = aPoint.getOffset();
 
-	anIndex = {}; // reset to 0
+	anIndex = { }; // reset to 0
 	aJacobian.setZero();
 	if (nOffset < 0) // need interpolation
 			{
@@ -750,7 +760,7 @@ void GblTrajectory::getFitToLocalJacobian(std::array<unsigned int, 5>& anIndex,
  * \param [out] aJacobian Corresponding transformation matrix
  * \param [in] aPoint Point to use
  */
-void GblTrajectory::getFitToKinkJacobian(std::array<unsigned int, 7>& anIndex,
+void GblTrajectory::getFitToKinkJacobian(std::array<unsigned int, 7> &anIndex,
 		Matrix27d &aJacobian, const GblPoint &aPoint) const {
 
 	unsigned int nDim = theDimension.size();
@@ -759,7 +769,7 @@ void GblTrajectory::getFitToKinkJacobian(std::array<unsigned int, 7>& anIndex,
 
 	int nOffset = aPoint.getOffset();
 
-	anIndex = {}; // reset to 0
+	anIndex = { }; // reset to 0
 	aJacobian.setZero();
 
 	Matrix2d prevW, prevWJ, nextW, nextWJ;
@@ -819,7 +829,7 @@ unsigned int GblTrajectory::getResults(int aSignedLabel,
 	return 0;
 }
 
-/// Get residuals from fit at point for measurement.
+/// Get residuals from fit at point for measurement "long list".
 /**
  * Get (diagonalized) residual, error of measurement and residual and down-weighting
  * factor for measurement at point
@@ -845,6 +855,32 @@ unsigned int GblTrajectory::getMeasResults(unsigned int aLabel,
 	for (unsigned int i = 0; i < numData; ++i) {
 		getResAndErr(firstData + i, (aLabel != skippedMeasLabel), aResiduals(i),
 				aMeasErrors(i), aResErrors(i), aDownWeights(i));
+	}
+	return 0;
+}
+
+/// Get residuals from fit at point for measurement "short list".
+/**
+ * Get (diagonalized) residual, error of measurement and residual and down-weighting
+ * factor for measurement at point
+ *
+ * \param [in]  aLabel Label of point on trajectory
+ * \param [out] numData Number of data blocks from measurement at point
+ * \param [out] aResiduals Measurements-Predictions
+ * \param [out] aMeasErrors Errors of Measurements
+ * \return error code (non-zero if trajectory not fitted successfully)
+ */
+unsigned int GblTrajectory::getMeasResults(unsigned int aLabel,
+		unsigned int &numData, Eigen::VectorXd &aResiduals,
+		Eigen::VectorXd &aMeasErrors) {
+	numData = 0;
+	if (not fitOK)
+		return 1;
+
+	unsigned int firstData = measDataIndex[aLabel - 1]; // first data block with measurement
+	numData = measDataIndex[aLabel] - firstData; // number of data blocks
+	for (unsigned int i = 0; i < numData; ++i) {
+		getResAndErr(firstData + i, aResiduals(i), aMeasErrors(i));
 	}
 	return 0;
 }
@@ -1022,7 +1058,7 @@ unsigned int GblTrajectory::getLabels(
 	return 0;
 }
 
-/// Get residual and errors from data block.
+/// Get residual and errors from data block "long list".
 /**
  * Get residual, error of measurement and residual and down-weighting
  * factor for (single) data block
@@ -1039,8 +1075,8 @@ void GblTrajectory::getResAndErr(unsigned int aData, bool used,
 
 	double aMeasVar;
 	unsigned int numLocal;
-	unsigned int* indLocal;
-	double* derLocal;
+	unsigned int *indLocal;
+	double *derLocal;
 	theData[aData].getResidual(aResidual, aMeasVar, aDownWeight, numLocal,
 			indLocal, derLocal);
 	VectorXd aVec(numLocal); // compressed vector of derivatives
@@ -1057,14 +1093,30 @@ void GblTrajectory::getResAndErr(unsigned int aData, bool used,
 		aResError = sqrt(aMeasVar + aFitVar); // error of (unbiased) residual
 }
 
+/// Get residual and errors from data block "short list".
+/**
+ * Get residual, error of measurement and residual and down-weighting
+ * factor for (single) data block
+ * \param [in]  aData Label of data block
+ * \param [out] aResidual Measurement-Prediction
+ * \param [out] aMeasError Error of Measurement
+ */
+void GblTrajectory::getResAndErr(unsigned int aData, double &aResidual,
+		double &aMeasError) {
+
+	double aMeasVar;
+	theData[aData].getResidual(aResidual, aMeasVar);
+	aMeasError = sqrt(aMeasVar); // error of measurement
+}
+
 /// Build linear equation system from data (blocks).
 void GblTrajectory::buildLinearEquationSystem() {
 	unsigned int nBorder = numCurvature + numLocals;
 	theVector.resize(numParameters);
 	theMatrix.resize(numParameters, nBorder);
 	double aValue, aWeight;
-	unsigned int* indLocal;
-	double* derLocal;
+	unsigned int *indLocal;
+	double *derLocal;
 	unsigned int numLocal;
 
 	std::vector<GblData>::iterator itData;
@@ -1129,7 +1181,7 @@ void GblTrajectory::prepare() {
 				throw 12;
 			}
 			// innermost point
-			GblPoint* innerPoint = &thePoints[iTraj].front();
+			GblPoint *innerPoint = &thePoints[iTraj].front();
 			// transformation fit to local track parameters
 			std::array<unsigned int, 5> firstLabels;
 			Matrix5d matFitToLocal;
@@ -1156,6 +1208,7 @@ void GblTrajectory::prepare() {
 
 	Matrix5d matP;              // measurements
 	std::vector<GblPoint>::iterator itPoint;
+	std::vector<GblMeasurement>::const_iterator itMeas;
 	// limit the scope of proDer:
 	{
 		// transform for external parameters
@@ -1167,76 +1220,85 @@ void GblTrajectory::prepare() {
 					itPoint < thePoints[iTraj].end(); ++itPoint) {
 				Vector5d aMeas, aPrec;
 				unsigned int nLabel = itPoint->getLabel();
-				unsigned int measDim = itPoint->hasMeasurement();
-				if (measDim) {
-					const MatrixXd localDer = itPoint->getLocalDerivatives();
-					maxNumGlobals = std::max(maxNumGlobals,
-							itPoint->getNumGlobals());
-					MatrixXd transDer;
-					itPoint->getMeasurement(matP, aMeas, aPrec);
-					double minPrecision = itPoint->getMeasPrecMin();
-					unsigned int iOff = 5 - measDim; // first active component
-					std::array<unsigned int, 5> labDer;
-					Matrix5d matDer, matPDer;
-					unsigned int nJacobian =
-							(itPoint < thePoints[iTraj].end() - 1) ? 1 : 0; // last point needs backward propagation
-					getFitToLocalJacobian(labDer, matDer, *itPoint, measDim,
-							nJacobian);
-					if (measDim > 2) {
-						matPDer = matP * matDer;
-					} else { // 'shortcut' for position measurements
-						matPDer.setZero();
-						matPDer.block<2, 5>(3, 0) = matP.block<2, 2>(3, 3)
-								* matDer.block<2, 5>(3, 0);
-					}
+				if (itPoint->numMeasurements()) {
+					for (itMeas = itPoint->getMeasBegin();
+							itMeas < itPoint->getMeasEnd(); ++itMeas) {
+						// skip disabled measurements
+						if (!itMeas->isEnabled())
+							continue;
+						unsigned int measDim = itMeas->getMeasDim();
+						const MatrixXd localDer = itMeas->getLocalDerivatives();
+						maxNumGlobals = std::max(maxNumGlobals,
+								itMeas->getNumGlobals());
+						MatrixXd transDer;
+						itMeas->getMeasurement(matP, aMeas, aPrec);
+						double minPrecision = itMeas->getMeasPrecMin();
+						unsigned int iOff = 5 - measDim; // first active component
+						std::array<unsigned int, 5> labDer;
+						Matrix5d matDer, matPDer;
+						unsigned int nJacobian =
+								(itPoint < thePoints[iTraj].end() - 1) ? 1 : 0; // last point needs backward propagation
+						getFitToLocalJacobian(labDer, matDer, *itPoint, measDim,
+								nJacobian);
+						if (measDim > 2) {
+							matPDer = matP * matDer;
+						} else { // 'shortcut' for position measurements
+							matPDer.setZero();
+							matPDer.block<2, 5>(3, 0) = matP.block<2, 2>(3, 3)
+									* matDer.block<2, 5>(3, 0);
+						}
 
-					if (numInnerTransformations > 0) {
-						// transform for external parameters
-						proDer.resize(measDim, Eigen::NoChange);
-						proDer.setZero();
-						// match parameters
-						unsigned int ifirst = 0;
-						unsigned int ilast = 2 * numInnerTransOffsets;
-						unsigned int ilabel = 0;
-						unsigned int numRelated = 0;
-						while (ilabel < 5) {
-							if (labDer[ilabel] > 0) {
-								while (innerTransLab[iTraj][ifirst]
-										!= labDer[ilabel] and ifirst <= ilast) {
-									++ifirst;
-								}
-								if (ifirst > ilast) {
-									labDer[ilabel] -= numInnerTransOffsets
-											* nDim * (iTraj + 1); // adjust label
-								} else {
-									// match
-									labDer[ilabel] = 0; // mark as related to external parameters
-									numRelated++;
-									for (unsigned int k = iOff; k < 5; ++k) {
-										proDer(k - iOff, ifirst) = matPDer(k,
-												ilabel);
+						if (numInnerTransformations > 0) {
+							// transform for external parameters
+							proDer.resize(measDim, Eigen::NoChange);
+							proDer.setZero();
+							// match parameters
+							unsigned int ifirst = 0;
+							unsigned int ilast = 2 * numInnerTransOffsets;
+							unsigned int ilabel = 0;
+							unsigned int numRelated = 0;
+							while (ilabel < 5) {
+								if (labDer[ilabel] > 0) {
+									while (innerTransLab[iTraj][ifirst]
+											!= labDer[ilabel]
+											and ifirst <= ilast) {
+										++ifirst;
+									}
+									if (ifirst > ilast) {
+										labDer[ilabel] -= numInnerTransOffsets
+												* nDim * (iTraj + 1); // adjust label
+									} else {
+										// match
+										labDer[ilabel] = 0; // mark as related to external parameters
+										numRelated++;
+										for (unsigned int k = iOff; k < 5;
+												++k) {
+											proDer(k - iOff, ifirst) = matPDer(
+													k, ilabel);
+										}
 									}
 								}
+								++ilabel;
 							}
-							++ilabel;
+							if (numRelated > 0) {
+								transDer.resize(measDim, numCurvature);
+								transDer = proDer * innerTransDer[iTraj];
+							}
 						}
-						if (numRelated > 0) {
-							transDer.resize(measDim, numCurvature);
-							transDer = proDer * innerTransDer[iTraj];
+						for (unsigned int i = iOff; i < 5; ++i) {
+							if (aPrec(i) > minPrecision) {
+								GblData aData(nLabel, InternalMeasurement,
+										aMeas(i), aPrec(i), iTraj,
+										itPoint - thePoints[iTraj].begin(),
+										itMeas - itPoint->getMeasBegin());
+								aData.addDerivatives(i, labDer, matPDer, iOff,
+										localDer, numLocals, transDer);
+								theData.emplace_back(std::move(aData));
+								nData++;
+							}
 						}
-					}
-					for (unsigned int i = iOff; i < 5; ++i) {
-						if (aPrec(i) > minPrecision) {
-							GblData aData(nLabel, InternalMeasurement, aMeas(i),
-									aPrec(i), iTraj,
-									itPoint - thePoints[iTraj].begin());
-							aData.addDerivatives(i, labDer, matPDer, iOff,
-									localDer, numLocals, transDer);
-							theData.emplace_back(std::move(aData));
-							nData++;
-						}
-					}
 
+					}
 				}
 				measDataIndex[nLabel] = nData;
 			}
@@ -1396,7 +1458,7 @@ double GblTrajectory::downWeight(unsigned int aMethod) {
  * \return Error code (non zero value indicates failure of fit)
  */
 unsigned int GblTrajectory::fit(double &Chi2, int &Ndf, double &lostWeight,
-		const std::string& optionList, unsigned int aLabel) {
+		const std::string &optionList, unsigned int aLabel) {
 	const double normChi2[4] = { 1.0, 0.8737, 0.9326, 0.8228 };
 	const std::string methodList = "TtHhCc";
 
@@ -1457,10 +1519,11 @@ void GblTrajectory::milleOut(MilleBinary &aMille) {
 	double aErr;
 	unsigned int aTraj;
 	unsigned int aPoint;
+	unsigned int aMeas;
 	unsigned int aRow;
 	unsigned int numLocal;
-	unsigned int* labLocal;
-	double* derLocal;
+	unsigned int *labLocal;
+	double *derLocal;
 	std::vector<int> labGlobal;
 	std::vector<double> derGlobal;
 
@@ -1473,9 +1536,9 @@ void GblTrajectory::milleOut(MilleBinary &aMille) {
 	std::vector<GblData>::iterator itData;
 	for (itData = theData.begin(); itData != theData.end(); ++itData) {
 		itData->getAllData(aValue, aErr, numLocal, labLocal, derLocal, aTraj,
-				aPoint, aRow);
+				aPoint, aMeas, aRow);
 		if (itData->getType() == InternalMeasurement)
-			thePoints[aTraj][aPoint].getGlobalLabelsAndDerivatives(aRow,
+			thePoints[aTraj][aPoint].getGlobalLabelsAndDerivatives(aMeas, aRow,
 					labGlobal, derGlobal);
 		else
 			labGlobal.resize(0);
