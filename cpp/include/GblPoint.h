@@ -61,7 +61,7 @@ typedef Eigen::Matrix<double, 5, 5> Matrix5d;
  */
 class GblPoint {
 public:
-	GblPoint(const Matrix5d &aJacobian);
+	GblPoint(const Matrix5d &aJacobian, unsigned int numMeasReserve = 0);
 	GblPoint(const GblPoint&) = default;
 	GblPoint& operator=(const GblPoint&) = default;
 	GblPoint(GblPoint&&) = default;

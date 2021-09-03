@@ -37,10 +37,12 @@ namespace gbl {
 /**
  * Create point on (initial) trajectory. Needs transformation jacobian from previous point.
  * \param [in] aJacobian Transformation jacobian from previous point
+ * \param [in] numMeasReserve number of measurements to reserve (space for)
  */
-GblPoint::GblPoint(const Matrix5d &aJacobian) :
+GblPoint::GblPoint(const Matrix5d &aJacobian, unsigned int numMeasReserve) :
 		theLabel(0), theOffset(0), p2pJacobian(aJacobian), scatFlag(
 				false) {
+	theMeasurements.reserve(numMeasReserve);
 }
 
 #ifdef GBL_EIGEN_SUPPORT_ROOT

@@ -79,6 +79,7 @@ public:
 	virtual ~BorderedBandMatrix();
 	void resize(unsigned int nSize, unsigned int nBorder = 1,
 			unsigned int nBand = 5);
+	void setZero();
 	void solveAndInvertBorderedBand(const VVector &aRightHandSide,
 			VVector &aSolution);
 	void addBlockMatrix(double aWeight,

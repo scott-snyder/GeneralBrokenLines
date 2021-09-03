@@ -58,6 +58,13 @@ void BorderedBandMatrix::resize(unsigned int nSize, unsigned int nBorder,
 	theBand.resize((nBand + 1), numCol);
 }
 
+/// Set content to 0.
+void BorderedBandMatrix::setZero() {
+	theBorder.setZero();
+	theMixed.setZero();
+	theBand.setZero();
+}
+
 /// Add symmetric block matrix.
 /**
  * Add (extended) block matrix defined by 'aVector * aWeight * aVector.T'
@@ -68,8 +75,8 @@ void BorderedBandMatrix::resize(unsigned int nSize, unsigned int nBorder,
  * \param aVector [in] Vector
  */
 void BorderedBandMatrix::addBlockMatrix(double aWeight,
-		const std::vector<unsigned int>* anIndex,
-		const std::vector<double>* aVector) {
+		const std::vector<unsigned int> *anIndex,
+		const std::vector<double> *aVector) {
 	int nBorder = numBorder;
 	for (unsigned int i = 0; i < anIndex->size(); ++i) {
 		int iIndex = (*anIndex)[i] - 1; // anIndex has to be sorted
@@ -102,7 +109,7 @@ void BorderedBandMatrix::addBlockMatrix(double aWeight,
  * \param aVector [in] Vector
  */
 void BorderedBandMatrix::addBlockMatrix(double aWeight, unsigned int aSize,
-		unsigned int* anIndex, double* aVector) {
+		unsigned int *anIndex, double *aVector) {
 	int nBorder = numBorder;
 	for (unsigned int i = 0; i < aSize; ++i) {
 		int iIndex = anIndex[i] - 1; // anIndex has to be sorted
@@ -158,7 +165,7 @@ MatrixXd BorderedBandMatrix::getBlockMatrix(
  * \param anIndex [in] Array of rows/colums to be used
  */
 MatrixXd BorderedBandMatrix::getBlockMatrix(unsigned int aSize,
-		unsigned int* anIndex) const {
+		unsigned int *anIndex) const {
 
 	MatrixXd aMatrix(aSize, aSize);
 	int nBorder = numBorder;

@@ -1113,7 +1113,9 @@ void GblTrajectory::getResAndErr(unsigned int aData, double &aResidual,
 void GblTrajectory::buildLinearEquationSystem() {
 	unsigned int nBorder = numCurvature + numLocals;
 	theVector.resize(numParameters);
+	theVector.setZero();
 	theMatrix.resize(numParameters, nBorder);
+	theMatrix.setZero();
 	double aValue, aWeight;
 	unsigned int *indLocal;
 	double *derLocal;
@@ -1139,8 +1141,9 @@ void GblTrajectory::buildLinearEquationSystem() {
  * Generate data (blocks) from measurements, kinks, external seed and measurements.
  *
  * \exception 10 : inner transformation matrix with invalid number of rows (valid are 5=kinematic or 2=geometric constraint)
- * \exception 11 : inner transformation matrix with to few columns (must be >= number of rows)
+ * \exception 11 : inner transformation matrix with too few columns (must be >= number of rows)
  * \exception 12 : inner transformation matrices with varying sizes
+ * \exception 13 : too many external derivatives (must be <= number of columns of inner transformation matrix)
  */
 void GblTrajectory::prepare() {
 	unsigned int nDim = theDimension.size();
@@ -1406,10 +1409,18 @@ void GblTrajectory::prepare() {
 	// external measurements
 	unsigned int nExt = externalMeasurements.rows();
 	if (nExt > 0) {
-		std::vector<unsigned int> index(numCurvature);
-		std::vector<double> derivatives(numCurvature);
+		unsigned int nInnerTransCols = innerTransformations[0].cols();
+		unsigned int nExtDer = externalDerivatives.cols();
+		if (nExtDer > nInnerTransCols) {
+			std::cout
+					<< " GblTrajectory::prepare external measurement with too many derivatives: "
+					<< nExtDer << ", defined: " << nInnerTransCols << std::endl;
+			throw 13;
+		}
+		std::vector<unsigned int> index(nExtDer);
+		std::vector<double> derivatives(nExtDer);
 		for (unsigned int iExt = 0; iExt < nExt; ++iExt) {
-			for (unsigned int iCol = 0; iCol < numCurvature; ++iCol) {
+			for (unsigned int iCol = 0; iCol < nExtDer; ++iCol) {
 				index[iCol] = numLocals + iCol + 1;
 				derivatives[iCol] = externalDerivatives(iExt, iCol);
 			}

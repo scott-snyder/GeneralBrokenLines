@@ -58,6 +58,11 @@ void VMatrix::resize(const unsigned int nRows, const unsigned int nCols) {
 	theVec.resize(nRows * nCols);
 }
 
+/// Set content to 0.
+void VMatrix::setZero() {
+	std::fill(theVec.begin(), theVec.end(), 0.);
+}
+
 /// Get transposed matrix.
 /**
  * \return Transposed matrix.
@@ -145,7 +150,7 @@ VMatrix VMatrix::operator+(const VMatrix &aMatrix) const {
 }
 
 /// Assignment Matrix=Matrix.
-VMatrix &VMatrix::operator=(const VMatrix &aMatrix) {
+VMatrix& VMatrix::operator=(const VMatrix &aMatrix) {
 	if (this != &aMatrix) {   // Gracefully handle self assignment
 		numRows = aMatrix.getNumRows();
 		numCols = aMatrix.getNumCols();
@@ -175,6 +180,11 @@ VSymMatrix::~VSymMatrix() {
 void VSymMatrix::resize(const unsigned int nRows) {
 	numRows = nRows;
 	theVec.resize((nRows * nRows + nRows) / 2);
+}
+
+/// Set content to 0.
+void VSymMatrix::setZero() {
+	std::fill(theVec.begin(), theVec.end(), 0.);
 }
 
 /// Get number of rows (= number of colums).
@@ -264,6 +274,11 @@ void VVector::resize(const unsigned int nRows) {
 	theVec.resize(nRows);
 }
 
+/// Set content to 0.
+void VVector::setZero() {
+	std::fill(theVec.begin(), theVec.end(), 0.);
+}
+
 /// Get part of vector.
 /**
  * \param [in] len Length of part.
@@ -318,7 +333,7 @@ VVector VVector::operator-(const VVector &aVector) const {
 }
 
 /// Assignment Vector=Vector.
-VVector &VVector::operator=(const VVector &aVector) {
+VVector& VVector::operator=(const VVector &aVector) {
 	if (this != &aVector) {   // Gracefully handle self assignment
 		numRows = aVector.getNumRows();
 		theVec.resize(numRows);
