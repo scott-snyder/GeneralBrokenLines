@@ -625,8 +625,8 @@ class GblData(object):
 #  matrices of track parameters in homogeneous magnetic fields
 #  A. Strandlie, W. Wittek, NIM A, 566 (2006) 687-698.
 #  
-#  The source code is available at the DESY SVN server, see:
-#  https://www.wiki.terascale.de/index.php/GeneralBrokenLines
+#  The source code is available at the DESY GitLab server, see:
+#  https://gitlab.desy.de/claus.kleinwort/general-broken-lines/-/wikis/home
 #
 #  \section seq_sec Calling sequence:
 #    -# Create trajectory:\n
@@ -665,7 +665,7 @@ class GblData(object):
 #  \section example_sec Examples
 # Technical examples are given in gbltst.py, an example silicon tracker in gblsit.py.
 #
-#  \section ref_sec References:  
+#  \section ref_sec References:
 #    - V. Blobel, C. Kleinwort, F. Meier,
 #      Fast alignment of a complex tracking detector using advanced track models,
 #      Computer Phys. Communications (2011), doi:10.1016/j.cpc.2011.03.017

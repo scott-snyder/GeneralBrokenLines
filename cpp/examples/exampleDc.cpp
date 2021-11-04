@@ -11,7 +11,7 @@
  *  \author Claus Kleinwort, DESY, 2018 (Claus.Kleinwort@desy.de)
  *
  *  \copyright
- *  Copyright (c) 2018 Deutsches Elektronen-Synchroton,
+ *  Copyright (c) 2018-2021 Deutsches Elektronen-Synchroton,
  *  Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
  *  This library is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU Library General Public License as
@@ -132,7 +132,7 @@ void exampleDc() {
 	 } */
 
 	unsigned int nTry = 10000; //: number of tries
-	std::cout << " GblDc $Rev$ " << nTry << ", " << layers.size()
+	std::cout << " GblDc $Id$ " << nTry << ", " << layers.size()
 			<< std::endl;
 	srand(4711);
 	clock_t startTime = clock();

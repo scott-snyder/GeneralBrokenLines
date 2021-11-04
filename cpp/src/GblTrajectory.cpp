@@ -83,8 +83,8 @@
  *  matrices of track parameters in homogeneous magnetic fields
  *  A. Strandlie, W. Wittek, NIM A, 566 (2006) 687-698.
  *
- *  The source code is available at the DESY SVN server, see:
- *  https://www.wiki.terascale.de/index.php/GeneralBrokenLines
+ *  The source code is available at the DESY GitLab server, see:
+ *  https://gitlab.desy.de/claus.kleinwort/general-broken-lines/-/wikis/home
  *
  *  \section call_sec Calling sequence
  *

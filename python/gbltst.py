@@ -12,7 +12,7 @@ Created on Jul 27, 2011
 # \author Claus Kleinwort, DESY, 2011 (Claus.Kleinwort@desy.de)
 #
 #  \copyright
-#  Copyright (c) 2011 - 2018 Deutsches Elektronen-Synchroton,
+#  Copyright (c) 2011 - 2021 Deutsches Elektronen-Synchroton,
 #  Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
 #  This library is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU Library General Public License as
@@ -59,7 +59,7 @@ def example1():
 
   nTry = 1000  #: number of tries
   nLayer = 5  #: number of detector layers
-  print " Gbltst $Rev$ ", nTry, nLayer
+  print " Gbltst $Id$ ", nTry, nLayer
   start = time.clock()
 # track direction
   sinLambda = 0.3

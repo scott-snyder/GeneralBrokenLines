@@ -10,7 +10,7 @@ Created on 28 Sep 2018
 # \author Claus Kleinwort, DESY, 2018 (Claus.Kleinwort@desy.de)
 #
 #  \copyright
-#  Copyright (c) 2018-2020 Deutsches Elektronen-Synchroton,
+#  Copyright (c) 2018-2021 Deutsches Elektronen-Synchroton,
 #  Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
 #  This library is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU Library General Public License as
@@ -102,7 +102,7 @@ def exampleSit():
   binaryFile = open("milleBinary.dat", "wb")
   #binaryFile = None
   #
-  print " Gblsit $Rev$ ", nTry
+  print " Gblsit $Id$ ", nTry
   #
   start = time.clock()
   Chi2Sum = 0.

@@ -1,2 +1,5 @@
 Documentation is maintained at
-www.wiki.terascale.de/index.php/GeneralBrokenLines .
+https://gitlab.desy.de/claus.kleinwort/general-broken-lines/-/wikis/home .
+
+The previous location (www.wiki.terascale.de/index.php/GeneralBrokenLines) 
+is not maintained anymore and may disappear.
