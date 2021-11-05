@@ -14,5 +14,4 @@ V. Blobel, NIM A, 566 (2006), pp. 14-17
 
 ===========================================================
 
-Implementation in Python. Requires at least Python version
-2.5 and the 'numpy' module.
+Implementation in Python3. Requires the 'numpy' module.
