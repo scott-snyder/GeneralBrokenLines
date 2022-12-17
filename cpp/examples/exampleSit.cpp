@@ -256,6 +256,8 @@ void exampleSit() {
 	std::cout << " Time elapsed " << diff / cps << " s" << std::endl;
 	std::cout << " Chi2/Ndf = " << Chi2Sum / NdfSum << std::endl;
 	std::cout << " Tracks fitted " << numFit << std::endl;
+	if (LostSum > 0.)
+		std::cout << " Weight lost   " << LostSum << std::endl;
 }
 
 namespace gbl {

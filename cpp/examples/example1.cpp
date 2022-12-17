@@ -59,8 +59,7 @@ void example1() {
 //MP	MilleBinary mille; // for producing MillePede-II binary file
 	unsigned int nTry = 1000; //: number of tries
 	unsigned int nLayer = 10; //: number of detector layers
-	std::cout << " Gbltst-eigen $Id$ " << nTry << ", " << nLayer
-			<< std::endl;
+	std::cout << " Gbltst-eigen $Id$ " << nTry << ", " << nLayer << std::endl;
 
 	srand(4711);
 
@@ -133,7 +132,7 @@ void example1() {
 		addDer(0, 0) = 1.;
 		addDer(1, 1) = 1.;
 // arclength
-		double s = 0.;
+		//double s = 0.;
 		Matrix5d jacPointToPoint;
 		jacPointToPoint.setIdentity();
 // create list of points
@@ -172,7 +171,7 @@ void example1() {
 			 meas[i] = measErr[i] * unrm(); // + addDer(i, 0) * 0.0075;
 			 }
 			 meas = proM2l * meas + clPar.tail<2>();
-			 Matrix2d localInvCov = proL2m.adjoint() * measInvCov * proL2m;
+			 Matrix2d localInvCov = proL2m.transpose() * measInvCov * proL2m;
 			 pointMeas.addMeasurement(meas, localInvCov); */
 
 			// additional local parameters?
@@ -189,8 +188,8 @@ void example1() {
 			jacPointToPoint = gblSimpleJacobian(step, cosLambda, bfac);
 			//jac2 = gblSimpleJacobian2(step, cosLambda, bfac);
 			clPar = jacPointToPoint * clPar;
-			clCov = jacPointToPoint * clCov * jacPointToPoint.adjoint();
-			s += step;
+			clCov = jacPointToPoint * clCov * jacPointToPoint.transpose();
+			//s += step;
 			if (iLayer < nLayer - 1) {
 				Vector2d scat(0., 0.);
 				// point with scatterer
@@ -208,8 +207,8 @@ void example1() {
 				}
 				// propagate to next measurement layer
 				clPar = jacPointToPoint * clPar;
-				clCov = jacPointToPoint * clCov * jacPointToPoint.adjoint();
-				s += step;
+				clCov = jacPointToPoint * clCov * jacPointToPoint.transpose();
+				//s += step;
 			}
 		}
 //
@@ -267,5 +266,7 @@ void example1() {
 	std::cout << " Time elapsed " << diff / cps << " s" << std::endl;
 	std::cout << " Chi2/Ndf = " << Chi2Sum / NdfSum << std::endl;
 	std::cout << " Tracks fitted " << numFit << std::endl;
+	if (LostSum > 0.)
+		std::cout << " Weight lost   " << LostSum << std::endl;
 }
 

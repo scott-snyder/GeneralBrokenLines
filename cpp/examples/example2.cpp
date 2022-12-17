@@ -119,7 +119,7 @@ void example2() {
 		addDer(0, 0) = 1.;
 		addDer(1, 1) = 1.;
 // arclength
-		double s = 0.;
+		// double s = 0.;
 		Matrix5d jacPointToPoint;
 		jacPointToPoint.setIdentity();
 		Matrix5d oldM2c;
@@ -167,7 +167,7 @@ void example2() {
 // propagate to scatterer
 			jacPointToPoint = gblSimpleJacobian(step, cosLambda, bfac);
 			clPar = jacPointToPoint * clPar;
-			s += step;
+			// s += step;
 			if (iLayer < nLayer - 1) {
 				Vector2d scat(0., 0.);
 				// point with scatterer
@@ -187,7 +187,7 @@ void example2() {
 				}
 				// propagate to next measurement layer
 				clPar = jacPointToPoint * clPar;
-				s += step;
+				// s += step;
 			}
 			oldM2c = meas2crvl;
 		}
@@ -246,5 +246,7 @@ void example2() {
 	std::cout << " Time elapsed " << diff / cps << " s" << std::endl;
 	std::cout << " Chi2/Ndf = " << Chi2Sum / NdfSum << std::endl;
 	std::cout << " Tracks fitted " << numFit << std::endl;
+	if (LostSum > 0.)
+		std::cout << " Weight lost   " << LostSum << std::endl;
 }
 

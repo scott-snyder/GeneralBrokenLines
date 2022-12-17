@@ -788,7 +788,7 @@ void GblTrajectory::getFitToKinkJacobian(std::array<unsigned int, 7> &anIndex,
 	}
 	aJacobian.block<2, 2>(0, 1) = prevW; // from 1st Offset
 	aJacobian.block<2, 2>(0, 3) = -sumWJ; // from 2nd Offset
-	aJacobian.block<2, 2>(0, 5) = nextW; // from 1st Offset
+	aJacobian.block<2, 2>(0, 5) = nextW; // from 3rd Offset
 	for (unsigned int i = 0; i < nDim; ++i) {
 		anIndex[1 + theDimension[i]] = iOff + i;
 		anIndex[3 + theDimension[i]] = iOff + nDim + i;
@@ -825,7 +825,7 @@ unsigned int GblTrajectory::getResults(int aSignedLabel,
 	MatrixXd aMat = theMatrix.getBlockMatrix(indexAndJacobian.first); // compressed matrix
 	localPar = indexAndJacobian.second * aVec;
 	localCov = indexAndJacobian.second * aMat
-			* indexAndJacobian.second.adjoint();
+			* indexAndJacobian.second.transpose();
 	return 0;
 }
 
@@ -945,7 +945,7 @@ unsigned int GblTrajectory::getResults(int aSignedLabel, TVectorD &localPar,
 	MatrixXd aMat = theMatrix.getBlockMatrix(indexAndJacobian.first); // compressed matrix
 	VectorXd aLocalPar = indexAndJacobian.second * aVec;
 	MatrixXd aLocalCov = indexAndJacobian.second * aMat
-	* indexAndJacobian.second.adjoint();
+	* indexAndJacobian.second.transpose();
 	// convert to ROOT
 	unsigned int nParOut = localPar.GetNrows();
 	for (unsigned int i = 0; i < nParOut; ++i) {
