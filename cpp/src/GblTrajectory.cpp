@@ -11,7 +11,7 @@
  *  \author Claus Kleinwort, DESY, 2011 (Claus.Kleinwort@desy.de)
  *
  *  \copyright
- *  Copyright (c) 2011 - 2021 Deutsches Elektronen-Synchroton,
+ *  Copyright (c) 2011 - 2023 Deutsches Elektronen-Synchroton,
  *  Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
  *  This library is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU Library General Public License as
@@ -36,7 +36,7 @@
  *  (external seed) the description of multiple scattering is
  *  added by offsets in a local system. Along the initial
  *  trajectory points are defined with can describe a measurement
- *  or a (thin) scatterer or both. Measurements are arbitrary
+ *  or a scatterer or both. Measurements are arbitrary
  *  functions of the local track parameters at a point (e.g. 2D:
  *  position, 4D: direction+position). Multiple measurements can be
  *  added to a point (and later disabled) to implement
@@ -58,8 +58,11 @@
  *  first and last point and all points with a scatterer. The
  *  prediction for a measurement is obtained by interpolation of
  *  the enclosing offsets and for triplets of adjacent offsets
- *  kink angles are determined. This requires for all points the
- *  jacobians for propagation to the previous and next offset.
+ *  kink angles are determined (*thin* scatterer, single offset)
+ *  or for quadruplets of adjacent offsets kink angles and steps
+ *  are determined (*thick* scatterer, two offsets, see logo).
+ *  This requires for all points the jacobians for propagation
+ *  to the previous and next point with an offset.
  *  These are calculated from the point-to-point jacobians along
  *  the initial trajectory. The sequence of points has to be
  *  strictly monotonic in arc-length.
@@ -97,7 +100,7 @@
  *           - Add additional local or global parameters to measurement:\n
  *             - <tt>point.addLocals(..)</tt>
  *             - <tt>point.addGlobals(..)</tt>
- *           - <tt>point.addScatterer(..)</tt>
+ *           - <tt>point.addScatterer(..)</tt> or <tt>point.addThickScatterer(..)</tt>
  *        - Add point (ordered by arc length) to list:\n
  *            <tt>list.push_back(point)</tt>
  *    -# Create (simple) trajectory from list of points:\n
@@ -136,7 +139,7 @@
  *  Several GBL methods are implemented as templates to allow more EIGEN compile time optimization.
  *
  *  \section example_sec Examples
- *  Technical examples are given in example1.cpp, example2.cpp and example3.cpp.
+ *  Technical examples are given in example1.cpp, example2.cpp, example3.cpp and example4.cpp.
  *  An example silicon tracker is described in exampleSit.cpp
  *  and an example sector of forward drift chambers in exampleDc.cpp.
  *
@@ -484,19 +487,31 @@ void GblTrajectory::defineOffsets() {
 	// loop over trajectories
 	for (unsigned int iTraj = 0; iTraj < numTrajectories; ++iTraj) {
 		// first point is offset
+		thePoints[iTraj].front().setType(-1);
 		thePoints[iTraj].front().setOffset(numOffsets++);
+		numOffsetPoints++;
 		// intermediate scatterers are offsets
 		std::vector<GblPoint>::iterator itPoint;
 		for (itPoint = thePoints[iTraj].begin() + 1;
 				itPoint < thePoints[iTraj].end() - 1; ++itPoint) {
-			if (itPoint->hasScatterer()) {
+			unsigned int scatDim = itPoint->getScatDim();
+			if (scatDim) {
 				itPoint->setOffset(numOffsets++);
+				numOffsetPoints++;
+				// thick scatterer?
+				if (scatDim == 4)
+					numOffsets++;
 			} else {
 				itPoint->setOffset(-numOffsets);
 			}
 		}
 		// last point is offset
+		thePoints[iTraj].back().setType(1);
 		thePoints[iTraj].back().setOffset(numOffsets++);
+		numOffsetPoints++;
+		// thick scatterer at last point?
+		if (thePoints[iTraj].back().getScatDim() == 4)
+			numOffsets++;
 	}
 }
 
@@ -673,6 +688,7 @@ void GblTrajectory::getFitToLocalJacobian(std::array<unsigned int, 5> &anIndex,
 	unsigned int nLocals = numLocals;
 
 	int nOffset = aPoint.getOffset();
+	unsigned int scatDim = aPoint.getScatDim();
 
 	anIndex = { }; // reset to 0
 	aJacobian.setZero();
@@ -722,6 +738,9 @@ void GblTrajectory::getFitToLocalJacobian(std::array<unsigned int, 5> &anIndex,
 		// anIndex must be sorted
 		// forward : iOff2 = iOff1 + nDim, index1 = 1, index2 = 3
 		// backward: iOff2 = iOff1 - nDim, index1 = 3, index2 = 1
+		// adjust for thick scatterer (before/after)
+		if (scatDim == 4)
+			nOffset += nJacobian;
 		unsigned int iOff1 = nDim * nOffset + nCurv + nLocals + 1; // first offset ('i' in u_i)
 		unsigned int index1 = 3 - 2 * nJacobian; // index of first offset
 		unsigned int iOff2 = iOff1 + nDim * (nJacobian * 2 - 1); // second offset ('i' in u_i)
@@ -759,9 +778,11 @@ void GblTrajectory::getFitToLocalJacobian(std::array<unsigned int, 5> &anIndex,
  * \param [out] anIndex List of fit parameters (zero for zero derivatives)
  * \param [out] aJacobian Corresponding transformation matrix
  * \param [in] aPoint Point to use
+ * \return Number of derivatives
  */
-void GblTrajectory::getFitToKinkJacobian(std::array<unsigned int, 7> &anIndex,
-		Matrix27d &aJacobian, const GblPoint &aPoint) const {
+unsigned int GblTrajectory::getFitToKinkJacobian(
+		std::array<unsigned int, 9> &anIndex, Matrix49d &aJacobian,
+		const GblPoint &aPoint) const {
 
 	unsigned int nDim = theDimension.size();
 	unsigned int nCurv = numCurvature;
@@ -770,7 +791,7 @@ void GblTrajectory::getFitToKinkJacobian(std::array<unsigned int, 7> &anIndex,
 	int nOffset = aPoint.getOffset();
 
 	anIndex = { }; // reset to 0
-	aJacobian.setZero();
+	aJacobian.topRows<2>().setZero();
 
 	Matrix2d prevW, prevWJ, nextW, nextWJ;
 	Vector2d prevWd, nextWd;
@@ -794,6 +815,120 @@ void GblTrajectory::getFitToKinkJacobian(std::array<unsigned int, 7> &anIndex,
 		anIndex[3 + theDimension[i]] = iOff + nDim + i;
 		anIndex[5 + theDimension[i]] = iOff + nDim * 2 + i;
 	}
+	return 7;
+}
+
+/// Get jacobian for transformation from (trajectory) fit to step parameters at point.
+/**
+ * Jacobian broken lines (q/p,..,u_i-1,u_i-,u_i+,u_i+1..) to step (du) parameters.
+ * \param [out] anIndex List of fit parameters (zero for zero derivatives)
+ * \param [out] aJacobian Corresponding transformation matrix
+ * \param [in] aPoint Point to use
+ * \return Number of derivatives
+ */
+unsigned int GblTrajectory::getFitToStepJacobian(
+		std::array<unsigned int, 9> &anIndex, Matrix49d &aJacobian,
+		const GblPoint &aPoint) const {
+
+	unsigned int nDim = theDimension.size();
+	unsigned int nCurv = numCurvature;
+	unsigned int nLocals = numLocals;
+
+	int nOffset = aPoint.getOffset();
+
+	anIndex = { }; // reset to 0
+	aJacobian.leftCols<4>().setZero();
+
+	unsigned int iOff = (nOffset - 1) * nDim + nCurv + nLocals + 1; // first offset ('i' in u_i)
+
+	// step
+	aJacobian(2, 0) = -1.;  // from 2nd Offset
+	aJacobian(3, 1) = -1.;  // from 2nd Offset
+	aJacobian(2, 2) = +1.;  // from 3rd Offset
+	aJacobian(3, 3) = +1.;  // from 3rd Offset
+
+	for (unsigned int i = 0; i < nDim; ++i) {
+		anIndex[0 + theDimension[i]] = iOff + nDim + i;
+		anIndex[2 + theDimension[i]] = iOff + nDim * 2 + i;
+	}
+	return 4;
+}
+
+/// Get jacobian for transformation from (trajectory) fit to kink and step parameters at point.
+/**
+ * Jacobian broken lines (q/p,..,u_i-1,u_i-,u_i+,u_i+1..) to kink (du') and step (du) parameters.
+ * \param [out] anIndex List of fit parameters (zero for zero derivatives)
+ * \param [out] aJacobian Corresponding transformation matrix
+ * \param [in] aPoint Point to use
+ * \return Number of derivatives
+ */
+unsigned int GblTrajectory::getFitToKinkAndStepJacobian(
+		std::array<unsigned int, 9> &anIndex, Matrix49d &aJacobian,
+		const GblPoint &aPoint) const {
+
+	unsigned int nDim = theDimension.size();
+	unsigned int nCurv = numCurvature;
+	unsigned int nLocals = numLocals;
+
+	int nOffset = aPoint.getOffset();
+
+	anIndex = { }; // reset to 0
+	aJacobian.setZero();
+
+	Matrix2d prevW, prevWJ, nextW, nextWJ;
+	Vector2d prevWd, nextWd;
+	aPoint.getDerivatives(0, prevW, prevWJ, prevWd); // W-, W- * J-, W- * d-
+	aPoint.getDerivatives(1, nextW, nextWJ, nextWd); // W-, W- * J-, W- * d-
+
+	unsigned int iOff = (nOffset - 1) * nDim + nCurv + nLocals + 1; // first offset ('i' in u_i)
+
+	// kink
+	if (nCurv > 0) {
+		aJacobian.block<2, 1>(0, 0) = -(prevWd + nextWd); // from curvature
+		anIndex[0] = nLocals + 1;
+	}
+	aJacobian.block<2, 2>(0, 1) = prevW; // from 1st Offset
+	aJacobian.block<2, 2>(0, 3) = -prevWJ; // from 2nd Offset
+	aJacobian.block<2, 2>(0, 5) = -nextWJ; // from 3rd Offset
+	aJacobian.block<2, 2>(0, 7) = nextW; // from 4th Offset
+	// step
+	aJacobian(2, 3) = -1.;  // from 2nd Offset
+	aJacobian(3, 4) = -1.;  // from 2nd Offset
+	aJacobian(2, 5) = +1.;  // from 3rd Offset
+	aJacobian(3, 6) = +1.;  // from 3rd Offset
+
+	for (unsigned int i = 0; i < nDim; ++i) {
+		anIndex[1 + theDimension[i]] = iOff + i;
+		anIndex[3 + theDimension[i]] = iOff + nDim + i;
+		anIndex[5 + theDimension[i]] = iOff + nDim * 2 + i;
+		anIndex[7 + theDimension[i]] = iOff + nDim * 3 + i;
+	}
+	return 9;
+}
+
+/// Get fit results for external parameters.
+/**
+ * Get corrections and covariance matrix for external parameters.
+ *
+ * \param [out] extPar Corrections for external parameters
+ * \param [out] extCov Covariance for external parameters
+ * \return error code (non-zero if trajectory not fitted successfully)
+ */
+unsigned int GblTrajectory::getExtResults(Eigen::VectorXd &extPar,
+		Eigen::MatrixXd &extCov) const {
+	if (not fitOK)
+		return 1;
+	// get external parameters (single block after locals)
+	unsigned int nExt = innerTransformations[0].cols();
+	VectorXd aVec(nExt); // compressed vector
+	std::vector<unsigned int> index;
+	for (unsigned int i = 0; i < nExt; ++i) {
+		aVec[i] = theVector(numLocals + i);
+		index.push_back(numLocals + i + 1);
+	}
+	extPar = aVec;
+	extCov = theMatrix.getBlockMatrix(index); // compressed matrix
+	return 0;
 }
 
 /// Get fit results at point.
@@ -803,10 +938,10 @@ void GblTrajectory::getFitToKinkJacobian(std::array<unsigned int, 7> &anIndex,
  *
  * The point is identified by its label (1..number(points)), the sign distinguishes the
  * backward (facing previous point) and forward 'side' (facing next point).
- * For scatterers the track direction may change in between.
+ * For (thick) scatterers the track direction (and offset) may change in between.
  *
  * \param [in] aSignedLabel (Signed) label of point on trajectory
- * (<0: in front, >0: after point, slope changes at scatterer!)
+ * (<0: in front, >0: after point, slope (and offset) changes at (thick) scatterer!)
  * \param [out] localPar Corrections for local parameters
  * \param [out] localCov Covariance for local parameters
  * \return error code (non-zero if trajectory not fitted successfully)
@@ -916,6 +1051,38 @@ unsigned int GblTrajectory::getScatResults(unsigned int aLabel,
 }
 
 #ifdef GBL_EIGEN_SUPPORT_ROOT
+/// Get fit results for external parameters.
+/**
+ * Get corrections and covariance matrix for external parameters.
+ *
+ * \param [out] extPar Corrections for external parameters
+ * \param [out] extCov Covariance for external parameters
+ * \return error code (non-zero if trajectory not fitted successfully)
+ */
+unsigned int GblTrajectory::getExtResults(TVectorD &extPar,
+		TMatrixDSym &extCov) const {
+	if (not fitOK)
+		return 1;
+	// get external parameters (single block after locals)
+	unsigned int nExt = innerTransformations[0].cols();
+	VectorXd aVec(nExt); // compressed vector
+	std::vector<unsigned int> index;
+	for (unsigned int i = 0; i < nExt; ++i) {
+		aVec[i] = theVector(numLocals + i);
+		index.push_back(numLocals + i + 1);
+	}
+	MatrixXd aMat = theMatrix.getBlockMatrix(index); // compressed matrix
+	// convert to ROOT
+	unsigned int nParOut = extPar.GetNrows();
+	for (unsigned int i = 0; i < nParOut; ++i) {
+		extPar[i] = aVec(i);
+		for (unsigned int j = 0; j < nParOut; ++j) {
+			extCov(i, j) = aMat(i, j);
+		}
+	}
+	return 0;
+}
+
 /// Get fit results at point.
 /**
  * Get corrections and covariance matrix for local track and additional parameters
@@ -923,7 +1090,7 @@ unsigned int GblTrajectory::getScatResults(unsigned int aLabel,
  *
  * The point is identified by its label (1..number(points)), the sign distinguishes the
  * backward (facing previous point) and forward 'side' (facing next point).
- * For scatterers the track direction may change in between.
+ * For (thick) scatterers the track direction (and offset) may change in between.
  *
  * \param [in] aSignedLabel (Signed) label of point on trajectory
  * (<0: in front, >0: after point, slope changes at scatterer!)
@@ -1239,16 +1406,21 @@ void GblTrajectory::prepare() {
 						unsigned int iOff = 5 - measDim; // first active component
 						std::array<unsigned int, 5> labDer;
 						Matrix5d matDer, matPDer;
-						unsigned int nJacobian =
-								(itPoint < thePoints[iTraj].end() - 1) ? 1 : 0; // last point needs backward propagation
-						getFitToLocalJacobian(labDer, matDer, *itPoint, measDim,
-								nJacobian);
+						matPDer.topRows(iOff).setZero(); // clear unused part
 						if (measDim > 2) {
+							unsigned int nJacobian =
+									(itPoint->isLast()) ? 0 : 1; // last point needs backward propagation (for slopes)
+							getFitToLocalJacobian(labDer, matDer, *itPoint,
+									measDim, nJacobian);
 							matPDer = matP * matDer;
+							matPDer.bottomRows(measDim) =
+									matP.bottomRightCorner(measDim, measDim)
+											* matDer.bottomRows(measDim);
 						} else { // 'shortcut' for position measurements
-							matPDer.setZero();
-							matPDer.block<2, 5>(3, 0) = matP.block<2, 2>(3, 3)
-									* matDer.block<2, 5>(3, 0);
+							getFitToLocalJacobian(labDer, matDer, *itPoint,
+									measDim, 1); // forward propagation (-> after THICK scatterer)
+							matPDer.bottomRows<2>() = matP.bottomRightCorner<2,
+									2>() * matDer.bottomRows<2>();
 						}
 
 						if (numInnerTransformations > 0) {
@@ -1308,7 +1480,7 @@ void GblTrajectory::prepare() {
 		}
 	} // end of scope for proDer
 
-	Matrix2d matT;              // kinks
+	Matrix4d matT;              // kinks
 	// limit the scope of proDer:
 	{
 		// transform for external parameters
@@ -1319,26 +1491,51 @@ void GblTrajectory::prepare() {
 		// loop over trajectories
 		for (unsigned int iTraj = 0; iTraj < numTrajectories; ++iTraj) {
 			for (itPoint = thePoints[iTraj].begin() + 1;
-					itPoint < thePoints[iTraj].end() - 1; ++itPoint) {
-				Vector2d aMeas, aPrec;
+					itPoint < thePoints[iTraj].end(); ++itPoint) {
+				Vector4d aMeas, aPrec;
 				unsigned int nLabel = itPoint->getLabel();
-				if (itPoint->hasScatterer()) {
-					itPoint->getScatterer(matT, aMeas, aPrec);
+				unsigned int scatDim = itPoint->getScatDim();
+				if (scatDim) {
 					MatrixXd transDer;
-					std::array<unsigned int, 7> labDer;
-					Matrix27d matDer, matTDer;
-					getFitToKinkJacobian(labDer, matDer, *itPoint);
-					matTDer = matT * matDer;
+					std::array<unsigned int, 9> labDer;
+					Matrix49d matDer, matTDer;
+					unsigned int numDer;
+					if (scatDim == 4) {
+						// thick scatterer, last point?
+						if (itPoint->isLast()) {
+							// steps (only)
+							itPoint->getReducedScatterer(matT, aMeas, aPrec);
+							numDer = getFitToStepJacobian(labDer, matDer,
+									*itPoint);
+							matTDer.leftCols<4>() = matT * matDer.leftCols<4>(); // numDer == 4 !
+						} else {
+							// kinks+steps
+							itPoint->getScatterer(matT, aMeas, aPrec);
+							numDer = getFitToKinkAndStepJacobian(labDer, matDer,
+									*itPoint);
+							matTDer = matT * matDer; // numDer == 9 !
+						}
+					} else {
+						// thin scatterer, last point?
+						if (itPoint->isLast())
+							break;
+						// kinks
+						itPoint->getScatterer(matT, aMeas, aPrec);
+						numDer = getFitToKinkJacobian(labDer, matDer, *itPoint);
+						matTDer.topLeftCorner<2, 7>() =
+								matT.topLeftCorner<2, 2>()
+										* matDer.topLeftCorner<2, 7>(); // numDer == 7 !
+					}
 					if (numInnerTransformations > 0) {
 						// transform for external parameters
-						proDer.resize(nDim, Eigen::NoChange);
+						proDer.resize(scatDim, Eigen::NoChange);
 						proDer.setZero();
 						// match parameters
 						unsigned int ifirst = 0;
 						unsigned int ilast = 2 * numInnerTransOffsets;
 						unsigned int ilabel = 0;
 						unsigned int numRelated = 0;
-						while (ilabel < 7) {
+						while (ilabel < numDer) {
 							if (labDer[ilabel] > 0) {
 								while (innerTransLab[iTraj][ifirst]
 										!= labDer[ilabel] and ifirst <= ilast) {
@@ -1351,7 +1548,7 @@ void GblTrajectory::prepare() {
 									// match
 									labDer[ilabel] = 0; // mark as related to external parameters
 									numRelated++;
-									for (unsigned int k = 0; k < nDim; ++k) {
+									for (unsigned int k = 0; k < scatDim; ++k) {
 										proDer(k, ifirst) = matTDer(k, ilabel);
 									}
 								}
@@ -1359,17 +1556,17 @@ void GblTrajectory::prepare() {
 							++ilabel;
 						}
 						if (numRelated > 0) {
-							transDer.resize(nDim, numCurvature);
+							transDer.resize(scatDim, numCurvature);
 							transDer = proDer * innerTransDer[iTraj];
 						}
 					}
-					for (unsigned int i = 0; i < nDim; ++i) {
-						unsigned int iDim = theDimension[i];
-						if (aPrec(iDim) > 0.) {
-							GblData aData(nLabel, InternalKink, aMeas(iDim),
-									aPrec(iDim), iTraj,
+					// loop over kinks and steps (if any)
+					for (unsigned int i = 0; i < scatDim; ++i) {
+						if (aPrec(i) > 0.) {
+							GblData aData(nLabel, InternalKink, aMeas(i),
+									aPrec(i), iTraj,
 									itPoint - thePoints[iTraj].begin());
-							aData.addDerivatives(iDim, labDer, matTDer,
+							aData.addDerivatives(i, numDer, labDer, matTDer,
 									numLocals, transDer);
 							theData.emplace_back(std::move(aData));
 							nData++;
@@ -1576,7 +1773,9 @@ void GblTrajectory::printTrajectory(unsigned int level) const {
 	}
 	std::cout << " Number of GblPoints          : " << numAllPoints
 			<< std::endl;
-	std::cout << " Number of points with offsets: " << numOffsets << std::endl;
+	std::cout << " Number of points with offsets: " << numOffsetPoints
+			<< std::endl;
+	std::cout << " Number of (1D or 2D) offsets : " << numOffsets << std::endl;
 	std::cout << " Number of fit parameters     : " << numParameters
 			<< std::endl;
 	std::cout << " Number of measurements       : " << numMeasurements

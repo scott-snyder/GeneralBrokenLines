@@ -11,7 +11,7 @@
  *  \author Claus Kleinwort, DESY, 2021 (Claus.Kleinwort@desy.de)
  *
  *  \copyright
- *  Copyright (c) 2021 Deutsches Elektronen-Synchroton,
+ *  Copyright (c) 2021 - 2023 Deutsches Elektronen-Synchroton,
  *  Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
  *  This library is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU Library General Public License as
@@ -447,11 +447,14 @@ void GblMeasurement::printMeasurement(unsigned int level) const {
 		IOFormat CleanFmt(4, 0, ", ", "\n", "[", "]");
 		if (measDim) {
 			std::cout << "   Projection: " << std::endl
-					<< measProjection.format(CleanFmt) << std::endl;
+					<< measProjection.bottomRightCorner(measDim, measDim).format(
+							CleanFmt) << std::endl;
 			std::cout << "   Residuals: "
-					<< measResiduals.transpose().format(CleanFmt) << std::endl;
+					<< measResiduals.tail(measDim).transpose().format(CleanFmt)
+					<< std::endl;
 			std::cout << "   Precision (min.: " << measPrecMin << "): "
-					<< measPrecision.transpose().format(CleanFmt) << std::endl;
+					<< measPrecision.tail(measDim).transpose().format(CleanFmt)
+					<< std::endl;
 		}
 		if (localDerivatives.cols()) {
 			std::cout << "  Local Derivatives:" << std::endl

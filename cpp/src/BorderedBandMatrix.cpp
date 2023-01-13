@@ -11,7 +11,7 @@
  *  \author Claus Kleinwort, DESY, 2011 (Claus.Kleinwort@desy.de)
  *
  *  \copyright
- *  Copyright (c) 2011 - 2017 Deutsches Elektronen-Synchroton,
+ *  Copyright (c) 2011 - 2023 Deutsches Elektronen-Synchroton,
  *  Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
  *  This library is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU Library General Public License as
@@ -45,7 +45,7 @@ BorderedBandMatrix::~BorderedBandMatrix() {
 /**
  * \param nSize [in] Size of matrix
  * \param nBorder [in] Size of border (=1 for q/p + additional local parameters)
- * \param nBand [in] Band width (usually = 5, for simplified jacobians = 4)
+ * \param nBand [in] Band width (usually = 5, for simplified jacobians = 4, +2 for steps)
  */
 void BorderedBandMatrix::resize(unsigned int nSize, unsigned int nBorder,
 		unsigned int nBand) {

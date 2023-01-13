@@ -13,7 +13,7 @@
  *
  *
  *  \copyright
- *  Copyright (c) 2011 - 2021 Deutsches Elektronen-Synchroton,
+ *  Copyright (c) 2011 - 2023 Deutsches Elektronen-Synchroton,
  *  Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
  *  This library is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU Library General Public License as
@@ -46,9 +46,9 @@ namespace gbl {
 typedef Eigen::Matrix<double, 5, 1> Vector5d;
 typedef Eigen::Matrix<double, 2, 3> Matrix23d;
 typedef Eigen::Matrix<double, 2, 5> Matrix25d;
-typedef Eigen::Matrix<double, 2, 7> Matrix27d;
 typedef Eigen::Matrix<double, 3, 2> Matrix32d;
 typedef Eigen::Matrix<double, 5, 5> Matrix5d;
+typedef Eigen::Matrix<double, 4, 9> Matrix49d;
 
 /// Point on trajectory
 /**
@@ -80,6 +80,8 @@ public:
 			const TMatrixDSym &aPrecision, double minPrecision = 0.);
 	void addScatterer(const TVectorD &aResiduals, const TVectorD &aPrecision);
 	void addScatterer(const TVectorD &aResiduals,
+			const TMatrixDSym &aPrecision);
+	void addThickScatterer(const TVectorD &aResiduals,
 			const TMatrixDSym &aPrecision);
 	void addLocals(const TMatrixD &aDerivatives);
 	void addGlobals(const std::vector<int> &aLabels,
@@ -161,49 +163,12 @@ public:
 			const Eigen::MatrixBase<Precision> &aPrecision,
 			double minPrecision = 0.);
 
-	/// Add a (thin) scatterer to a point.
-	/**
-	 * Add scatterer with arbitrary precision (inverse covariance) matrix.
-	 * Will be diagonalized. Changes local track direction.
-	 *
-	 * The precision matrix for the local slopes is defined by the
-	 * angular scattering error theta_0 and the scalar products c_1, c_2 of the
-	 * offset directions in the local frame with the track direction:
-	 *
-	 *            (1 - c_1*c_1 - c_2*c_2)   |  1 - c_1*c_1     - c_1*c_2  |
-	 *       P =  ----------------------- * |                             |
-	 *                theta_0*theta_0       |    - c_1*c_2   1 - c_2*c_2  |
-	 *
-	 * \tparam Precision   Precision matrix or vector (with diagonal)
-	 * \param [in] aResiduals Scatterer residuals
-	 * \param [in] aPrecision Scatterer precision (full matrix)
-	 */
-	template<typename Precision, typename std::enable_if<
-			(Precision::ColsAtCompileTime == 2)>::type* = nullptr>
 	void addScatterer(const Eigen::Vector2d &aResiduals,
-			const Eigen::MatrixBase<Precision> &aPrecision);
-
-	/// Add a (thin) scatterer to a point.
-	/**
-	 * Add scatterer with diagonal precision (inverse covariance) matrix.
-	 * Changes local track direction.
-	 *
-	 * The precision matrix for the local slopes is defined by the
-	 * angular scattering error theta_0 and the scalar products c_1, c_2 of the
-	 * offset directions in the local frame with the track direction:
-	 *
-	 *            (1 - c_1*c_1 - c_2*c_2)   |  1 - c_1*c_1     - c_1*c_2  |
-	 *       P =  ----------------------- * |                             |
-	 *                theta_0*theta_0       |    - c_1*c_2   1 - c_2*c_2  |
-	 *
-	 * \tparam Precision   Precision matrix or vector (with diagonal)
-	 * \param [in] aResiduals Scatterer residuals
-	 * \param [in] aPrecision Scatterer precision (vector with diagonal)
-	 */
-	template<typename Precision, typename std::enable_if<
-			(Precision::ColsAtCompileTime == 1)>::type* = nullptr>
+			const Eigen::Matrix2d &aPrecision);
 	void addScatterer(const Eigen::Vector2d &aResiduals,
-			const Eigen::MatrixBase<Precision> &aPrecision);
+			const Eigen::Vector2d &aPrecision);
+	void addThickScatterer(const Eigen::Vector4d &aResiduals,
+			const Eigen::Matrix4d &aPrecision);
 
 	/// Add local derivatives to a point.
 	/**
@@ -226,10 +191,12 @@ public:
 			const Eigen::MatrixBase<Derivative> &aDerivatives);
 	//
 	unsigned int numMeasurements() const;
-	bool hasScatterer() const;
-	void getScatterer(Eigen::Matrix2d &aTransformation,
-			Eigen::Vector2d &aResiduals, Eigen::Vector2d &aPrecision) const;
-	void getScatTransformation(Eigen::Matrix2d &aTransformation) const;
+	unsigned int getScatDim() const;
+	void getScatterer(Eigen::Matrix4d &aTransformation,
+			Eigen::Vector4d &aResiduals, Eigen::Vector4d &aPrecision) const;
+	void getReducedScatterer(Eigen::Matrix4d &aTransformation,
+			Eigen::Vector4d &aResiduals, Eigen::Vector4d &aPrecision) const;
+	void getScatTransformation(Eigen::MatrixXd &aTransformation) const;
 	unsigned int getLabel() const;
 	int getOffset() const;
 	const Matrix5d& getP2pJacobian() const;
@@ -240,23 +207,29 @@ public:
 	std::vector<GblMeasurement>::iterator getMeasEnd();
 	void getGlobalLabelsAndDerivatives(unsigned int aMeas, unsigned int aRow,
 			std::vector<int> &aLabels, std::vector<double> &aDerivatives) const;
+	bool isFirst() const;
+	bool isLast() const;
 
 private:
 	friend class GblTrajectory; // to have the following setters private
 	void setLabel(unsigned int aLabel);
 	void setOffset(int anOffset);
+	void setType(int aType);
 	void addPrevJacobian(const Matrix5d &aJac);
 	void addNextJacobian(const Matrix5d &aJac);
 
 	unsigned int theLabel; ///< Label identifying point
 	int theOffset; ///< Offset number at point if not negative (else interpolation needed)
+	int theType; ///< Type (-1: first, 0: inner, 1: last)
 	Matrix5d p2pJacobian; ///< Point-to-point jacobian from previous point
 	Matrix5d prevJacobian; ///< Jacobian to previous scatterer (or first measurement)
 	Matrix5d nextJacobian; ///< Jacobian to next scatterer (or last measurement)
-	bool scatFlag; ///< Scatterer present?
-	Eigen::Matrix2d scatTransformation; ///< Transformation of diagonalization (of scat. precision matrix)
-	Eigen::Vector2d scatResiduals; ///< Scattering residuals (initial kinks if iterating)
-	Eigen::Vector2d scatPrecision; ///< Scattering precision (diagonal of inverse covariance matrix)
+	unsigned int scatDim; ///< Dimension of scatterer (0: none, 2: thin, 4:thick)
+	//Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic,
+	//		Eigen::ColMajor /* default */, 4, 4> scatTransformation; ///< Transformation of diagonalization (of scat. precision matrix)
+	Eigen::Matrix4d scatTransformation; ///< Transformation of diagonalization (of scat. precision matrix)
+	Eigen::Vector4d scatResiduals; ///< Scattering residuals (initial kinks if iterating)
+	Eigen::Vector4d scatPrecision; ///< Scattering precision (diagonal of inverse covariance matrix)
 	std::vector<GblMeasurement> theMeasurements; ///< List of measurements at point
 
 };
@@ -309,32 +282,6 @@ void GblPoint::addMeasurement(const Eigen::MatrixBase<Residuals> &aResiduals,
 	static_assert(static_cast<int>(Residuals::RowsAtCompileTime) <= 5 or static_cast<int>(Residuals::RowsAtCompileTime) == Eigen::Dynamic, "addMeasurement: rows(Residuals) must be 1-5 or dynamic");
 	static_assert(static_cast<int>(Residuals::RowsAtCompileTime) == static_cast<int>(Precision::RowsAtCompileTime), "addMeasurement: rows(Residuals) and rows(Precision) must be equal");
 	theMeasurements.emplace_back(aResiduals, aPrecision, minPrecision);
-}
-
-template<typename Precision, typename std::enable_if<
-		(Precision::ColsAtCompileTime == 2)>::type*>
-void GblPoint::addScatterer(const Eigen::Vector2d &aResiduals,
-		const Eigen::MatrixBase<Precision> &aPrecision) {
-	static_assert(static_cast<int>(Precision::RowsAtCompileTime) == 2 or static_cast<int>(Precision::RowsAtCompileTime) == Eigen::Dynamic, "addScatterer: rows(Precision) must be 2 or dynamic");
-	scatFlag = true;
-	// arbitrary precision matrix
-	Eigen::SelfAdjointEigenSolver<typename Precision::PlainObject> scatEigen {
-			aPrecision };
-	scatTransformation = scatEigen.eigenvectors();
-	scatTransformation.transposeInPlace();
-	scatResiduals = scatTransformation * aResiduals;
-	scatPrecision = scatEigen.eigenvalues();
-}
-
-template<typename Precision, typename std::enable_if<
-		(Precision::ColsAtCompileTime == 1)>::type*>
-void GblPoint::addScatterer(const Eigen::Vector2d &aResiduals,
-		const Eigen::MatrixBase<Precision> &aPrecision) {
-	static_assert(static_cast<int>(Precision::RowsAtCompileTime) == 2 or static_cast<int>(Precision::RowsAtCompileTime) == Eigen::Dynamic, "addScatterer: rows(Precision) must be 2 or dynamic");
-	scatFlag = true;
-	scatResiduals = aResiduals;
-	scatPrecision = aPrecision;
-	scatTransformation.setIdentity();
 }
 
 template<typename Derivative>

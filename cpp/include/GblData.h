@@ -13,7 +13,7 @@
  *
  *
  *  \copyright
- *  Copyright (c) 2011 - 2021 Deutsches Elektronen-Synchroton,
+ *  Copyright (c) 2011 - 2023 Deutsches Elektronen-Synchroton,
  *  Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
  *  This library is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU Library General Public License as
@@ -44,7 +44,7 @@
 namespace gbl {
 
 typedef Eigen::Matrix<double, 5, 5> Matrix5d;
-typedef Eigen::Matrix<double, 2, 7> Matrix27d;
+typedef Eigen::Matrix<double, 4, 9> Matrix49d;
 
 enum dataBlockType {
 	None, InternalMeasurement, InternalKink, ExternalSeed, ExternalMeasurement
@@ -91,15 +91,16 @@ public:
 	/**
 	 * Add (non-zero) derivatives to data block. Fill list of labels of used fit parameters.
 	 * \tparam ExtDerivative  External derivatives matrix
-	 * \param [in] iRow Row index (0-1) in 2D kink
+	 * \param [in] iRow Row index (0-3) in 2D kinks and steps
+	 * \param [in] nDer Number of derivatives (7: kinks, 9: kinks+steps)
 	 * \param [in] labDer Labels for derivatives
-	 * \param [in] matDer Derivatives (matrix) 'kink vs track fit parameters'
+	 * \param [in] matDer Derivatives (matrix) 'kinks+steps vs track fit parameters'
 	 * \param [in] extOff Offset for external parameters
 	 * \param [in] extDer Derivatives for external Parameters
 	 */
 	template<typename ExtDerivative>
-	void addDerivatives(unsigned int iRow,
-			const std::array<unsigned int, 7> &labDer, const Matrix27d &matDer,
+	void addDerivatives(unsigned int iRow, unsigned int nDer,
+			const std::array<unsigned int, 9> &labDer, const Matrix49d &matDer,
 			unsigned int extOff,
 			const Eigen::MatrixBase<ExtDerivative> &extDer);
 
@@ -134,9 +135,9 @@ private:
 	double theDownWeight; ///< Down-weighting factor (0-1)
 	double thePrediction; ///< Prediction from fit
 	// standard local parameters (curvature, offsets), fixed size
-	unsigned int theNumLocal; ///< Number of (non zero) local derivatives (max 7 for kinks)
-	unsigned int theParameters[7]; ///< List of parameters (with non zero derivatives)
-	double theDerivatives[7]; ///< List of derivatives for fit
+	unsigned int theNumLocal; ///< Number of (non zero) local derivatives (max 9 for kinks+steps)
+	unsigned int theParameters[9]; ///< List of parameters (with non zero derivatives)
+	double theDerivatives[9]; ///< List of derivatives for fit
 	// more local parameters, dynamic size
 	std::vector<unsigned int> moreParameters; ///< List of fit parameters (with non zero derivatives)
 	std::vector<double> moreDerivatives; ///< List of derivatives for fit
@@ -150,7 +151,7 @@ void GblData::addDerivatives(unsigned int iRow,
 
 	unsigned int nParMax = 5 + derLocal.cols() + extDer.cols();
 	theRow = iRow - iOff;
-	if (nParMax > 7) {
+	if (nParMax > 9) {
 		// dynamic data block size
 		moreParameters.reserve(nParMax); // have to be sorted
 		moreDerivatives.reserve(nParMax);
@@ -209,13 +210,13 @@ void GblData::addDerivatives(unsigned int iRow,
 }
 
 template<typename ExtDerivative>
-void GblData::addDerivatives(unsigned int iRow,
-		const std::array<unsigned int, 7> &labDer, const Matrix27d &matDer,
+void GblData::addDerivatives(unsigned int iRow,unsigned int nDer,
+		const std::array<unsigned int, 9> &labDer, const Matrix49d &matDer,
 		unsigned int extOff, const Eigen::MatrixBase<ExtDerivative> &extDer) {
 
-	unsigned int nParMax = 7 + extDer.cols();
+	unsigned int nParMax = nDer + extDer.cols();
 	theRow = iRow;
-	if (nParMax > 7) {
+	if (nParMax > 9) {
 		// dynamic data block size
 		moreParameters.reserve(nParMax); // have to be sorted
 		moreDerivatives.reserve(nParMax);
@@ -228,7 +229,7 @@ void GblData::addDerivatives(unsigned int iRow,
 			}
 		}
 
-		for (size_t i = 0; i < labDer.size(); ++i) // curvature, offset derivatives
+		for (size_t i = 0; i < nDer; ++i) // curvature, offset derivatives
 				{
 			if (labDer[i] and matDer(iRow, i)) {
 				moreParameters.push_back(labDer[i]);
@@ -237,7 +238,7 @@ void GblData::addDerivatives(unsigned int iRow,
 		}
 	} else {
 		// simple (static) data block
-		for (size_t i = 0; i < labDer.size(); ++i) // curvature, offset derivatives
+		for (size_t i = 0; i < nDer; ++i) // curvature, offset derivatives
 				{
 			if (labDer[i] and matDer(iRow, i)) {
 				theParameters[theNumLocal] = labDer[i];

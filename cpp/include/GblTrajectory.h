@@ -13,7 +13,7 @@
  *
  *
  *  \copyright
- *  Copyright (c) 2011 - 2021 Deutsches Elektronen-Synchroton,
+ *  Copyright (c) 2011 - 2023 Deutsches Elektronen-Synchroton,
  *  Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
  *  This library is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU Library General Public License as
@@ -134,6 +134,8 @@ public:
 	virtual ~GblTrajectory();
 	bool isValid() const;
 	unsigned int getNumPoints() const;
+	unsigned int getExtResults(Eigen::VectorXd &extPar,
+			Eigen::MatrixXd &extCov) const;
 	unsigned int getResults(int aSignedLabel, Eigen::VectorXd &localPar,
 			Eigen::MatrixXd &localCov) const;
 	unsigned int getMeasResults(unsigned int aLabel, unsigned int &numData,
@@ -146,6 +148,8 @@ public:
 			Eigen::VectorXd &aResErrors, Eigen::VectorXd &aDownWeights);
 #ifdef GBL_EIGEN_SUPPORT_ROOT
 	// input from ROOT
+	unsigned int getExtResults(TVectorD &extPar,
+			TMatrixDSym &extCov) const;
 	unsigned int getResults(int aSignedLabel, TVectorD &localPar,
 			TMatrixDSym &localCov) const;
 	unsigned int getMeasResults(unsigned int aLabel, unsigned int &numData,
@@ -169,7 +173,8 @@ private:
 	unsigned int numAllPoints; ///< Number of all points on trajectory
 	std::vector<unsigned int> numPoints; ///< Number of points on (sub)trajectory
 	unsigned int numTrajectories; ///< Number of trajectories (in composed trajectory)
-	unsigned int numOffsets; ///< Number of (points with) offsets on trajectory
+	unsigned int numOffsetPoints; ///< Number of points with offsets on trajectory
+	unsigned int numOffsets; ///< Number of (1D or 2D) offsets on trajectory
 	unsigned int numInnerTransformations; ///< Number of inner transformations to external parameters
 	unsigned int numInnerTransOffsets; ///< Number of (points with) offsets affected by inner transformations to external parameters
 	unsigned int numCurvature; ///< Number of curvature parameters (0 or 1) or external parameters
@@ -203,8 +208,13 @@ private:
 	void getFitToLocalJacobian(std::array<unsigned int, 5> &anIndex,
 			Matrix5d &aJacobian, const GblPoint &aPoint, unsigned int measDim,
 			unsigned int nJacobian = 1) const;
-	void getFitToKinkJacobian(std::array<unsigned int, 7> &anIndex,
-			Matrix27d &aJacobian, const GblPoint &aPoint) const;
+	unsigned int getFitToKinkJacobian(std::array<unsigned int, 9> &anIndex,
+			Matrix49d &aJacobian, const GblPoint &aPoint) const;
+	unsigned int getFitToStepJacobian(std::array<unsigned int, 9> &anIndex,
+			Matrix49d &aJacobian, const GblPoint &aPoint) const;
+	unsigned int getFitToKinkAndStepJacobian(
+			std::array<unsigned int, 9> &anIndex, Matrix49d &aJacobian,
+			const GblPoint &aPoint) const;
 	void construct();
 	void defineOffsets();
 	void calcJacobians();
@@ -222,10 +232,11 @@ template<typename Seed>
 GblTrajectory::GblTrajectory(const std::vector<GblPoint> &aPointList,
 		unsigned int aLabel, const Eigen::MatrixBase<Seed> &aSeed,
 		bool flagCurv, bool flagU1dir, bool flagU2dir) :
-		numAllPoints(aPointList.size()), numPoints(), numOffsets(0), numInnerTransformations(
-				0), numInnerTransOffsets(0), numCurvature(flagCurv ? 1 : 0), numParameters(
-				0), numLocals(0), numMeasurements(0), externalPoint(aLabel), skippedMeasLabel(
-				0), maxNumGlobals(0), theDimension(0), thePoints(), theData(), measDataIndex(), scatDataIndex(), externalSeed(
+		numAllPoints(aPointList.size()), numPoints(), numOffsetPoints(0), numOffsets(
+				0), numInnerTransformations(0), numInnerTransOffsets(0), numCurvature(
+				flagCurv ? 1 : 0), numParameters(0), numLocals(0), numMeasurements(
+				0), externalPoint(aLabel), skippedMeasLabel(0), maxNumGlobals(
+				0), theDimension(0), thePoints(), theData(), measDataIndex(), scatDataIndex(), externalSeed(
 				aSeed), innerTransformations(), externalDerivatives(), externalMeasurements(), externalPrecisions() {
 
 	if (flagU1dir)
@@ -245,7 +256,7 @@ GblTrajectory::GblTrajectory(
 		const Eigen::MatrixBase<Derivatives> &extDerivatives,
 		const Eigen::MatrixBase<Measurements> &extMeasurements,
 		const Eigen::MatrixBase<Precision> &extPrecisions) :
-		numAllPoints(), numPoints(), numOffsets(0), numInnerTransformations(
+		numAllPoints(), numPoints(), numOffsetPoints(0), numOffsets(0), numInnerTransformations(
 				aPointsAndTransList.size()), numParameters(0), numLocals(0), numMeasurements(
 				0), externalPoint(0), skippedMeasLabel(0), maxNumGlobals(0), theDimension(
 				0), thePoints(), theData(), measDataIndex(), scatDataIndex(), externalSeed(), innerTransformations() {
@@ -290,7 +301,7 @@ GblTrajectory::GblTrajectory(
 		const Eigen::MatrixBase<Derivatives> &extDerivatives,
 		const Eigen::MatrixBase<Measurements> &extMeasurements,
 		const Eigen::MatrixBase<Precision> &extPrecisions) :
-		numAllPoints(), numPoints(), numOffsets(0), numInnerTransformations(
+		numAllPoints(), numPoints(), numOffsetPoints(0), numOffsets(0), numInnerTransformations(
 				aPointsAndTransList.size()), numParameters(0), numLocals(0), numMeasurements(
 				0), externalPoint(0), skippedMeasLabel(0), maxNumGlobals(0), theDimension(
 				0), thePoints(), theData(), measDataIndex(), scatDataIndex(), externalSeed(), innerTransformations() {
