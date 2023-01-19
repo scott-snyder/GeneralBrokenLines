@@ -7,10 +7,10 @@ Created on 28 Sep 2018
 ## \file
 # silicon tracker example
 #
-# \author Claus Kleinwort, DESY, 2018-2021 (Claus.Kleinwort@desy.de)
+# \author Claus Kleinwort, DESY, 2018 (Claus.Kleinwort@desy.de)
 #
 #  \copyright
-#  Copyright (c) 2018-2020 Deutsches Elektronen-Synchroton,
+#  Copyright (c) 2018-2021 Deutsches Elektronen-Synchroton,
 #  Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
 #  This library is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU Library General Public License as
@@ -141,7 +141,7 @@ def exampleSit():
       # as local system
       curviDirs = pred.getCurvilinearDirs()
       # projection matrix (local to measurement)
-      proL2m = np.linalg.inv(np.dot(curviDirs, np.linalg.inv(layer.getMeasSystemDirs())[:, :2]))
+      proL2m = np.linalg.inv(np.dot(curviDirs, np.linalg.inv(layer.getMeasSystemDirs())[:,:2]))
       # propagation
       jacPointToPoint = gblSimpleJacobian((sArc - sOld) / cosLambda, cosLambda, bfac)
       sOld = sArc
@@ -153,7 +153,7 @@ def exampleSit():
         pred = layer.intersectWithHelix2(seed)
         measPred = pred.getMeasPred()
         # 4D measurement
-        pro4D = np.zeros((4, 4)); pro4D[2:, 2:] = proL2m; pro4D[3, :2] = proL2m[1, :] * layer.getSpacing();
+        pro4D = np.zeros((4, 4)); pro4D[2:, 2:] = proL2m; pro4D[3,:2] = proL2m[1,:] * layer.getSpacing();
         res4D = np.array([0., 0., res[0], genHits[l][1] - measPred[1]])
         prec4D = np.array([0., 0., measPrec[0], measPrec[1]])
         point.addMeasurement([pro4D, res4D, prec4D]) 
@@ -431,7 +431,7 @@ class gblSiliconDet(object):
 #
 # Assuming constant magnetic field in (positive) Z-direction
 #
-class gblSimpleHelix(object):  
+class gblSimpleHelix(object): 
   
   ## Constructor.
   #
@@ -468,7 +468,7 @@ class gblSimpleHelix(object):
   # @param[in] vDir    measurement direction 'v'; vector
   # @return prediction; class
   #
-  def getPrediction(self, refPos, uDir, vDir):  
+  def getPrediction(self, refPos, uDir, vDir): 
     # normal to (u,v) measurement plane
     nDir = np.cross(uDir, vDir); nDir /= np.linalg.norm(nDir)
     # ZS direction  
@@ -528,7 +528,7 @@ class gblSimpleHelix(object):
     dy = (yPos * self.__rinv - self.__yRelCenter)
     dphi = math.atan2(dx, -dy) - self.__phi0
     if (abs(dphi) > math.pi):
-      dphi -= (lambda a,b:(a>b)-(a<b))(dphi, 0.) * 2.0 * math.pi 
+      dphi -= (lambda a, b:(a > b) - (a < b))(dphi, 0.) * 2.0 * math.pi 
     return dphi / self.__rinv
   
   ## Change reference point
@@ -553,7 +553,7 @@ class gblSimpleHelix(object):
     sc = -rho * newRefPoint[1] + u * self.__dir0[0]
     sd = math.sqrt(1. - rho * sa)
     # transformed parameters
-    if rho == 0.:      
+    if rho == 0.: 
       dca = dp
       sArc = dl
       newPar = [rho, phi, dca]
@@ -561,7 +561,7 @@ class gblSimpleHelix(object):
       phi = math.atan2(sb, sc)
       dca = sa / (1. + sd)
       dphi = phi - self.__phi0 
-      if abs(dphi) > math.pi: dphi -= (lambda a,b:(a>b)-(a<b))(dphi, 0.) * 2.0 * math.pi 
+      if abs(dphi) > math.pi: dphi -= (lambda a, b:(a > b) - (a < b))(dphi, 0.) * 2.0 * math.pi 
       sArc = dphi / rho
       newPar = [rho, phi, dca]  
     z0 += sArc * dzds 
@@ -584,7 +584,7 @@ class gblHelixPrediction(object):
   # @param[in] nDir     normal to measurement plane; vector
   # @param[in] pos      position at prediction; vector
   #
-  def __init__(self, sArc, pred, tDir, uDir, vDir, nDir, pos):  
+  def __init__(self, sArc, pred, tDir, uDir, vDir, nDir, pos): 
     ## arc-length
     self.__sarc = sArc
     ## prediction

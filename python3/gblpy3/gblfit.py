@@ -9,10 +9,10 @@ Created on Jul 27, 2011
 ## \file
 # GBL objects
 #
-# \author Claus Kleinwort, DESY, 2021 (Claus.Kleinwort@desy.de)
+# \author Claus Kleinwort, DESY, 2011 (Claus.Kleinwort@desy.de)
 #
 #  \copyright
-#  Copyright (c) 2011 - 2021 Deutsches Elektronen-Synchroton,
+#  Copyright (c) 2011 - 2023 Deutsches Elektronen-Synchroton,
 #  Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
 #  This library is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU Library General Public License as
@@ -190,12 +190,16 @@ class GblPoint(object):
     self.__label = 0
     ##  >=0: offset number at point, <0: offset number at next point with offset; int
     self.__offset = 0
+    ## type (-1: first, 0: inner, 1: last)
+    self.__type = 0
     ## Point-to-point jacobian from previous point; matrix(float)
     self.__p2pJacobian = aJacobian
     ## jacobians for propagation to previous or next point with offsets; pair(matrix(float))
     self.__jacobians = [ [], [] ]
     ## measurements at point; list(GblMeasurement)
     self.__measurements = []
+    ## scatterer dimension (valid 2(thin) or 4(thick))
+    self.__scatDim = 0
     ## scatterer at point: (transformation or None,) initial kinks, precision (inverse covariance matrix); list(matrix(float))
     self.__scatterer = None
       
@@ -230,12 +234,14 @@ class GblPoint(object):
   def getMeasurements(self):
     return self.__measurements
  
-  ## Add a (thin) scatterer to a point.
+  ## Add a (thin or thick) scatterer to a point.
   #  
   #  Add scatterer with arbitrary precision (inverse covariance) matrix.
-  #  Will be diagonalized. Changes local track direction.
+  #  Will be diagonalized
   #
-  #  The precision matrix for the local slopes is defined by the
+  #  **Thin scatterer**: Changes local track direction.
+  #
+  #  The (2x2) precision matrix for the local slopes is defined by the
   #  angular scattering error theta_0 and the scalar products c_1, c_2 of the
   #  offset directions in the local frame with the track direction:
   #
@@ -243,9 +249,40 @@ class GblPoint(object):
   #        P =  ~~~~~~~~~~~~~~~~~~~~~~~ * |                             |
   #                 theta_0*theta_0       |    - c_1*c_2   1 - c_2*c_2  |
   #      
-  #  @param aScatterer scatterer (kinks, precision (diagonal of or full matrix)); list(matrix(float))     
+  #
+  #  For a diagonal precision matrix at least one of the scalar products c_1, c_2
+  #  must be zero.
+  #
+  #  One offset is defined at the point.
+  #  The comparison with the previous and next offsets allows to define a kink.
+  #
+  #  **Thick scatterer**: Local track direction and position change (correlated).
+  #
+  #  Combination of several scatterers extrapolated to point
+  #  (yielding dense (4x4) covariance matrix). E.g. sum of thin scatterers (covariance V_i,
+  #  jacobian J_i for slopes and offsets):
+  #
+  #        P = [sum(J_i*V_i*J_i^t)]^-1
+  #
+  #  For each thin scatterer the covarinace matrix V_i is defined by the
+  #  angular scattering error theta_0,i and the scalar products c_1,i, c_2,i
+  #  of the offset directions in the local frame with the track direction:
+  #
+  #                                          | 1 - c_2,i^2  c_1,i*c_2,i     0     0 |
+  #                                          |                                      |
+  #                      theta_0,i^2         | c_1,i*c_2,i  1 - c_1,i^2     0     0 |
+  #        V_i = ------------------------- * |                                      |
+  #              (1 - c_1,i^2 - c_2,i^2)^2   |      0            0          0     0 |
+  #                                          |                                      |
+  #                                          |      0            0          0     0 |
+  #
+  #  Two offsets are defined at the point to describe a step (in the trajectory).
+  #  The comparison with the previous and next offsets allows to define a kink.
+  #
+  #  @param aScatterer scatterer (kinks(+steps), precision (diagonal of or full matrix, thin:2x2, thick:4x4)); list(matrix(float))
   # 
   def addScatterer(self, aScatterer):
+    self.__scatDim = aScatterer[0].shape[0]  # 2 (thin) or 4 (thick)
     self.__scatterer = [ None ] + aScatterer
     if (aScatterer[1].ndim == 2):  # full precision matrix, need to diagonalize
       eigenVal, eigenVec = np.linalg.eigh(aScatterer[1])
@@ -254,20 +291,39 @@ class GblPoint(object):
       self.__scatterer[0] = scatTransformation
       self.__scatterer[1] = np.dot(scatTransformation, aScatterer[0])
       self.__scatterer[2] = eigenVal
- 
-  ## Check point for a scatterer.
+
+  ## Get scatterer dimension.
   #
-  # @return flag; bool
+  # @return dimension; int
   #  
-  def hasScatterer(self):
-    return (self.__scatterer is not None)
+  def getScatDim(self):
+    return self.__scatDim
 
   ## Retrieve scatterer of a point.
   #  
-  #  @return scatterer (kinks, precision); list(matrix(float))   
+  #  @return scatterer (transformation, kinks(+steps), precision); list(matrix(float))
   # 
   def getScatterer(self):
     return self.__scatterer
+
+  ## Retrieve (reduced) scatterer of a point.
+  #
+  #  Reduce to positional scatterer.
+  #
+  #  @return scatterer (transformation, steps, precision); list(matrix(float))
+  #
+  def getReducedScatterer(self):
+    # get scatterer input back from diagonalization
+    scatRes = np.dot(self.__scatterer[0].T, self.__scatterer[1])
+    # positional covariance from diagonalization
+    posCov = np.dot(np.dot(self.__scatterer[0][:, 2:].T, np.diag(1. / self.__scatterer[2])), self.__scatterer[0][:, 2:])
+    ## scatPrec with only positional precision
+    scatPrec = np.zeros((4, 4))
+    scatPrec[2:, 2:] = np.linalg.inv(posCov)
+    # diagonalize again
+    eigenVal, eigenVec = np.linalg.eigh(scatPrec)
+    scatTransformation = eigenVec.T
+    return [scatTransformation, np.dot(scatTransformation, scatRes), eigenVal]
 
   ## Add local derivatives (to last measurement).
   #  
@@ -314,6 +370,27 @@ class GblPoint(object):
   def getOffset(self):
     return self.__offset
   
+  ## Define type of a point.
+  #
+  #  @param aType  type (-1: first, 0: inner, 1: last); int
+  #
+  def setType(self, aType):
+    self.__type = aType
+
+  ## Is first point?
+  #
+  #  @return flag; bool
+  #
+  def isFirst(self):
+    return (self.__type < 0)
+
+  ## Is last point?
+  #
+  #  @return flag; bool
+  #
+  def isLast(self):
+    return (self.__type > 0)
+
 #  def setDataMeas(self, aIndex, aData):
 # for extension to retrieval of residuals, pulls    
 #    self.__dataMeas[aIndex] = aData
@@ -360,7 +437,7 @@ class GblPoint(object):
 
   ## Print point. 
   def printPoint(self):
-    print(" point ", self.__label, self.__offset, len(self.__measurements)) 
+    print(" point ", self.__label, self.__offset, self.__scatDim, len(self.__measurements))
 
 #------------------------------------------------------------------------------ 
 
@@ -426,7 +503,7 @@ class GblData(object):
         
     for i in range(len(labDer)):  # curvature, offset derivatives
       if (labDer[i] != 0 and matDer[iRow, i] != 0.):
-        self.__derivatives.append(matDer[iRow , i])
+        self.__derivatives.append(matDer[iRow, i])
         self.__parameters.append(labDer[i])
 
     if (derGlobal is not None): 
@@ -594,7 +671,7 @@ class GblData(object):
 #  prediction (external seed) the description of multiple scattering
 #  is added by offsets in a local system. Along the initial
 #  trajectory points are defined with can describe a measurement
-#  or a (thin) scatterer or both. 
+#  or a scatterer or both.
 #  Multiple measurements can be added to a point to implement ambiguities.
 #  The refit provides corrections
 #  to the local track parameters (in the local system) and the 
@@ -608,12 +685,18 @@ class GblData(object):
 #  Along one direction the measurement precision may be zero,
 #  defining a 1D measurement in the other direction.
 #
-#  The broken lines trajectory is defined by (2D) offsets at the 
+#  The broken lines trajectory is defined by (2D) offsets at the
 #  first and last point and all points with a scatterer. The
 #  prediction for a measurement is obtained by interpolation of
 #  the enclosing offsets and for triplets of adjacent offsets
-#  kink angles are determined. This requires for all points the
-#  jacobians for propagation to the previous and next offset.
+#  kink angles are determined (*thin* scatterer, single offset)
+#  or for quadruplets of adjacent offsets kink angles and steps
+#  are determined (*thick* scatterer, two offsets, see logo).
+#  This requires for all points the jacobians for propagation
+#  to the previous and next point with an offset.
+#  These are calculated from the point-to-point jacobians along
+#  the initial trajectory. The sequence of points has to be
+#  strictly monotonic in arc-length.
 #
 #  Additional local or global parameters can be added and the
 #  trajectories can be written to special binary files for
@@ -634,12 +717,12 @@ class GblData(object):
 #    -# For all points on initial trajectory 
 #        - Create point (supply jacobian from previous point):\n
 #            <tt>point = \ref gblfit.GblPoint "GblPoint(jacobian)"</tt>
-#        - Optionally add measurement(s) to point:\n    
+#        - Optionally add measurement(s) to point:\n
 #            <tt>point.addMeasurement(..)</tt>
 #        - Optionally additional local or global parameters for measurement:\n 
 #            <tt>point.addLocals(..)</tt> \n
 #            <tt>point.addGlobals(..)</tt>
-#        - Optionally add scatterer to point:\n    
+#        - Optionally add scatterer to point:\n
 #            <tt>point.addScatterer(..)</tt>
 #        - Add point (ordered by arc length) to trajectory, get label of point:\n 
 #            <tt>label = traj.addPoint(point)</tt>
@@ -663,7 +746,7 @@ class GblData(object):
 #  measurements from a point is not possible.
 #  
 #  \section example_sec Examples
-# Technical examples are given in gbltst3.py, an example silicon tracker in gblsit3.py.
+# Technical examples are given in gbltst.py, an example silicon tracker in gblsit.py.
 #
 #  \section ref_sec References:
 #    - V. Blobel, C. Kleinwort, F. Meier,
@@ -782,7 +865,7 @@ class GblTrajectory(object):
     rec.readRecord(aFile)
     mPar = 0
     mBor = 0
-    mBand = 3 * len(self.__dimensions) - 1  # max band width
+    mBand = 4 * len(self.__dimensions) - 1  # max band width
     while (rec.moreData()):
       aTag = rec.specialDataTag()
       if (aTag < 0):
@@ -843,7 +926,7 @@ class GblTrajectory(object):
 
     return anIndex, aJacobian
 
-  ## Get (part of) jacobian for transformation from (trajectory) fit to track parameters at point.
+   ## Get (part of) jacobian for transformation from (trajectory) fit to track parameters at point.
   #
   #  Jacobian broken lines (q/p,..,u_i,u_i+1..) to local (q/p,u',u) parameters.
   #
@@ -858,7 +941,8 @@ class GblTrajectory(object):
     nDim = len(aDim)
     nCurv = self.__numCurvature
     nLocals = self.__numLocals      
-    nOffset = aPoint.getOffset() 
+    nOffset = aPoint.getOffset()
+    scatDim = aPoint.getScatDim()
     anIndex = [0, 0, 0, 0, 0]
     aJacobian = np.zeros((measDim, 5))
     labOffset = measDim - 2
@@ -902,6 +986,9 @@ class GblTrajectory(object):
 #     anIndex must be sorted
 #     forward : iOff2 = iOff1 + nDim, index1 = 1, index2 = 3
 #     backward: iOff2 = iOff1 - nDim, index1 = 3, index2 = 1
+      # adjust for thick scatterer
+      if (scatDim == 4):
+        nOffset += 1
       iOff1 = nDim * nOffset + nCurv + nLocals + 1  # first offset ('i' in u_i)
       index1 = 3 - 2 * nJacobian  # index of first offset
       iOff2 = iOff1 + nDim * (nJacobian * 2 - 1)  # second offset ('i' in u_i)
@@ -968,12 +1055,80 @@ class GblTrajectory(object):
         
     return anIndex, aJacobian    
 
-  ## Get residual and errors from data block.
-  #  
-  #  @param aData  data block
-  #  @param used    flag for usage of data block in fit; bool
-  #  @return residual, error of measurement and residual and down-weighting factor; list
+  ## Get jacobian for transformation from (trajectory) fit to step parameters at point.
   #
+  #  Jacobian broken lines (q/p,..,u_i-1,u_i,u_i+1..) to kink (du') and step (du) parameters.
+  #
+  #  Thick sactterers only.
+  #
+  #  @param aPoint point to use; GblPoint
+  #  @return labels for fit parameters with non zero derivatives,
+  #           corresponding transformation matrix; list(vector(int), matrix(float))
+  #
+  def __getFitToStepJacobian(self, aPoint):
+    aDim = self.__dimensions
+    nDim = len(aDim)
+    nCurv = self.__numCurvature
+    nLocals = self.__numLocals
+    nOffset = aPoint.getOffset()
+    anIndex = [0, 0, 0, 0]
+    aJacobian = np.zeros((4, 4))
+
+    iOff = (nOffset - 1) * nDim + nCurv + nLocals + 1  # first offset ('i' in u_i)
+
+#   step
+    aJacobian[2:,:2] = -np.eye(2)  # from 2nd Offset
+    aJacobian[2:, 2:] = np.eye(2)  # from 3rd Offset
+
+    for i in range(nDim):
+      anIndex[aDim[i]] = iOff + nDim + i
+      anIndex[2 + aDim[i]] = iOff + nDim * 2 + i
+
+    return anIndex, aJacobian
+
+  ## Get jacobian for transformation from (trajectory) fit to kink and step parameters at point.
+  #
+  #  Jacobian broken lines (q/p,..,u_i-1,u_i,u_i+1..) to kink (du') and step (du) parameters.
+  #
+  #  Thick sactterers only.
+  #
+  #  @param aPoint point to use; GblPoint
+  #  @return labels for fit parameters with non zero derivatives,
+  #           corresponding transformation matrix; list(vector(int), matrix(float))
+  #
+  def __getFitToKinkAndStepJacobian(self, aPoint):
+    aDim = self.__dimensions
+    nDim = len(aDim)
+    nCurv = self.__numCurvature
+    nLocals = self.__numLocals
+    nOffset = aPoint.getOffset()
+    anIndex = [0, 0, 0, 0, 0, 0, 0, 0, 0]
+    aJacobian = np.zeros((4, 9))
+
+    prevW, prevWJ, prevWd = aPoint.getDerivatives(0)  # W-, W- * J-, W- * d-
+    nextW, nextWJ, nextWd = aPoint.getDerivatives(1)  # W+, W+ * J+, W+ * d+
+    iOff = (nOffset - 1) * nDim + nCurv + nLocals + 1  # first offset ('i' in u_i)
+
+#   kink
+    if (nCurv > 0):
+      aJacobian[:2, 0:1] = -(prevWd + nextWd)  # from curvature
+      anIndex[0] = nLocals + 1
+    aJacobian[:2, 1:3] = prevW  # from 1st Offset
+    aJacobian[:2, 3:5] = -prevWJ  # from 2nd Offset
+    aJacobian[:2, 5:7] = -nextWJ  # from 3rd Offset
+    aJacobian[:2, 7:9] = nextW  # from 4th Offset
+#   step
+    aJacobian[2:, 3:5] = -np.eye(2)  # from 2nd Offset
+    aJacobian[2:, 5:7] = np.eye(2)  # from 3rd Offset
+
+    for i in range(nDim):
+      anIndex[1 + aDim[i]] = iOff + i
+      anIndex[3 + aDim[i]] = iOff + nDim + i
+      anIndex[5 + aDim[i]] = iOff + nDim * 2 + i
+      anIndex[7 + aDim[i]] = iOff + nDim * 3 + i
+
+    return anIndex, aJacobian
+
   def __getResAndErr(self, aData, used=True):
     aResidual, aMeasVar, aDownWeight, indLocal, derLocal = self.__data[aData].getResidual()
     aVec = np.array(derLocal)  # compressed vector
@@ -1069,16 +1224,25 @@ class GblTrajectory(object):
 # set labels for previous/next offsets
 #     first point is offset    
       self.__points[0].setOffset(0)
+      self.__points[0].setType(-1)
       nOffsets = 1
 #     intermediate scatterers are offsets    
       for aPoint in self.__points[1:-1]:
-        if (aPoint.hasScatterer()):
+        scatDim = aPoint.getScatDim()
+        if (scatDim > 0):
           aPoint.setOffset(nOffsets)
           nOffsets += 1
+          # thick scatterer ?
+          if (scatDim == 4):
+            nOffsets += 1
         else: 
           aPoint.setOffset(-nOffsets)
 #     last point is offset    
       self.__points[-1].setOffset(nOffsets)
+      self.__points[-1].setType(1)
+      if (self.__points[-1].getScatDim() == 4):
+        # thick scatterer
+        nOffsets += 1
       self.__numOffsets = nOffsets + 1
       self.__numParameters = self.__numOffsets * len(self.__dimensions) \
                            +self.__numCurvature + self.__numLocals       
@@ -1139,17 +1303,41 @@ class GblTrajectory(object):
 # pseudo measurements from kinks
       self.__scatDataIndex.append(len(self.__data))  # offset
       self.__scatDataIndex.append(len(self.__data))  # first point
-      for aPoint in self.__points[1:-1]:
-        if (aPoint.hasScatterer()):
+      for aPoint in self.__points[1:]:
+        scatDim = aPoint.getScatDim()
+        if (scatDim > 0):
           nLabel = aPoint.getLabel()        
-          matT, aMeas, aPrec = aPoint.getScatterer()
-          labDer, matDer = self.__getFitToKinkJacobian(aPoint)
+          if (scatDim == 4):
+          # thick scatterer, last point?
+            if (aPoint.isLast()):
+              # steps (only)
+              matT, aMeas, aPrec = aPoint.getReducedScatterer()
+              labDer, matDer = self.__getFitToStepJacobian(aPoint)
+            else:
+              # kinks+steps
+              matT, aMeas, aPrec = aPoint.getScatterer()
+              labDer, matDer = self.__getFitToKinkAndStepJacobian(aPoint)
+          else:
+          # thin scatterer, last point?
+            if (aPoint.isLast()):
+              continue
+            else:
+              # kinks
+              matT, aMeas, aPrec = aPoint.getScatterer()
+              labDer, matDer = self.__getFitToKinkJacobian(aPoint)
           matTDer = matDer if matT is None else np.dot(matT, matDer)
           for i in aDim:
             if (aPrec[i] > 0.):
               aData = GblData(nLabel, 2, aMeas[i], aPrec[i])
               aData.addDerivatives(i, labDer, matTDer)
               self.__data.append(aData)
+          # thick scatterer?
+          if (scatDim == 4):
+            for i in aDim:
+              if (aPrec[i + 2] > 0.):
+                aData = GblData(nLabel, 2, aMeas[i + 2], aPrec[i + 2])
+                aData.addDerivatives(i + 2, labDer, matTDer)
+                self.__data.append(aData)
         self.__scatDataIndex.append(len(self.__data))
 #              aPoint.setDataScat(i, len(self.__data)) 
       self.__scatDataIndex.append(len(self.__data))  # last point

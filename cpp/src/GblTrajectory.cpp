@@ -36,7 +36,7 @@
  *  (external seed) the description of multiple scattering is
  *  added by offsets in a local system. Along the initial
  *  trajectory points are defined with can describe a measurement
- *  or a scatterer or both. Measurements are arbitrary
+ *  or a scatterer or both. Measurements are arbitrary (linear)
  *  functions of the local track parameters at a point (e.g. 2D:
  *  position, 4D: direction+position). Multiple measurements can be
  *  added to a point (and later disabled) to implement

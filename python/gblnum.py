@@ -12,7 +12,7 @@ Created on Jul 27, 2011
 # \author Claus Kleinwort, DESY, 2011 (Claus.Kleinwort@desy.de)
 #
 #  \copyright
-#  Copyright (c) 2011 - 2016 Deutsches Elektronen-Synchroton,
+#  Copyright (c) 2011 - 2023 Deutsches Elektronen-Synchroton,
 #  Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
 #  This library is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU Library General Public License as
@@ -28,6 +28,7 @@ Created on Jul 27, 2011
 #  675 Mass Ave, Cambridge, MA 02139, USA.
 
 import numpy as np
+
 
 ##  (Symmetric) Bordered Band Matrix. 
 #    
@@ -67,9 +68,9 @@ class BorderedBandMatrix(object):
   #  
   #  @param nSize  size of matrix; int
   #  @param nBorder  size of border (default: 1, 'curvature'); int
-  #  @param nBand  (maximal) band width (5); int
+  #  @param nBand  (maximal) band width (7); int
   #
-  def __init__(self, nSize, nBorder=1, nBand=5):
+  def __init__(self, nSize, nBorder=1, nBand=7):
     nSizeBand = nSize - nBorder
     ## size of matrix; int
     self.__numSize = nSize
@@ -149,10 +150,10 @@ class BorderedBandMatrix(object):
   def printMatrix(self):
     print " block part "
     nRow = self.__numBorder
-    for i in range(nRow):  
+    for i in range(nRow):
       print " row ", i, self.__border[i]
     print " mixed part "
-    for i in range(nRow):  
+    for i in range(nRow):
       print " row ", i, self.__mixed[i]
     nRow = self.__numBand + 1
     print " band part "
@@ -167,6 +168,7 @@ class BorderedBandMatrix(object):
   #  @note BBmatrix is replaced by BB part of it's inverse
   #
   def solveAndInvertBorderedBand(self, aRightHandSide):
+
 #============================================================================
 ## from Dbandmatrix.F (MillePede-II by V. Blobel, Univ. Hamburg) 
 #============================================================================
@@ -216,7 +218,7 @@ class BorderedBandMatrix(object):
       nRow = self.__numBand + 1
       nCol = self.__numCol       
       inverseBand = np.zeros((nRow, nCol))
-      for i in range(nCol - 1, -1, -1):   
+      for i in range(nCol - 1, -1, -1):
         rxw = self.__band[0, i]
         for j in range(i, max(0, i - nRow + 1) - 1, -1):
           for k in range(j + 1, min(nCol, j + nRow)):
@@ -252,17 +254,17 @@ class BorderedBandMatrix(object):
 
     if (nBorder > 0):
       auxMat = np.empty((nBorder, nCol))
-# solve for mixed part      
-      for i in range(nBorder):    
+# solve for mixed part
+      for i in range(nBorder):
         auxMat[i] = solveBand(self.__mixed[i])
-      auxMatT = auxMat.T      	
+      auxMatT = auxMat.T
 # solve for border
       auxVec = aRightHandSide[:nBorder] - np.dot(auxMat, aRightHandSide[nBorder:])
       invBorder = np.linalg.inv(self.__border - np.dot(self.__mixed, auxMatT))
       aSolution[:nBorder] = np.dot(invBorder, auxVec)
 # solve for band part 
       aSolution[nBorder:] = solveBand(aRightHandSide[nBorder:]) \
-                          - np.dot(auxMatT, aSolution[:nBorder])
+                          -np.dot(auxMatT, aSolution[:nBorder])
 # parts of inverse
       self.__border = invBorder
       self.__mixed = np.dot(-invBorder, auxMat)
