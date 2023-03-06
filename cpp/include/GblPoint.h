@@ -49,6 +49,7 @@ typedef Eigen::Matrix<double, 2, 5> Matrix25d;
 typedef Eigen::Matrix<double, 3, 2> Matrix32d;
 typedef Eigen::Matrix<double, 5, 5> Matrix5d;
 typedef Eigen::Matrix<double, 4, 9> Matrix49d;
+typedef Eigen::Matrix<double, 6, 6> Matrix6d;
 
 /// Point on trajectory
 /**
@@ -221,9 +222,18 @@ private:
 	unsigned int theLabel; ///< Label identifying point
 	int theOffset; ///< Offset number at point if not negative (else interpolation needed)
 	int theType; ///< Type (-1: first, 0: inner, 1: last)
-	Matrix5d p2pJacobian; ///< Point-to-point jacobian from previous point
-	Matrix5d prevJacobian; ///< Jacobian to previous scatterer (or first measurement)
-	Matrix5d nextJacobian; ///< Jacobian to next scatterer (or last measurement)
+	Matrix5d p2pJacobian  = Matrix5d::Zero(5,5); ///< Point-to-point jacobian from previous point
+	Matrix5d prevJacobian = Matrix5d::Zero(5,5); ///< Jacobian to previous scatterer (or first measurement)
+	Matrix5d nextJacobian = Matrix5d::Zero(5,5); ///< Jacobian to next scatterer (or last measurement)
+	unsigned int measDim; ///< Dimension of measurement (1-5), 0 indicates absence of measurement
+	double measPrecMin; ///< Minimal measurement precision (for usage)
+	Matrix5d measProjection = Matrix5d::Zero(5,5); ///< Projection from measurement to local system
+	Vector5d measResiduals  = Vector5d::Zero(5); ///< Measurement residuals
+	Vector5d measPrecision  = Vector5d::Zero(5); ///< Measurement precision (diagonal of inverse covariance matrix)
+	bool transFlag; ///< Transformation exists?
+	Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic,
+        Eigen::ColMajor /* default */, 5, 5> measTransformation; ///< Transformation of diagonalization (of meas. precision matrix)
+	bool scatFlag; ///< Scatterer present?
 	unsigned int scatDim; ///< Dimension of scatterer (0: none, 2: thin, 4:thick)
 	//Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic,
 	//		Eigen::ColMajor /* default */, 4, 4> scatTransformation; ///< Transformation of diagonalization (of scat. precision matrix)
@@ -232,6 +242,9 @@ private:
 	Eigen::Vector4d scatPrecision; ///< Scattering precision (diagonal of inverse covariance matrix)
 	std::vector<GblMeasurement> theMeasurements; ///< List of measurements at point
 
+	Eigen::MatrixXd localDerivatives; ///< Derivatives of measurement vs additional local (fit) parameters
+	std::vector<int> globalLabels; ///< Labels of global (MP-II) derivatives
+	Eigen::MatrixXd globalDerivatives; ///< Derivatives of measurement vs additional global (MP-II) parameters
 };
 
 template<typename Projection, typename Residuals, typename Precision,
@@ -245,6 +258,18 @@ void GblPoint::addMeasurement(const Eigen::MatrixBase<Projection> &aProjection,
 	static_assert(static_cast<int>(Residuals::RowsAtCompileTime) == static_cast<int>(Projection::RowsAtCompileTime), "addMeasurement: rows(Residuals) and rows(Projection) must be equal");
 	static_assert(static_cast<int>(Precision::RowsAtCompileTime) == static_cast<int>(Precision::ColsAtCompileTime), "addMeasurement: rows(Precision) and cols(Precision) must be equal");
 	static_assert(static_cast<int>(Projection::RowsAtCompileTime) == static_cast<int>(Projection::ColsAtCompileTime), "addMeasurement: rows(Projection) and cols(Projection) must be equal");
+	measDim = aResiduals.rows();
+	measPrecMin = minPrecision;
+	// arbitrary precision matrix
+	Eigen::SelfAdjointEigenSolver<typename Precision::PlainObject> measEigen {
+			aPrecision };
+	measTransformation = measEigen.eigenvectors().transpose();
+	transFlag = true;
+    
+    measResiduals.tail(measDim) = measTransformation * aResiduals;
+	measPrecision.tail(measDim) = measEigen.eigenvalues();
+	measProjection.bottomRightCorner(measDim, measDim) = measTransformation
+			* aProjection;
 	theMeasurements.emplace_back(aProjection, aResiduals, aPrecision,
 			minPrecision);
 }
@@ -295,6 +320,16 @@ void GblPoint::addGlobals(const std::vector<int> &aLabels,
 		const Eigen::MatrixBase<Derivative> &aDerivatives) {
 	if (theMeasurements.size())
 		theMeasurements.back().addGlobals(aLabels, aDerivatives);
+
+    if (measDim) {
+		  globalLabels = aLabels;
+		  globalDerivatives.resize(aDerivatives.rows(), aDerivatives.cols());
+		  if (transFlag) {
+			  globalDerivatives = measTransformation * aDerivatives;
+		  } else {
+			  globalDerivatives = aDerivatives;
+		  }
+	}
 }
 
 }

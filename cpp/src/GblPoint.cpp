@@ -30,6 +30,7 @@
 #include "GblPoint.h"
 using namespace Eigen;
 
+
 //! Namespace for the general broken lines package
 namespace gbl {
 

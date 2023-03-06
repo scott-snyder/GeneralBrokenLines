@@ -28,6 +28,7 @@
  */
 
 #include "MilleBinary.h"
+#include <iostream>
 
 //! Namespace for the general broken lines package
 namespace gbl {
@@ -55,10 +56,18 @@ MilleBinary::MilleBinary(const std::string& fileName, bool doublePrec,
 		floatBuffer.push_back(0.);
 	}
 }
-
-MilleBinary::~MilleBinary() {
-	binaryFile.close();
-}
+    
+    void MilleBinary::Close() {
+        if (binaryFile.is_open()) {
+            std::cout<<"Close Binary"<<std::endl;
+            binaryFile.close();
+        }
+    }
+    
+    
+    MilleBinary::~MilleBinary() {
+        Close();
+    }
 
 /// Add data block to (end of) record.
 /**
