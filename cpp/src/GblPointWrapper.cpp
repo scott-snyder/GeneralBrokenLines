@@ -1,7 +1,6 @@
 #include "GblPoint.h"
 #include "Eigen/Core"
 
-
 const int NROW = 5;
 const int NCOL = 5;
 
@@ -10,24 +9,24 @@ using namespace Eigen;
 
 extern "C" { 
 GblPoint* GblPointCtor(double matrixArray[NROW*NCOL]) {
-	
 	Map<Matrix5d> jacobian(matrixArray,5,5);
 	return new GblPoint(jacobian);
-	
 }
 
 void GblPoint_printPoint(const GblPoint* self, unsigned int level) {
 	self->printPoint(level);
 }
 
+/*
+ * not in GblPoint anymore
 unsigned int GblPoint_hasMeasurement(const GblPoint* self) {
 	return self->hasMeasurement();
 }
 
-
 double GblPoint_getMeasPrecMin(const GblPoint* self) {
 	return self->getMeasPrecMin();
 }
+ */
 
 //Only supporting:
 //2D position residual
@@ -49,13 +48,13 @@ void GblPoint_addMeasurement2D(GblPoint* self,
 
 //Only support vector precision
 void GblPoint_addScatterer(GblPoint* self, double *resArray, double *precArray) {
-	
-	Map<Vector2d> aResiduals(resArray,2);
-	Map<Vector2d> aPrecision(precArray,2);
+	// chose to do the Vector2d addScatterer since
+	// PF's original comment "only support vector precision"
+	Eigen::Vector2d aResiduals(resArray);
+	Eigen::Vector2d aPrecision(precArray);
 	
 	self->addScatterer(aResiduals,aPrecision);
 }
-
 
 void GblPoint_addGlobals(GblPoint* self, int *labels, int nlabels, double* derArray) {
 	std::vector<int> aLabels;
@@ -66,37 +65,31 @@ void GblPoint_addGlobals(GblPoint* self, int *labels, int nlabels, double* derAr
 	self->addGlobals(aLabels, derivatives);
 }
 
-int GblPoint_getNumGlobals(GblPoint* self) {
-	return self->getNumGlobals();
-}
-
-//TODO revisit these!
-
-//Should I add the number of nlabels?
-void GblPoint_getGlobalLabels(GblPoint* self, int* labels) {
-	
+void GblPoint_getGlobalLabelsAndDerivatives(GblPoint* self, int* labels, double* ders) {
 	std::vector<int> glabels;
-	self->getGlobalLabels(glabels);
+	std::vector<double> gders;
+
+	//Should I add the number of derivatives? -  Row/Col? CHECK CHECK CHECK
+	self->getGlobalLabelsAndDerivatives(
+			0 /* aMeas */, 0 /* aRow  */,
+			glabels, gders);
 
 	//std::cout<<"GblPointWrapper::glabels"<<std::endl;
 	
-	for (unsigned int il = 0 ; il < glabels.size(); il++) {
+	for (std::size_t il{0}; il < glabels.size(); ++il) {
 		labels[il] = glabels.at(il);
 		//std::cout<<glabels.at(il)<<std::endl;
 	}
-}  
 
-//Should I add the number of derivatives? -  Row/Col? CHECK CHECK CHECK
-void GblPoint_getGlobalDerivatives(GblPoint* self, double* gders) {
+	//std::cout<<"GblPointWrapper::gders"<<std::endl;
 	
-	int ngders = self->getNumGlobals();
-	Eigen::MatrixXd e_gders(1,ngders);
-	self->getGlobalDerivatives(e_gders);
-	
-	//std::cout<<"GblPointWrapper::e_ders"<<std::endl;
-	//std::cout<<e_gders<<std::endl;
+	for (std::size_t id{0}; id < gders.size(); ++id) {
+		ders[id] = gders.at(id);
+		//std::cout<<gders.at(il)<<std::endl;
+	}
 
-	Map<MatrixXd>(gders,1,ngders) = e_gders;
+	// set array using Eigen
+	//Map<MatrixXd>(ders,1,gders.size()) = gders;
 }
 
 }
