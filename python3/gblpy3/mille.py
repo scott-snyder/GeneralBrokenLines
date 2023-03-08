@@ -158,7 +158,7 @@ class MilleRecord(object):
   def readRecord(self, aFile):
     header = array.array('i')  # header with number of words
     header.fromfile(aFile, 1)
-    self.__recLen = abs(header[0] / 2)
+    self.__recLen = abs(header[0] // 2)
     if header[0] < 0:
       self.__glder = array.array('d')
     self.__glder.fromfile(aFile, self.__recLen)
