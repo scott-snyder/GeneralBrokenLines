@@ -7,13 +7,32 @@ const int NCOL = 5;
 using namespace gbl;
 using namespace Eigen;
 
+#ifdef JNA_DEBUG
+int num_gbl_point = 0;
+#endif
+
 extern "C" { 
 GblPoint* GblPointCtor(double matrixArray[NROW*NCOL]) {
 	Map<Matrix5d> jacobian(matrixArray,5,5);
-	return new GblPoint(jacobian);
+	GblPoint* self = new GblPoint(jacobian);
+#ifdef JNA_DEBUG
+  std::cout << "GblPointCtor at " << self << " " << ++num_gbl_point << std::endl;
+#endif
+  return self;
 }
 
+void GblPoint_delete(GblPoint* self) {
+#ifdef JNA_DEBUG
+  std::cout << "GblPoint_delete(" << self << ") " << --num_gbl_point << std::endl;
+#endif
+	if (self) delete self;
+}
+
+
 void GblPoint_printPoint(const GblPoint* self, unsigned int level) {
+#ifdef JNA_DEBUG
+  std::cout << "GblPoint_printPoint(" << self << ", " << level << ")" << std::endl;
+#endif
 	self->printPoint(level);
 }
 
@@ -37,6 +56,11 @@ void GblPoint_addMeasurement2D(GblPoint* self,
 								 double *resArray,
 								 double *precArray, 
 								 double minPrecision) { 
+#ifdef JNA_DEBUG
+  std::cout << "GblPoint_addMeasurement2D("
+    << self << ", " << projArray << ", " << resArray << ", " << precArray << ", " << minPrecision
+    << ")" << std::endl;
+#endif
 	
 	Map<Matrix2d> aProjection(projArray,2,2);
 	Map<Vector2d> aResiduals(resArray, 2);
@@ -48,6 +72,10 @@ void GblPoint_addMeasurement2D(GblPoint* self,
 
 //Only support vector precision
 void GblPoint_addScatterer(GblPoint* self, double *resArray, double *precArray) {
+#ifdef JNA_DEBUG
+  std::cout << "GblPoint_addScatterer(" << self << ", " 
+    << resArray << ", " << precArray << ")" << std::endl;
+#endif
 	// chose to do the Vector2d addScatterer since
 	// PF's original comment "only support vector precision"
 	Eigen::Vector2d aResiduals(resArray);
@@ -57,6 +85,10 @@ void GblPoint_addScatterer(GblPoint* self, double *resArray, double *precArray) 
 }
 
 void GblPoint_addGlobals(GblPoint* self, int *labels, int nlabels, double* derArray) {
+#ifdef JNA_DEBUG
+  std::cout << "GblPoint_addGlobals(" << self
+    << ", " << labels << ", " << nlabels << ", " << derArray << ")" << std::endl;
+#endif
 	std::vector<int> aLabels;
 	for (int i=0; i<nlabels; i++) {
 		aLabels.push_back(labels[i]);
@@ -66,6 +98,11 @@ void GblPoint_addGlobals(GblPoint* self, int *labels, int nlabels, double* derAr
 }
 
 void GblPoint_getGlobalLabelsAndDerivatives(GblPoint* self, int* labels, double* ders) {
+#ifdef JNA_DEBUG
+  std::cout << "GblPoint_getGlobalLabelsAndDerivatives("
+    << self << ", " << labels << ", " << ders
+    << ")" << std::endl;
+#endif
 	std::vector<int> glabels;
 	std::vector<double> gders;
 

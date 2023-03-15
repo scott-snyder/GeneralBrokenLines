@@ -6,7 +6,9 @@ using namespace Eigen;
 extern "C" {
 
 GblTrajectory* GblTrajectoryCtor(int flagCurv, int flagU1dir, int flagU2dir) {
-	
+#ifdef JNA_DEBUG
+  std::cout << "GblTrajectoryCtor(" << flagCurv << ", " << flagU1dir << ", " << flagU2dir << ")" << std::endl;
+#endif
 	return new GblTrajectory(flagCurv, flagU1dir, flagU2dir);
 	
 }
@@ -14,8 +16,13 @@ GblTrajectory* GblTrajectoryCtor(int flagCurv, int flagU1dir, int flagU2dir) {
 //Simple trajectory constructor wrapper
 GblTrajectory* GblTrajectoryCtorPtrArray(GblPoint* points[], int npoints, 
 										 int flagCurv, int flagU1dir, int flagU2dir) {
-	
-	
+#ifdef JNA_DEBUG
+  std::cout << "GblTracjectoryCtorPtrArray("
+    << points << ", " << npoints << ", "
+    << flagCurv << ", " << flagU1dir << ", " << flagU2dir
+    << ")" << std::endl;
+#endif
+
 	std::vector<GblPoint> aPointList;
 	
 	for (int i=0; i<npoints; i++) {
@@ -34,6 +41,13 @@ GblTrajectory* GblTrajectoryCtorPtrArray(GblPoint* points[], int npoints,
 GblTrajectory* GblTrajectoryCtorPtrArraySeed(GblPoint* points[], int npoints,
 											 int aLabel, double seedArray[],
 											 int flagCurv, int flagU1dir, int flagU2dir) {
+#ifdef JNA_DEBUG
+  std::cout << "GblTrajectoryCtorPtrArraySeed("
+    << points << ", " << npoints << ", "
+    << aLabel << ", " << seedArray << ", "
+    << flagCurv << ", " << flagU1dir << ", " << flagU2dir
+    << ")" << std::endl;
+#endif
 	
 	std::vector<GblPoint> aPointList;
 	
@@ -55,6 +69,12 @@ GblTrajectory* GblTrajectoryCtorPtrArraySeed(GblPoint* points[], int npoints,
 
 GblTrajectory* GblTrajectoryCtorPtrComposed(GblPoint* points_1[], int npoints_1, double trafo_1[],
 											GblPoint* points_2[], int npoints_2, double trafo_2[]) {
+#ifdef JNA_DEBUG
+  std::cout << "GblTrajectoryCtorPtrComposed("
+    << points_1 << ", " << npoints_1 << ", " << trafo_1 << ", "
+    << points_2 << ", " << npoints_2 << ", " << trafo_2 << ")"
+    << std::endl;
+#endif
 	
 	std::vector<std::pair<std::vector<GblPoint>, Eigen::MatrixXd> > pointsAndTransList;
 	
@@ -108,26 +128,41 @@ GblTrajectory* GblTrajectoryCtorPtrComposed(GblPoint* points_1[], int npoints_1,
 }
 
 void GblTrajectory_fit(GblTrajectory* self, double* Chi2, int* Ndf, double* lostWeight, char* c_optionList, unsigned int aLabel) {
+#ifdef JNA_DEBUG
+  std::cout << "GblTrajectory_fit("
+    << self << ", " << Chi2 << ", " << Ndf << ", " << lostWeight << ", " << c_optionList << ", " << aLabel << ")"
+    << std::endl;
+#endif
 	
 	std::string optionList(c_optionList);
 	self->fit(*Chi2, *Ndf, *lostWeight, optionList,aLabel);
 }
 
 void GblTrajectory_delete(GblTrajectory* self) {
-	if (self)
-	delete self;
+#ifdef JNA_DEBUG
+  std::cout << "GblTrajectory_delete(" << self << ")" << std::endl;
+#endif
+	if (self) delete self;
 }
 
 int GblTrajectory_isValid(GblTrajectory* self) {
-	
+#ifdef JNA_DEBUG
+  std::cout << "GblTrajectory_isValid(" << self << ")" << std::endl;
+#endif
 	return (int) self->isValid();
 }
 
 int GblTrajectory_getNumPoints(GblTrajectory* self) {
+#ifdef JNA_DEBUG
+  std::cout << "GblTrajectory_getNumPoints(" << self << ")" << std::endl;
+#endif
 	return (int) self->getNumPoints();
 }
 
 void GblTrajectory_printTrajectory(GblTrajectory* self, int level) {
+#ifdef JNA_DEBUG
+  std::cout << "GblTrajectory_printTrajectory(" << self << ", " << level << ")" << std::endl;
+#endif
 	return self->printTrajectory();
 }
 
@@ -142,6 +177,11 @@ void GblTrajectory_printPoints(GblTrajectory* self, int level) {
 //Only 5-vector and 5x5 cov matrix.
 void GblTrajectory_getResults(GblTrajectory* self, int aSignedLabel, double* localPar, int* nLocalPar,
 								double * localCov, int* sizeLocalCov) {
+#ifdef JNA_DEBUG
+  std::cout << "GblTrajectory_getResults(" << self 
+    << ", " << aSignedLabel << ", " << localPar << ", " << nLocalPar
+    << ", " << localCov << ", " << sizeLocalCov << ")" << std::endl;
+#endif
 
 	Eigen::VectorXd e_localPar(5);
 	Eigen::MatrixXd e_localCov(5,5);
@@ -164,6 +204,11 @@ void GblTrajectory_getResults(GblTrajectory* self, int aSignedLabel, double* loc
 void GblTrajectory_getMeasResults(GblTrajectory* self, int aLabel, int* numData, 
 									double* aResiduals, double* aMeasErrors, double* aResErrors, 
 									double* aDownWeights) {
+#ifdef JNA_DEBUG
+  std::cout << "GblTrajectory_getMeasResults(" << self 
+    << ", " << aLabel << ", " << numData << ", " << aResiduals
+    << ", " << aMeasErrors << ", " << aResErrors << ", " << aDownWeights << ")" << std::endl;
+#endif
 	
 	Eigen::VectorXd e_aResiduals(2);
 	Eigen::VectorXd e_aMeasErrors(2);
@@ -187,6 +232,10 @@ void GblTrajectory_getMeasResults(GblTrajectory* self, int aLabel, int* numData,
 
 
 void GblTrajectory_milleOut(GblTrajectory* self, MilleBinary* millebinary) {
+#ifdef JNA_DEBUG
+  std::cout << "GblTrajectory_milleOut(" << self 
+    << ", " << millebinary << ")" << std::endl;
+#endif
 	self->milleOut(*millebinary);
 }
 

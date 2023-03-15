@@ -43,6 +43,8 @@ INSTALL( TARGETS ${PROJECT_NAME} DESTINATION lib )
 
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${ROOT_LIBS})
 
+target_compile_definitions(${PROJECT_NAME} PUBLIC JNA_DEBUG)
+
 # the examples, build with "make examples"
 ADD_SUBDIRECTORY( examples/ )
   
