@@ -439,7 +439,11 @@ unsigned int GblTrajectory::getNumPoints() const {
  * Trajectory is prepared for fit or output to binary file, may consists of sub-trajectories.
  */
 void GblTrajectory::construct() {
-
+#ifdef JNA_DEBUG
+	std::cout << "GblPoints in GblTrajectory(" << this << ") : [ ";
+	for (const auto& pt : thePoints[0]) std::cout << &pt << " ";
+	std::cout << "]" << std::endl;
+#endif
 	constructOK = false;
 	fitOK = false;
 	unsigned int aLabel = 0;

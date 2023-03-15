@@ -16,7 +16,7 @@ GblPoint* GblPointCtor(double matrixArray[NROW*NCOL]) {
 	Map<Matrix5d> jacobian(matrixArray,5,5);
 	GblPoint* self = new GblPoint(jacobian);
 #ifdef JNA_DEBUG
-	std::cout << "GblPointCtor at " << self << " " << ++num_gbl_point << std::endl;
+	//std::cout << "GblPointCtor at " << self << " " << ++num_gbl_point << std::endl;
 #endif
 	return self;
 }
@@ -31,21 +31,10 @@ void GblPoint_delete(GblPoint* self) {
 
 void GblPoint_printPoint(const GblPoint* self, unsigned int level) {
 #ifdef JNA_DEBUG
-	std::cout << "GblPoint_printPoint(" << self << ", " << level << ")" << std::endl;
+	//std::cout << "GblPoint_printPoint(" << self << ", " << level << ")" << std::endl;
 #endif
 	self->printPoint(level);
 }
-
-/*
- * not in GblPoint anymore
-unsigned int GblPoint_hasMeasurement(const GblPoint* self) {
-	return self->hasMeasurement();
-}
-
-double GblPoint_getMeasPrecMin(const GblPoint* self) {
-	return self->getMeasPrecMin();
-}
- */
 
 //Only supporting:
 //2D position residual
@@ -97,7 +86,7 @@ void GblPoint_addGlobals(GblPoint* self, int *labels, int nlabels, double* derAr
 	self->addGlobals(aLabels, derivatives);
 }
 
-void GblPoint_getGlobalLabelsAndDerivatives(GblPoint* self, int* labels, double* ders) {
+void GblPoint_getGlobalLabelsAndDerivatives(GblPoint* self, int* nlabels, int labels[], double ders[]) {
 #ifdef JNA_DEBUG
 	std::cout << "GblPoint_getGlobalLabelsAndDerivatives("
 		<< self << ", " << labels << ", " << ders
@@ -113,14 +102,18 @@ void GblPoint_getGlobalLabelsAndDerivatives(GblPoint* self, int* labels, double*
 
 	//std::cout<<"GblPointWrapper::glabels"<<std::endl;
 	
-	for (std::size_t il{0}; il < glabels.size(); ++il) {
+	*nlabels = glabels.size();
+	labels = new int[*nlabels];
+	ders   = new double[*nlabels];
+	
+	for (std::size_t il{0}; il < *nlabels; ++il) {
 		labels[il] = glabels.at(il);
 		//std::cout<<glabels.at(il)<<std::endl;
 	}
 
 	//std::cout<<"GblPointWrapper::gders"<<std::endl;
 	
-	for (std::size_t id{0}; id < gders.size(); ++id) {
+	for (std::size_t id{0}; id < *nlabels; ++id) {
 		ders[id] = gders.at(id);
 		//std::cout<<gders.at(il)<<std::endl;
 	}

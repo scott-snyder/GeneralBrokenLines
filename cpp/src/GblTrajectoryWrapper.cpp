@@ -27,9 +27,11 @@ std::vector<GblPoint> ptr_array_to_vector(GblPoint* points[], int npoints) {
 	for (int i{0}; i < npoints; ++i) {
 		// get the pointer
 		GblPoint* gblpoint = points[i];
-		// MOVE the data into the vector,
-		//   this transfers ownership into the vector and invalidates the array
+		// COPY the data into the vector,
 		points_vec.emplace_back(*(gblpoint));
+#ifdef JNA_DEBUG
+		std::cout << "COPY GblPoint " << gblpoint << " -> " << &(points_vec.back()) << std::endl;
+#endif
 	}
 
 	return points_vec;
