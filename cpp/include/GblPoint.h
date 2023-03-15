@@ -61,7 +61,9 @@ typedef Eigen::Matrix<double, 6, 6> Matrix6d;
  *   -# Scatterer (thin, 2D kinks)
  */
 class GblPoint {
+#ifdef JNA_DEBUG
   static int num_gbl_point;
+#endif
 public:
 	GblPoint(const Matrix5d &aJacobian, unsigned int numMeasReserve = 0);
 	GblPoint(const GblPoint&) = default;
