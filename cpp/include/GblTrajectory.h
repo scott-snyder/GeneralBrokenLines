@@ -49,11 +49,6 @@ namespace gbl {
  */
 class GblTrajectory {
 public:
-
-    //make a constructor without passing the points
-    GblTrajectory(bool flagCurv, bool flagU1dir, bool flagU2dir);
-        
-    
 	GblTrajectory(const std::vector<GblPoint> &aPointList, bool flagCurv = true,
 			bool flagU1dir = true, bool flagU2dir = true);
 	GblTrajectory(
@@ -173,10 +168,6 @@ public:
 	void printTrajectory(unsigned int level = 0) const;
 	void printPoints(unsigned int level = 0) const;
 	void printData() const;
-    
-    void getPoints(std::vector<GblPoint> &aPointList) const;
-    void getPoints(std::vector< std::vector <GblPoint> > &aPointList) const;
-
 
 private:
 	unsigned int numAllPoints; ///< Number of all points on trajectory

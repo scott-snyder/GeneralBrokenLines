@@ -37,13 +37,6 @@ std::vector<GblPoint> ptr_array_to_vector(GblPoint* points[], int npoints) {
 	return points_vec;
 }
 
-GblTrajectory* GblTrajectoryCtor(int flagCurv, int flagU1dir, int flagU2dir) {
-#ifdef JNA_DEBUG
-	std::cout << "GblTrajectoryCtor(" << flagCurv << ", " << flagU1dir << ", " << flagU2dir << ")" << std::endl;
-#endif
-	return new GblTrajectory(flagCurv, flagU1dir, flagU2dir);
-	
-}
 	
 //Simple trajectory constructor wrapper
 GblTrajectory* GblTrajectoryCtorPtrArray(GblPoint* points[], int npoints, 
