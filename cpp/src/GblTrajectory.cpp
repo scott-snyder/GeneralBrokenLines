@@ -142,6 +142,7 @@
  *  Technical examples are given in example1.cpp, example2.cpp, example3.cpp and example4.cpp.
  *  An example silicon tracker is described in exampleSit.cpp
  *  and an example sector of forward drift chambers in exampleDc.cpp.
+ *  Composed trajectories in a cylindrical drift chamber are used in exampleComposedGeo.cpp and exampleComposedKin.cpp.
  *
  *  \section ref_sec References
  *    - V. Blobel, C. Kleinwort, F. Meier,
@@ -168,7 +169,7 @@ namespace gbl {
  */
 GblTrajectory::GblTrajectory(const std::vector<GblPoint> &aPointList,
 		bool flagCurv, bool flagU1dir, bool flagU2dir) :
-		numAllPoints(aPointList.size()), numPoints(), numOffsets(0), numInnerTransformations(
+		numAllPoints(aPointList.size()), numPoints(), numOffsetPoints(0), numOffsets(0), numInnerTransformations(
 				0), numInnerTransOffsets(0), numCurvature(flagCurv ? 1 : 0), numParameters(
 				0), numLocals(0), numMeasurements(0), externalPoint(0), skippedMeasLabel(
 				0), maxNumGlobals(0), theDimension(0), thePoints(), theData(), measDataIndex(), scatDataIndex(), externalSeed(), innerTransformations(), externalDerivatives(), externalMeasurements(), externalPrecisions() {
@@ -190,7 +191,7 @@ GblTrajectory::GblTrajectory(const std::vector<GblPoint> &aPointList,
  */
 GblTrajectory::GblTrajectory(
 		const std::vector<std::pair<std::vector<GblPoint>, Eigen::MatrixXd> > &aPointsAndTransList) :
-		numAllPoints(), numPoints(), numOffsets(0), numInnerTransformations(
+		numAllPoints(), numPoints(), numOffsetPoints(0), numOffsets(0), numInnerTransformations(
 				aPointsAndTransList.size()), numParameters(0), numLocals(0), numMeasurements(
 				0), externalPoint(0), skippedMeasLabel(0), maxNumGlobals(0), theDimension(
 				0), thePoints(), theData(), measDataIndex(), scatDataIndex(), externalSeed(), innerTransformations(), externalDerivatives(), externalMeasurements(), externalPrecisions() {
@@ -228,7 +229,7 @@ GblTrajectory::GblTrajectory(
 GblTrajectory::GblTrajectory(const std::vector<GblPoint> &aPointList,
 		unsigned int aLabel, const TMatrixDSym &aSeed, bool flagCurv,
 		bool flagU1dir, bool flagU2dir) :
-numAllPoints(aPointList.size()), numPoints(), numOffsets(0),
+numAllPoints(aPointList.size()), numPoints(), numOffsetPoints(0), numOffsets(0),
 numInnerTransformations(0), numInnerTransOffsets(0), numCurvature(flagCurv ? 1 : 0), numParameters(0),
 numLocals(0), numMeasurements(0), externalPoint(aLabel), skippedMeasLabel(0),
 maxNumGlobals(0), theDimension(0), thePoints(), theData(), measDataIndex(),
@@ -259,7 +260,7 @@ externalMeasurements(), externalPrecisions() {
  * \param [in] aPointsAndTransList List containing pairs with list of points and transformation (at inner (first) point)
  */
 GblTrajectory::GblTrajectory(const std::vector<std::pair<std::vector<GblPoint>, TMatrixD> > &aPointsAndTransList) :
-numAllPoints(), numPoints(), numOffsets(0), numInnerTransformations(aPointsAndTransList.size()),
+numAllPoints(), numPoints(), numOffsetPoints(0), numOffsets(0), numInnerTransformations(aPointsAndTransList.size()),
 numParameters(0), numLocals(0), numMeasurements(0), externalPoint(0),
 skippedMeasLabel(0), maxNumGlobals(0), theDimension(0), thePoints(), theData(),
 measDataIndex(), scatDataIndex(), externalSeed(), innerTransformations(),
@@ -302,7 +303,7 @@ externalDerivatives(), externalMeasurements(), externalPrecisions() {
 GblTrajectory::GblTrajectory(const std::vector<std::pair<std::vector<GblPoint>, TMatrixD> > &aPointsAndTransList,
 		const TMatrixD &extDerivatives, const TVectorD &extMeasurements,
 		const TVectorD &extPrecisions) :
-numAllPoints(), numPoints(), numOffsets(0), numInnerTransformations(aPointsAndTransList.size()),
+numAllPoints(), numPoints(), numOffsetPoints(0), numOffsets(0), numInnerTransformations(aPointsAndTransList.size()),
 numParameters(0), numLocals(0), numMeasurements(0), externalPoint(0),
 skippedMeasLabel(0), maxNumGlobals(0), theDimension(0), thePoints(), theData(),
 measDataIndex(), scatDataIndex(), externalSeed(), innerTransformations(),
@@ -358,7 +359,7 @@ externalDerivatives(), externalMeasurements(), externalPrecisions() {
 GblTrajectory::GblTrajectory(const std::vector<std::pair<std::vector<GblPoint>, TMatrixD> > &aPointsAndTransList,
 		const TMatrixD &extDerivatives, const TVectorD &extMeasurements,
 		const TMatrixDSym &extPrecisions) :
-numAllPoints(), numPoints(), numOffsets(0), numInnerTransformations(aPointsAndTransList.size()),
+numAllPoints(), numPoints(), numOffsetPoints(0), numOffsets(0), numInnerTransformations(aPointsAndTransList.size()),
 numParameters(0), numLocals(0), numMeasurements(0), externalPoint(0),
 skippedMeasLabel(0), maxNumGlobals(0), theDimension(0), thePoints(), theData(),
 measDataIndex(), scatDataIndex(), externalSeed(), innerTransformations() {
