@@ -43,7 +43,10 @@ INSTALL( TARGETS ${PROJECT_NAME} DESTINATION lib )
 
 TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${ROOT_LIBS})
 
-target_compile_definitions(${PROJECT_NAME} PUBLIC JNA_DEBUG)
+OPTION(JNA_DEBUG "Debug printouts for helping debug JNA memory issues" OFF)
+IF( JNA_DEBUG )
+  TARGET_COMPILE_DEFINITIONS(${PROJECT_NAME} PUBLIC JNA_DEBUG)
+ENDIF()
 
 # the examples, build with "make examples"
 ADD_SUBDIRECTORY( examples/ )
