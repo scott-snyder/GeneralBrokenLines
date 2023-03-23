@@ -86,7 +86,7 @@ void GblPoint_addGlobals(GblPoint* self, int *labels, int nlabels, double* derAr
 	self->addGlobals(aLabels, derivatives);
 }
 
-void GblPoint_getGlobalLabelsAndDerivatives(GblPoint* self, int* nlabels, int labels[], double ders[]) {
+void GblPoint_getGlobalLabelsAndDerivatives(GblPoint* self, int* nlabels, int** labels, double** ders) {
 #ifdef JNA_DEBUG
 	std::cout << "GblPoint_getGlobalLabelsAndDerivatives("
 		<< self << ", " << labels << ", " << ders
@@ -95,31 +95,47 @@ void GblPoint_getGlobalLabelsAndDerivatives(GblPoint* self, int* nlabels, int la
 	std::vector<int> glabels;
 	std::vector<double> gders;
 
+#ifdef JNA_DEBUG
+  std::cout << "  GblPoint has " << std::flush
+    << self->getMeasEnd() - self->getMeasBegin()
+    << " measurements." << std::endl;
+#endif
+
 	//Should I add the number of derivatives? -  Row/Col? CHECK CHECK CHECK
 	self->getGlobalLabelsAndDerivatives(
 			0 /* aMeas */, 0 /* aRow	*/,
 			glabels, gders);
 
-	//std::cout<<"GblPointWrapper::glabels"<<std::endl;
+#ifdef JNA_DEBUG
+	std::cout <<"  Aquired " << glabels.size() << " labels and " << gders.size() << " derivatives." <<std::endl;
+#endif
 	
 	*nlabels = glabels.size();
-	labels = new int[*nlabels];
-	ders   = new double[*nlabels];
+	*labels = new int[*nlabels];
+	*ders   = new double[*nlabels];
+
+#ifdef JNA_DEBUG
+	std::cout <<"  Allocated return arrays." << std::endl;
+#endif
+	
 	
 	for (std::size_t il{0}; il < *nlabels; ++il) {
-		labels[il] = glabels.at(il);
+		(*labels)[il] = glabels.at(il);
 		//std::cout<<glabels.at(il)<<std::endl;
 	}
 
 	//std::cout<<"GblPointWrapper::gders"<<std::endl;
 	
 	for (std::size_t id{0}; id < *nlabels; ++id) {
-		ders[id] = gders.at(id);
+		(*ders)[id] = gders.at(id);
 		//std::cout<<gders.at(il)<<std::endl;
 	}
 
 	// set array using Eigen
 	//Map<MatrixXd>(ders,1,gders.size()) = gders;
+#ifdef JNA_DEBUG
+  std::cout << "  Done with assignment and leaving." << std::endl;
+#endif
 }
 
 }
