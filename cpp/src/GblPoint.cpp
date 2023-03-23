@@ -48,7 +48,7 @@ GblPoint::GblPoint(const Matrix5d &aJacobian, unsigned int numMeasReserve) :
 				0) {
 	theMeasurements.reserve(numMeasReserve);
 #ifdef JNA_DEBUG
-  std::cout << "GblPoint(" << this << ") " << ++num_gbl_point << std::endl;
+	std::cout << "GblPoint(" << this << ") " << ++num_gbl_point << std::endl;
 #endif
 }
 
@@ -71,7 +71,7 @@ GblPoint::GblPoint(const TMatrixD &aJacobian) :
 
 GblPoint::~GblPoint() {
 #ifdef JNA_DEBUG
-  std::cout << "~GblPoint(" << this << ") " << --num_gbl_point << std::endl;
+	std::cout << "~GblPoint(" << this << ") " << --num_gbl_point << std::endl;
 #endif
 }
 
