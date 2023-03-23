@@ -36,6 +36,10 @@ void GblPoint_printPoint(const GblPoint* self, unsigned int level) {
 	self->printPoint(level);
 }
 
+int GblPoint_getNumMeasurements(GblPoint* self) {
+  return (self->getMeasEnd() - self->getMeasBegin());
+}
+
 //Only supporting:
 //2D position residual
 //2x2 projection matrix
