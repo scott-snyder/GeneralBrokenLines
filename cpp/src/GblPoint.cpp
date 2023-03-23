@@ -33,10 +33,6 @@ using namespace Eigen;
 //! Namespace for the general broken lines package
 namespace gbl {
 
-#ifdef JNA_DEBUG
-int GblPoint::num_gbl_point = 0;
-#endif
-
 /// Create a point.
 /**
  * Create point on (initial) trajectory. Needs transformation jacobian from previous point.
@@ -47,9 +43,6 @@ GblPoint::GblPoint(const Matrix5d &aJacobian, unsigned int numMeasReserve) :
 		theLabel(0), theOffset(0), theType(0), p2pJacobian(aJacobian), scatDim(
 				0) {
 	theMeasurements.reserve(numMeasReserve);
-#ifdef JNA_DEBUG
-	std::cout << "GblPoint(" << this << ") " << ++num_gbl_point << std::endl;
-#endif
 }
 
 #ifdef GBL_EIGEN_SUPPORT_ROOT
@@ -70,9 +63,6 @@ GblPoint::GblPoint(const TMatrixD &aJacobian) :
 #endif
 
 GblPoint::~GblPoint() {
-#ifdef JNA_DEBUG
-	std::cout << "~GblPoint(" << this << ") " << --num_gbl_point << std::endl;
-#endif
 }
 
 #ifdef GBL_EIGEN_SUPPORT_ROOT
