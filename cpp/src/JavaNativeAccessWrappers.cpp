@@ -1,3 +1,17 @@
+/**
+ * \file JavaNativeAccessWrappers.cpp
+ * Wrappers around construction, getters, setters, and destruction
+ * functions of Gbl classes.
+ *
+ * These wrappers are put into an `extern "C"` block so that there
+ * names are _not_ mangled and therefore can be accessed by name
+ * within a Java Native Access (JNA) class accessing the GBL library.
+ *
+ * \note This file is large however it is not intended to do anything besides
+ * interface between JNA and GBL. If any logic in this file affects the
+ * calculations done by GBL, that is considered a bug with the implemenation.
+ */
+
 #include "MilleBinary.h"
 #include "GblPoint.h"
 #include "GblTrajectory.h"
@@ -13,19 +27,24 @@ using namespace Eigen;
 
 #ifdef JNA_DEBUG
 #include <iostream>
+
 int num_gbl_point = 0;
 #endif
 
 extern "C" { 
 /**
- * MilleBinaryCtor
- *
- * Non-mangled constructor name for creating a new MilleBinary file.
+ * \brief Dynamically create new MilleBinary file.
  *
  * We return the raw pointer to this object so that JNA can effectively access it.
  *
  * Unfortunately the translation of booleans to/from java is not very stable, so it
  * is safer to simply pass integers and check if they are 0 (for false) or nonzero (for true).
+ *
+ * \param [in] fileName name of file in a C-style string
+ * \param [in] filenamesize length of filename for accessing C-style string
+ * \param [in] doublePrecision non-zero if should use doublePrecision, zero if should use float precision
+ * \param [in] keepZeros non-zero to keep zeros, zero to not keep them
+ * \param [in] aSize size of buffer to keep in memory
  */
 MilleBinary* MilleBinaryCtor(const char* fileName, int filenamesize, int doublePrecision, int keepZeros, int aSize) {
 #ifdef JNA_DEBUG
@@ -41,15 +60,17 @@ MilleBinary* MilleBinaryCtor(const char* fileName, int filenamesize, int doubleP
 }
 
 /**
- * Closing a MilleBinary file is the same as destructing it
+ * \brief Closing a gbl::MilleBinary file is the same as destructing it
  *
- * Since the destructor of the MilleBinary class is what handles
+ * Since the destructor of the gbl::MilleBinary class is what handles
  * performing the final write operations, we simply `delete` the 
  * object pointed to by the passed pointer.
  *
  * @note This means the object on the JNA side will be invalid
  * and will cause a program crash if it is accessed after using this
  * function on it!
+ *
+ * \param [in] self gbl::MilleBinary to delete
  */
 void MilleBinary_close(MilleBinary* self) {
 #ifdef JNA_DEBUG
@@ -57,6 +78,13 @@ void MilleBinary_close(MilleBinary* self) {
 #endif
 	if (self) delete self;
 }
+
+/**
+ * \brief create new gbl::GblPoint from a jacobian
+ *
+ * \param [in] matrixArray C-style double array listing the jacobian row-by-row.
+ * \return dynamically created GblPoint
+ */
 GblPoint* GblPointCtor(double matrixArray[NROW*NCOL]) {
 	Map<Matrix5d> jacobian(matrixArray,5,5);
 	GblPoint* self = new GblPoint(jacobian);
@@ -66,6 +94,14 @@ GblPoint* GblPointCtor(double matrixArray[NROW*NCOL]) {
 	return self;
 }
 
+/**
+ * \brief delete gbl::GblPoint
+ *
+ * provided so that users of JNA can clean up the memory that is not handled
+ * automatically by java itself
+ *
+ * \param [in] self gbl::GblPoint to delete
+ */
 void GblPoint_delete(GblPoint* self) {
 #ifdef JNA_DEBUG
 	std::cout << "GblPoint_delete(" << self << ") " << --num_gbl_point << std::endl;
@@ -74,6 +110,9 @@ void GblPoint_delete(GblPoint* self) {
 }
 
 
+/**
+ * \brief call gbl::GblPoint::printPoint on self
+ */
 void GblPoint_printPoint(const GblPoint* self, unsigned int level) {
 #ifdef JNA_DEBUG
 	//std::cout << "GblPoint_printPoint(" << self << ", " << level << ")" << std::endl;
@@ -81,14 +120,33 @@ void GblPoint_printPoint(const GblPoint* self, unsigned int level) {
 	self->printPoint(level);
 }
 
+/**
+ * \brief calculate number of measurements in a gbl::GblPoint
+ *
+ * Since java struggles to handle the C++ iterators, we calculate
+ * the difference between the iterators here so that the java side
+ * can access how many measurements a GblPoint has.
+ *
+ * \param [in] self gbl::GblPoint to operate on
+ * \return number of measurements
+ */
 int GblPoint_getNumMeasurements(GblPoint* self) {
   return (self->getMeasEnd() - self->getMeasBegin());
 }
 
-//Only supporting:
-//2D position residual
-//2x2 projection matrix
-
+/**
+ * \brief add a 2D measurement
+ *
+ * \note We are only supporting a 2D position residual
+ * and a 2x2 projection matrix!
+ *
+ * \see gbl::GblPoint::addMeasurement
+ *
+ * \param [in] self gbl::GblPoint to operate on
+ * \param [in] projArray length-4 array holding the entries in the 2x2 proj matrix
+ * \param [in] resArray length-2 array holding residuals
+ * \param [in] precArray length-2 array holding the precisions
+ */
 void GblPoint_addMeasurement2D(GblPoint* self, 
 								 double *projArray,
 								 double *resArray,
@@ -107,8 +165,14 @@ void GblPoint_addMeasurement2D(GblPoint* self,
 	self->addMeasurement(aProjection, aResiduals, aPrecision, minPrecision);
 }
 
-
-//Only support vector precision
+/**
+ * \brief add a vector-precision scatterer
+ * \note only supporting vector-precision at this time
+ * \see gbl::GblPoint::addScatterer
+ * \param [in] self gbl::GblPoint to operate on
+ * \param [in] resArray length-2 residuals array
+ * \param [in] precArray length-2 precision array
+ */
 void GblPoint_addScatterer(GblPoint* self, double *resArray, double *precArray) {
 #ifdef JNA_DEBUG
 	std::cout << "GblPoint_addScatterer(" << self << ", " 
@@ -122,6 +186,14 @@ void GblPoint_addScatterer(GblPoint* self, double *resArray, double *precArray) 
 	self->addScatterer(aResiduals,aPrecision);
 }
 
+/**
+ * \brief add global derivatives to the point
+ * \see gbl::GblPoint::addGlobals
+ * \param [in] self gbl::GblPoint to operate on
+ * \param [in] labels int array of labels nlabels long
+ * \param [in] nlabels number of labels
+ * \param [in] derArray double array of derivatives nlabels long
+ */
 void GblPoint_addGlobals(GblPoint* self, int *labels, int nlabels, double* derArray) {
 #ifdef JNA_DEBUG
 	std::cout << "GblPoint_addGlobals(" << self
@@ -135,6 +207,14 @@ void GblPoint_addGlobals(GblPoint* self, int *labels, int nlabels, double* derAr
 	self->addGlobals(aLabels, derivatives);
 }
 
+/**
+ * \brief get global derivatives and their labels from the point
+ * \see gbl::GblPoint::getGlobalLabelsAndDerivatives
+ * \param [in] self GblPoint to operate on
+ * \param [out] nlabels pointer to int where number of labels will be stored
+ * \param [out] labels pointer to array where labels will be stored
+ * \param [out] ders pointer to array where derivatives will be stored
+ */
 void GblPoint_getGlobalLabelsAndDerivatives(GblPoint* self, int* nlabels, int** labels, double** ders) {
 #ifdef JNA_DEBUG
 	std::cout << "GblPoint_getGlobalLabelsAndDerivatives("
@@ -188,14 +268,15 @@ void GblPoint_getGlobalLabelsAndDerivatives(GblPoint* self, int* nlabels, int** 
 }
 
 /**
- * convert the pointer array of GblPoints into a vector holding the objects
+ * \brief convert the pointer array of gbl::GblPoint into a vector holding the objects
  *
- * @note We *move* the data pointed to into the vector so the array *should
- * not* be accessed after this call is made.
+ * This is a helper function and should not be bound to a function by JNA.
  *
- * @param[in] points array of pointers to GblPoints to put into vector
- * @param[in] npoints number of points (size of array)
- * @return vector of GblPoints with same content as array
+ * \note We *copy* the data pointed to into the vector.
+ *
+ * \param [in] points array of pointers to gblGblPoint to put into vector
+ * \param [in] npoints number of points (size of array)
+ * \return vector of GblPoints with same content as array
  */
 std::vector<GblPoint> ptr_array_to_vector(GblPoint* points[], int npoints) {
 	std::vector<GblPoint> points_vec;
@@ -219,8 +300,20 @@ std::vector<GblPoint> ptr_array_to_vector(GblPoint* points[], int npoints) {
 	return points_vec;
 }
 
-	
-//Simple trajectory constructor wrapper
+/**
+ * \brief simple construction of a new gbl::GblTrajectory
+ *
+ * \see gbl::GblTrajectory::GblTrajectory
+ *
+ * Just constructing a trajectory from a set of points. No seeding matrix.
+ * 
+ * \param [in] points array of pointers to gbl::GblPoint to put into trajectory
+ * \param [in] npoints number of points in array
+ * \param [in] flagCurv use q/p - non-zero for true, zero for false
+ * \param [in] flagU1dir use in u1 direction - non-zero for true, zero for false
+ * \param [in] flagU2dir use in u2 direction - non-zero for true, zero for false
+ * \return dynamically allocated trajectory wrapping input points
+ */
 GblTrajectory* GblTrajectoryCtorPtrArray(GblPoint* points[], int npoints, 
 										 int flagCurv, int flagU1dir, int flagU2dir) {
 #ifdef JNA_DEBUG
@@ -230,11 +323,22 @@ GblTrajectory* GblTrajectoryCtorPtrArray(GblPoint* points[], int npoints,
 		<< ")" << std::endl;
 #endif
 	
-	return new GblTrajectory(ptr_array_to_vector(points, npoints), flagCurv, flagU1dir, flagU2dir);
+	return new GblTrajectory(ptr_array_to_vector(points, npoints), 
+			flagCurv!=0, flagU1dir!=0, flagU2dir!=0);
 }
 
-//Simple trajectory constructor with seed wrapper
-
+/**
+ * \brief construct new gbl::GblTrajectory with a seed matrix
+ * \see gbl::GblTrajectory::GblTrajectory
+ * \param [in] points array of pointers to gbl::GblPoint to put into trajectory
+ * \param [in] npoints number of points in array
+ * \param [in] aLabel integer label for seed
+ * \param [in] seedArray double-array of length 25 listing seed matrix elements row-wise
+ * \param [in] flagCurv use q/p - non-zero for true, zero for false
+ * \param [in] flagU1dir use in u1 direction - non-zero for true, zero for false
+ * \param [in] flagU2dir use in u2 direction - non-zero for true, zero for false
+ * \return dynamically allocated trajectory wrapping input points
+ */
 GblTrajectory* GblTrajectoryCtorPtrArraySeed(GblPoint* points[], int npoints,
 											 int aLabel, double seedArray[],
 											 int flagCurv, int flagU1dir, int flagU2dir) {
@@ -248,11 +352,21 @@ GblTrajectory* GblTrajectoryCtorPtrArraySeed(GblPoint* points[], int npoints,
 	
 	Map<Matrix5d> seed(seedArray,5,5);
 	
-	return new GblTrajectory(ptr_array_to_vector(points, npoints), aLabel, seed, flagCurv, flagU1dir, flagU2dir);
+	return new GblTrajectory(ptr_array_to_vector(points, npoints), aLabel, seed, 
+			flagCurv!=0, flagU1dir!=0, flagU2dir!=0);
 }
 
-//Composed trajectory constructor for 2 body decay
-
+/**
+ * \brief compose trajectory for a 2-body decay
+ * \see gbl::GblTrajectory::GblTrajectory
+ * \param [in] points_1 array of gbl::GblPoint for one track
+ * \param [in] npoints_1 number of points
+ * \param [in] trafo_1 double array listing elements of 2x3 track matrix
+ * \param [in] points_2 array of gbl::GblPoint for one track
+ * \param [in] npoints_2 number of points
+ * \param [in] trafo_2 double array listing elements of 2x3 track matrix
+ * \return dynamically created trajectory composed of two tracks
+ */
 GblTrajectory* GblTrajectoryCtorPtrComposed(GblPoint* points_1[], int npoints_1, double trafo_1[],
 											GblPoint* points_2[], int npoints_2, double trafo_2[]) {
 #ifdef JNA_DEBUG
@@ -291,6 +405,15 @@ GblTrajectory* GblTrajectoryCtorPtrComposed(GblPoint* points_1[], int npoints_1,
 
 }
 
+/**
+ * \brief call gbl::GblTrajectory::fit on self
+ * \param [in] self gbl::GblTrajectory to operate on
+ * \param [out] Chi2 pointer to double where Chi2 result will be stored
+ * \param [out] Ndf pointer to double where Ndf result will be stored
+ * \param [out] lostWeight pointer to double where lostWeight result will be stored
+ * \param [in] c_optionList C-style string listing options
+ * \param [in] aLabel integer label for fit
+ */
 void GblTrajectory_fit(GblTrajectory* self, double* Chi2, int* Ndf, double* lostWeight, char* c_optionList, unsigned int aLabel) {
 #ifdef JNA_DEBUG
 	std::cout << "GblTrajectory_fit("
@@ -302,6 +425,11 @@ void GblTrajectory_fit(GblTrajectory* self, double* Chi2, int* Ndf, double* lost
 	self->fit(*Chi2, *Ndf, *lostWeight, optionList,aLabel);
 }
 
+/**
+ * \brief delete self
+ *
+ * Cleanup for JNA, handles cleaning up all GblPoints within it!
+ */
 void GblTrajectory_delete(GblTrajectory* self) {
 #ifdef JNA_DEBUG
 	std::cout << "GblTrajectory_delete(" << self << ")" << std::endl;
@@ -309,13 +437,23 @@ void GblTrajectory_delete(GblTrajectory* self) {
 	if (self) delete self;
 }
 
+/**
+ * \brief call gbl::GblTrajectory::isValid
+ * \param [in] self gbl::GblTrajectory to operate on
+ * \return 0 if true, 1 if false
+ */
 int GblTrajectory_isValid(GblTrajectory* self) {
 #ifdef JNA_DEBUG
 	std::cout << "GblTrajectory_isValid(" << self << ")" << std::endl;
 #endif
-	return (int) self->isValid();
+	return self->isValid() ? 0 : 1;
 }
 
+/**
+ * \brief call gbl::GblTrajectory::getNumPoints
+ * \param [in] self gbl::GblTrajectory to operate on
+ * \return number of points
+ */
 int GblTrajectory_getNumPoints(GblTrajectory* self) {
 #ifdef JNA_DEBUG
 	std::cout << "GblTrajectory_getNumPoints(" << self << ")" << std::endl;
@@ -323,6 +461,11 @@ int GblTrajectory_getNumPoints(GblTrajectory* self) {
 	return (int) self->getNumPoints();
 }
 
+/**
+ * \brief call gbl::GblTrajectory::printTrajectory
+ * \param [in] self gbl::GblTrajectory to operate on
+ * \param [in] level integer level for printing
+ */
 void GblTrajectory_printTrajectory(GblTrajectory* self, int level) {
 #ifdef JNA_DEBUG
 	std::cout << "GblTrajectory_printTrajectory(" << self << ", " << level << ")" << std::endl;
@@ -330,15 +473,33 @@ void GblTrajectory_printTrajectory(GblTrajectory* self, int level) {
 	return self->printTrajectory();
 }
 
+/**
+ * \brief call gbl::GblTrajectory::printData
+ * \param [in] self gbl::GblTrajectory to operate on
+ */
 void GblTrajectory_printData(GblTrajectory* self) {
 	return self->printData();
 }
 
+/**
+ * \brief call gbl::GblTrajectory::printPoints
+ * \param [in] self gbl::GblTrajectory to operate on
+ * \param [in] level integer level for printing
+ */
 void GblTrajectory_printPoints(GblTrajectory* self, int level) {
 	return self->printPoints(level);
 }
 
-//Only 5-vector and 5x5 cov matrix.
+/**
+ * \brief get trajectory results
+ * \note only supports 5-vector and 5x5 covariance matrix!
+ * \param [in] self gbl::GblTrajectory to operate on
+ * \param [in] aSignedLabel integer label for results
+ * \param [out] localPar length 5 double array where local results will be stored
+ * \param [out] nLocalPar integer length of double array (always set to 5)
+ * \param [out] localCov length 25 double array where local covariance results will be stored
+ * \param [out] sizeLocalCov integer dimension of covariance matrix (always set to 5)
+ */
 void GblTrajectory_getResults(GblTrajectory* self, int aSignedLabel, double* localPar, int* nLocalPar,
 								double * localCov, int* sizeLocalCov) {
 #ifdef JNA_DEBUG
@@ -363,8 +524,17 @@ void GblTrajectory_getResults(GblTrajectory* self, int aSignedLabel, double* loc
 	
 }
 
-//Wrapper to get the residuals - Assume 2d residuals max
-
+/**
+ * \brief get measurement results from trajectory
+ * \see gbl::GblTrajectory::getMeasResults
+ * \param [in] self gbl::GblTrajectory to operate on
+ * \param [in] aLabel integer label of results
+ * \param [out] numData length of resulting arrays (expect 2)
+ * \param [out] aResiduals double array of residuals
+ * \param [out] aMeasErrors double array of measurement errors
+ * \param [out] aResErrors double array of residual errors
+ * \param [out] aDownWeights double array of down weights
+ */
 void GblTrajectory_getMeasResults(GblTrajectory* self, int aLabel, int* numData, 
 									double* aResiduals, double* aMeasErrors, double* aResErrors, 
 									double* aDownWeights) {
@@ -394,7 +564,12 @@ void GblTrajectory_getMeasResults(GblTrajectory* self, int aLabel, int* numData,
 	
 }
 
-
+/**
+ * \brief write a trajectory to a gbl::MilleBinary file
+ * \see gbl::GblTrajectory::milleOut
+ * \param [in] self gbl::GblTrajectory to write out
+ * \param [in] millebinary gbl::MilleBinary to write to
+ */
 void GblTrajectory_milleOut(GblTrajectory* self, MilleBinary* millebinary) {
 #ifdef JNA_DEBUG
 	std::cout << "GblTrajectory_milleOut(" << self 
@@ -403,13 +578,20 @@ void GblTrajectory_milleOut(GblTrajectory* self, MilleBinary* millebinary) {
 	self->milleOut(*millebinary);
 }
 
-//Gbl Detector Layer representation
-//aCenter 3-vector
-//aResolution 2-vector
-//aPrecision 2-vector
-//measTrafo 3x3 matrix
-//alignTrafo 3x3 matrix
-
+/**
+ * \brief construct a detector layer
+ * \see gbl::GblDetectorLayer::GblDetectorLayer
+ * \param [in] aName C-style string name
+ * \param [in] aLayer integer ID for layer
+ * \param [in] aDim dimension of layer
+ * \param [in] thickness thickness of alyer
+ * \param [in] aCenter double array of length 3 defining center of layer
+ * \param [in] aResolution double array of length 2
+ * \param [in] aPrecision double array of length 2
+ * \param [in] measTrafo double array defining 3x3 matrix row wise
+ * \param [in] alignTrafo double array defining 3x3 matrix row wise
+ * \return newly constructed detector layer
+ */
 GblDetectorLayer* GblDetectorLayerCtor(const char* aName, int aLayer, int aDim, double thickness,
 																			 double aCenter[], double aResolution[], double aPrecision[],
 																			 double measTrafo[], double alignTrafo[]) {
@@ -427,14 +609,25 @@ GblDetectorLayer* GblDetectorLayerCtor(const char* aName, int aLayer, int aDim, 
 	return layer;
 }
 
+/**
+ * \brief delete gbl::GblDetectorLayer
+ */
 void GblDetectorLayer_delete(GblDetectorLayer* self) {
 	if (self) delete self;
 }
 
+/**
+ * \brief call gbl::GblDetectorLayer::print
+ * \param [in] self gbl::GblDetectorLayer to operate on
+ */
 void GblDetectorLayer_print(GblDetectorLayer* self) {
 	self->print();
 }
 
+/**
+ * \brief call gbl::GblDetectorLayer::getRadiationLength
+ * \param [in] self gbl::GblDetectorLayer to operate on
+ */
 double GblDetectorLayer_getRadiationLength(GblDetectorLayer* self) {
 	return self->getRadiationLength();
 }
@@ -449,6 +642,12 @@ double GblDetectorLayer_getRadiationLength(GblDetectorLayer* self) {
 
 //Helix prediction on layer
 
+/**
+ * \brief construct a helix prediction from a layer
+ * \param [in] self gbl::GblDetectorLayer to operate on
+ * \param [in] hlx gbl::GblSimpleHelix to do helical calculations
+ * \return newly constructed gbl::GblHelixPrediction
+ */
 GblHelixPrediction* GblDetectorLayer_intersectWithHelix(GblDetectorLayer* self, GblSimpleHelix* hlx) {
 	
 	Vector3d center = self->getCenter();
@@ -458,37 +657,80 @@ GblHelixPrediction* GblDetectorLayer_intersectWithHelix(GblDetectorLayer* self, 
 	return new GblHelixPrediction(hlx->getPrediction(center, udir, vdir));
 }
 
-
-
-//Simple Helix
+/**
+ * \brief construct a new simple helix
+ *
+ * The input parameters are all the same as the C++ constructor
+ * gbl::GblSimpleHelix::GblSimpleHelix.
+ *
+ * \return newly constructed gbl::GblSimpleHelix
+ */
 GblSimpleHelix* GblSimpleHelixCtor(double aRinv, double aPhi0, double aDca, double aDzds, double aZ0) {
 	return new GblSimpleHelix(aRinv, aPhi0, aDca, aDzds, aZ0);
 }
 
+/**
+ * \brief delete gbl::GblSimpleHelix
+ */
 void GblSimpleHelix_delete(GblSimpleHelix* self) {
 	if (self) delete self;
 }
 
+/**
+ * \brief call gbl::GblSimpleHelix::getPhi
+ * \param [in] self gbl::GblSimpleHelix to operate on
+ * \param [in] aRadius radius to calculate phi at
+ * \return phi calculation
+ */
 double GblSimpleHelix_getPhi(GblSimpleHelix* self, double aRadius) {
 	return self->getPhi(aRadius);
 }
 
+/**
+ * \brief call gbl::GblSimpleHelix::getArcLengthR
+ * \param [in] self gbl::GblSimpleHelix to operate on
+ * \param [in] aRadius radius to calculate arc length of
+ * \return arc length calculation
+ */
 double GblSimpleHelix_getArcLengthR(GblSimpleHelix* self, double aRadius) {
-	return self->getPhi(aRadius);
+	return self->getArcLengthR(aRadius);
 }
 
+/**
+ * \brief call gbl::GblSimpleHelix::getArcLengthXY
+ * \param [in] self gbl::GblSimpleHelix to operate on
+ * \param [in] xPos x-position 
+ * \param [in] yPos y-position
+ * \return arc length calculation
+ */
 double GblSimpleHelix_getArcLengthXY(GblSimpleHelix* self, double xPos, double yPos) {
 	return self->getArcLengthXY(xPos, yPos);
 }
 
-
+/**
+ * \brief call gbl::GblSimpleHelix::moveToXY
+ * \param [in] self gbl::GblSimpleHelix to operate on
+ * \param [in] xPos x-position 
+ * \param [in] yPos y-position
+ * \param [out] newPhi0 double address to store resulting phi
+ * \param [out] newDca double address to store resulting Dca
+ * \param [out] newZ0 double address to store resulting Z0
+ */
 void GblSimpleHelix_moveToXY(GblSimpleHelix* self, double xPos, double yPos,
 														 double* newPhi0, double* newDca, double* newZ0) {
 	self->moveToXY(xPos, yPos,
 								 *newPhi0, *newDca, *newZ0);
 }
 
-//refPos, uDir and vDir are 3-vectors
+/**
+ * \brief get a helical prediction from a reference coordinate system
+ * \see gbl::GblSimpleHelix::getPrediction
+ * \param [in] self gbl::GblSimpleHelix to operate on
+ * \param [in] refPos double array of length three containing reference position
+ * \param [in] uDir 3-length double array defining u direction
+ * \param [in] vDir 3-length double array defining v direction
+ * \return new gbl::GblHelixPrediction from this coordinate system
+ */
 GblHelixPrediction* GblSimpleHelix_getPrediction(GblSimpleHelix* self, double refPos[], double uDir[], double vDir[]) {
 	
 	Map<Vector3d> e_refPos(refPos,3);
@@ -506,8 +748,16 @@ GblHelixPrediction* GblSimpleHelix_getPrediction(GblSimpleHelix* self, double re
 	return new GblHelixPrediction(prediction);
 }
 
-
-//Helix Prediction
+/**
+ * \brief create a new helix prediction manually
+ * \param [in] sArc arc length
+ * \param [in] aPred length-2 double array predicted measurement
+ * \param [in] tDir length-3 double array defining t direction
+ * \param [in] uDir length-3 double array defining u direction
+ * \param [in] vDir length-3 double array defining v direction
+ * \param [in] nDir length-3 double array defining n direction
+ * \param [in] aPos length-3 double array defining position
+ */
 GblHelixPrediction* GblHelixPredictionCtor(double sArc, double aPred[], double tDir[], double uDir[], double vDir[],
 																				 double nDir[], double aPos[]) {
 	Map<Vector2d> e_aPred(aPred,2);
@@ -522,14 +772,30 @@ GblHelixPrediction* GblHelixPredictionCtor(double sArc, double aPred[], double t
 																e_nDir, e_aPos);
 }
 
+/**
+ * \brief delete a gbl::GblHelixPrediction
+ * \param [in] self gbl::GblHelixPrediction to delete
+ */
 void GblHelixPrediction_delete(GblHelixPrediction* self) {
 	if (self) delete self;
 }
 
+/**
+ * \brief get the arc length of a helix prediction
+ * \see gbl::GblHelixPrediction::getArcLength
+ * \param [in] self gbl::GblHelixPrediction to operate on
+ * \return arc length
+ */
 double GblHelixPrediction_getArcLength(GblHelixPrediction* self) {
 	return self->getArcLength();
 }
 
+/**
+ * \brief get the predicted measurement
+ * \see gbl::GblHelixPrediction::getMeadPred
+ * \param [in] self gbl::GblHelixPrediction to operate on
+ * \param [out] prediction length-2 double array that will hold predicted measurement
+ */
 void GblHelixPrediction_getMeasPred(GblHelixPrediction* self, double* prediction) {
 	Vector2d e_pred = self->getMeasPred();
 	
@@ -537,6 +803,12 @@ void GblHelixPrediction_getMeasPred(GblHelixPrediction* self, double* prediction
 	prediction[1] = e_pred(1);
 }
 
+/**
+ * \brief get the position
+ * \see gbl::GblHelixPrediction::getPosition
+ * \param [in] self gbl::GblHelixPrediction to operate on
+ * \param [out] position length-3 double array that will hold position
+ */
 void GblHelixPrediction_getPosition(GblHelixPrediction* self, double* position) {
 	Vector3d e_pos = self->getPosition();
 	
@@ -545,6 +817,12 @@ void GblHelixPrediction_getPosition(GblHelixPrediction* self, double* position) 
 	position[2] = e_pos(2);
 }
 
+/**
+ * \brief get the direction
+ * \see gbl::GblHelixPrediction::getDirection
+ * \param [in] self gbl::GblHelixPrediction to operate on
+ * \param [out] direction length-3 double array that will hold direction
+ */
 void GblHelixPrediction_getDirection(GblHelixPrediction* self, double direction[]) {
 	Vector3d e_dir = self->getDirection();
 	
@@ -553,16 +831,25 @@ void GblHelixPrediction_getDirection(GblHelixPrediction* self, double direction[
 	direction[2] = e_dir(2);
 }
 
+/**
+ * \brief get the cosine incidence
+ * \see gbl::GblHelixPrediction::getCosIncidence
+ * \param [in] self gbl::GblHelixPrediction to operate on
+ * \return value of cosine incidence
+ */
 double GblHelixPrediction_getCosIncidence(GblHelixPrediction* self) {
 	return self->getCosIncidence();
 }
 
+/**
+ * \brief get the curvilinear directions
+ * \see gbl::GblHelixPrediction::getCurvilinearDirs
+ * \param [in] self gbl::GblHelixPrediction to operate on
+ * \param [out] curvilinear length-6 double array that will hold the two direction vectors
+ */
 void GblHelixPrediction_getCurvilinearDirs(GblHelixPrediction* self, double curvilinear[]) {
 	Matrix<double,2,3> curDirs = self->getCurvilinearDirs();
 	
-	//std::cout<<"Check curvilinear Directions" <<std::endl;
-	//std::cout<<curDirs<<std::endl;
-					
 	curvilinear[0] = curDirs(0,0);
 	curvilinear[1] = curDirs(0,1);
 	curvilinear[2] = curDirs(0,2);
