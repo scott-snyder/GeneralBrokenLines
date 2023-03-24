@@ -15,13 +15,17 @@ GblDetectorLayer* GblDetectorLayerCtor(const char* aName, int aLayer, int aDim, 
 																			 double aCenter[], double aResolution[], double aPrecision[],
 																			 double measTrafo[], double alignTrafo[]) {
 		
-		Map<Vector3d> e_aCenter(aCenter,3);
-		Map<Vector2d> e_aResolution(aResolution,2);
-		Map<Vector2d> e_aPrecision(aPrecision,2);
-		Map<Matrix3d> e_measTrafo(measTrafo,3,3);
-		Map<Matrix3d> e_alignTrafo(alignTrafo,3,3);
+		// uses eigen's Map structure to decompose an array into our type of Vector/Matrix
+		// need to then copy that object into a local variable since Map's only allow const
+		// reference access
+		Vector3d e_aCenter(Map<Vector3d>(aCenter,3));
+		Vector2d e_aResolution(Map<Vector2d>(aResolution,2));
+		Vector2d e_aPrecision(Map<Vector2d>(aPrecision,2));
+		Matrix3d e_measTrafo(Map<Matrix3d>(measTrafo,3,3));
+		Matrix3d e_alignTrafo(Map<Matrix3d>(alignTrafo,3,3));
 		
-		return new GblDetectorLayer(aName, aLayer, aDim, thickness, e_aCenter, e_aResolution, e_aPrecision, e_measTrafo, e_alignTrafo);
+		GblDetectorLayer* layer = new GblDetectorLayer(aName, aLayer, aDim, thickness, e_aCenter, e_aResolution, e_aPrecision, e_measTrafo, e_alignTrafo);
+		return layer;
 }
 
 void GblDetectorLayer_print(GblDetectorLayer* self) {
@@ -48,7 +52,7 @@ GblHelixPrediction* GblDetectorLayer_intersectWithHelix(GblDetectorLayer* self, 
 		Vector3d udir		= (self->getMeasSystemDirs()).row(0);
 		Vector3d vdir		= (self->getMeasSystemDirs()).row(1);
 		
-		return hlx->getPredictionPtr(center, udir, vdir);
+		return new GblHelixPrediction(hlx->getPrediction(center, udir, vdir));
 }
 
 
@@ -83,7 +87,7 @@ GblHelixPrediction* GblSimpleHelix_getPrediction(GblSimpleHelix* self, double re
 		Map<Vector3d> e_refPos(refPos,3);
 		Map<Vector3d> e_uDir(uDir,3);
 		Map<Vector3d> e_vDir(vDir,3);
-		GblHelixPrediction* prediction = self->getPredictionPtr(e_refPos,e_uDir,e_vDir);
+		GblHelixPrediction prediction = self->getPrediction(e_refPos,e_uDir,e_vDir);
 		
 		/*std::cout<<"Cross Check GBL predicted position!"<<std::endl;
 		std::cout<<prediction->getPosition()<<std::endl;
@@ -91,8 +95,8 @@ GblHelixPrediction* GblSimpleHelix_getPrediction(GblSimpleHelix* self, double re
 		std::cout<<"Cross Check GBL meas predicted position!"<<std::endl;
 		std::cout<<prediction->getMeasPred()<<std::endl;*/
 		
-		return prediction;
-		
+		// JNA only deals with pointers so we need to dynamically create a new copy
+		return new GblHelixPrediction(prediction);
 }
 
 
