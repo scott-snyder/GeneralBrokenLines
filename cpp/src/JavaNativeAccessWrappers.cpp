@@ -385,10 +385,10 @@ std::vector<GblPoint> ptr_array_to_vector(GblPoint* points[], int npoints) {
 	for (int i{0}; i < npoints; ++i) {
 		// get the pointer
 		GblPoint* gblpoint = points[i];
-		// MOVE the data into the vector,
+		// COPY the data into the vector,
 		points_vec.emplace_back(*(gblpoint));
 #ifdef JNA_DEBUG
-		std::cout << "MOVE GblPoint " << gblpoint << " -> " << &(points_vec.back()) << std::endl;
+		std::cout << "COPY GblPoint " << gblpoint << " -> " << &(points_vec.back()) << std::endl;
 #endif
 	}
 
