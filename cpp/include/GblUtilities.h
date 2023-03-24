@@ -1,17 +1,17 @@
 /*
- * exampleUtil.h
+ * GblUtilities.h
  *
  *  Created on: 6 Nov 2018
  *      Author: kleinwrt
  */
 
 /** \file
- *  Definitions for exampleUtil(ities).
+ *  Definitions for GBL utilities.
  *
  *  \author Claus Kleinwort, DESY, 2018 (Claus.Kleinwort@desy.de)
  *
  *  \copyright
- *  Copyright (c) 2018 Deutsches Elektronen-Synchroton,
+ *  Copyright (c) 2018-2023 Deutsches Elektronen-Synchroton,
  *  Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
  *  This library is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU Library General Public License as
@@ -27,8 +27,8 @@
  *  675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef SRC_EXAMPLEUTIL_H_
-#define SRC_EXAMPLEUTIL_H_
+#ifndef GBLUTILITIES_H_
+#define GBLUTILITIES_H_
 
 #include "Eigen/Dense"
 #include<iostream>
@@ -44,14 +44,14 @@ double gblMultipleScatteringError(double qbyp, double xbyx0);
 
 /// Prediction on helix
 /**
- * Prediction at intersection of helix and measurement plane
+ * Prediction at intersection of helix and measurement plane.
  */
 class GblHelixPrediction {
 public:
-	GblHelixPrediction(double sArc, const Eigen::Vector2d& aPred,
-			const Eigen::Vector3d& tDir, const Eigen::Vector3d& uDir,
-			const Eigen::Vector3d& vDir, const Eigen::Vector3d& nDir,
-			const Eigen::Vector3d& aPos);
+	GblHelixPrediction(double sArc, const Eigen::Vector2d &aPred,
+			const Eigen::Vector3d &tDir, const Eigen::Vector3d &uDir,
+			const Eigen::Vector3d &vDir, const Eigen::Vector3d &nDir,
+			const Eigen::Vector3d &aPos);
 	virtual ~GblHelixPrediction();
 	double getArcLength() const;
 	const Eigen::Vector2d& getMeasPred() const;
@@ -83,10 +83,10 @@ public:
 	double getPhi(double aRadius) const;
 	double getArcLengthR(double aRadius) const;
 	double getArcLengthXY(double xPos, double yPos) const;
-	void moveToXY(double xPos, double yPos, double& newPhi0, double& newDca,
-			double& newZ0) const;
-	GblHelixPrediction getPrediction(const Eigen::Vector3d& refPos,
-			const Eigen::Vector3d& uDir, const Eigen::Vector3d& vDir) const;
+	void moveToXY(double xPos, double yPos, double &newPhi0, double &newDca,
+			double &newZ0) const;
+	GblHelixPrediction getPrediction(const Eigen::Vector3d &refPos,
+			const Eigen::Vector3d &uDir, const Eigen::Vector3d &vDir) const;
 
 private:
 	const double rinv; ///< curvature (1/Radius)
@@ -102,14 +102,14 @@ private:
 
 /// Detector layer
 /**
- *
+ * Alignable (rigid body) planar detector layer.
  */
 class GblDetectorLayer {
 public:
 	GblDetectorLayer(const std::string aName, const unsigned int aLayer,
-			const int aDim, const double thickness, Eigen::Vector3d& aCenter,
-			Eigen::Vector2d& aResolution, Eigen::Vector2d& aPrecision,
-			Eigen::Matrix3d& measTrafo, Eigen::Matrix3d& alignTrafo);
+			const int aDim, const double thickness, Eigen::Vector3d &aCenter,
+			Eigen::Vector2d &aResolution, Eigen::Vector2d &aPrecision,
+			Eigen::Matrix3d &measTrafo, Eigen::Matrix3d &alignTrafo);
 	virtual ~GblDetectorLayer();
 	void print() const;
 	unsigned int getLayerID() const;
@@ -120,14 +120,14 @@ public:
 	Eigen::Matrix3d getMeasSystemDirs() const;
 	Eigen::Matrix3d getAlignSystemDirs() const;
 	GblHelixPrediction intersectWithHelix(GblSimpleHelix hlx) const;
-	Eigen::Matrix<double, 3, 6> getRigidBodyDerGlobal(Eigen::Vector3d& position,
-			Eigen::Vector3d& direction) const;
-	Eigen::Matrix<double, 2, 6> getRigidBodyDerLocal(Eigen::Vector3d& position,
-			Eigen::Vector3d& direction) const;
-	Eigen::Matrix<double, 6, 6> getTrafoGlobalToLocal(Eigen::Vector3d& offset,
-			Eigen::Matrix3d& rotation) const;
-	Eigen::Matrix<double, 6, 6> getTrafoLocalToGlobal(Eigen::Vector3d& offset,
-			Eigen::Matrix3d& rotation) const;
+	Eigen::Matrix<double, 3, 6> getRigidBodyDerGlobal(Eigen::Vector3d &position,
+			Eigen::Vector3d &direction) const;
+	Eigen::Matrix<double, 2, 6> getRigidBodyDerLocal(Eigen::Vector3d &position,
+			Eigen::Vector3d &direction) const;
+	Eigen::Matrix<double, 6, 6> getTrafoGlobalToLocal(Eigen::Vector3d &offset,
+			Eigen::Matrix3d &rotation) const;
+	Eigen::Matrix<double, 6, 6> getTrafoLocalToGlobal(Eigen::Vector3d &offset,
+			Eigen::Matrix3d &rotation) const;
 
 private:
 	std::string name; ///< name
@@ -145,4 +145,4 @@ private:
 };
 
 }
-#endif /* SRC_EXAMPLEUTIL_H_ */
+#endif /* GBLUTILITIES_H_ */

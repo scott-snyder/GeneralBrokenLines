@@ -30,7 +30,7 @@
 #ifndef SRC_EXAMPLEUTILCDC_H_
 #define SRC_EXAMPLEUTILCDC_H_
 
-#include "exampleUtil.h"
+#include "GblUtilities.h"
 
 //! Namespace for the general broken lines package
 namespace gbl {

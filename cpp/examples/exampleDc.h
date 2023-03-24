@@ -11,7 +11,7 @@
  *  \author Claus Kleinwort, DESY, 2018 (Claus.Kleinwort@desy.de)
  *
  *  \copyright
- *  Copyright (c) 2018 Deutsches Elektronen-Synchroton,
+ *  Copyright (c) 2018-2023 Deutsches Elektronen-Synchroton,
  *  Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
  *  This library is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU Library General Public License as
@@ -30,7 +30,7 @@
 #ifndef SRC_EXAMPLEDC_H_
 #define SRC_EXAMPLEDC_H_
 
-#include "exampleUtil.h"
+#include "GblUtilities.h"
 
 //! Namespace for the general broken lines package
 namespace gbl {

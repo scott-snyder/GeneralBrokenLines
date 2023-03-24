@@ -6,12 +6,12 @@
  */
 
 /** \file
- *  Example utilities.
+ *  Utilities for GBL applications.
  *
  *  \author Claus Kleinwort, DESY, 2018 (Claus.Kleinwort@desy.de)
  *
  *  \copyright
- *  Copyright (c) 2018 Deutsches Elektronen-Synchroton,
+ *  Copyright (c) 2018-2023 Deutsches Elektronen-Synchroton,
  *  Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
  *  This library is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU Library General Public License as
@@ -27,7 +27,7 @@
  *  675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#include "exampleUtil.h"
+#include "GblUtilities.h"
 
 using namespace Eigen;
 
@@ -37,7 +37,7 @@ typedef Eigen::Matrix<double, 5, 5> Matrix5d;
 
 /// Multiple scattering error
 /**
- * Angular error in plane, simple model (Rossi, Greisen)
+ * Angular error in plane, simple model (Rossi, Greisen, (1941))
  * \param [in] qbyp    q/p [1/GeV]
  * \param [in] xbyx0   thickness / radiation length
  */
@@ -97,6 +97,8 @@ double unif() {
 
 /// Create helix prediction.
 /**
+ * Prediction at intersection of helix and measurement plane.
+ *
  * \param [in] sArc     arc length
  * \param [in] aPred    prediction for measurement (u,v)
  * \param [in] tDir     track direction at prediction
@@ -105,9 +107,9 @@ double unif() {
  * \param [in] nDir     normal to measurement plane
  * \param [in] aPos     position at prediction
  */
-GblHelixPrediction::GblHelixPrediction(double sArc, const Vector2d& aPred,
-		const Vector3d& tDir, const Vector3d& uDir, const Vector3d& vDir,
-		const Vector3d& nDir, const Vector3d& aPos) :
+GblHelixPrediction::GblHelixPrediction(double sArc, const Vector2d &aPred,
+		const Vector3d &tDir, const Vector3d &uDir, const Vector3d &vDir,
+		const Vector3d &nDir, const Vector3d &aPos) :
 		sarc(sArc), pred(aPred), tdir(tDir), udir(uDir), vdir(vDir), ndir(nDir), pos(
 				aPos) {
 	global2meas << uDir.transpose(), vDir.transpose(), nDir.transpose();
@@ -157,6 +159,8 @@ Eigen::Matrix<double, 2, 3> GblHelixPrediction::getCurvilinearDirs() const {
 
 /// Create simple helix.
 /**
+ * Helix for constant magnetic field in Z direction.
+ *
  * \param [in] aRinv      curvature (1/R)
  * \param [in] aPhi0      azimuth at PCA
  * \param [in] aDca       XY distance at PCA
@@ -231,7 +235,7 @@ double GblSimpleHelix::getArcLengthXY(double xPos, double yPos) const {
 	return dphi / rinv;
 }
 
-/// Move to new reference point (X,y)
+/// Move to new reference point (X,Y)
 /**
  * \param [in] xPos      X Position
  * \param [in] yPos      Y Position
@@ -239,8 +243,8 @@ double GblSimpleHelix::getArcLengthXY(double xPos, double yPos) const {
  * \param [out] newDca   new dca
  * \param [out] newZ0    new z0
  */
-void GblSimpleHelix::moveToXY(double xPos, double yPos, double& newPhi0,
-		double& newDca, double& newZ0) const {
+void GblSimpleHelix::moveToXY(double xPos, double yPos, double &newPhi0,
+		double &newDca, double &newZ0) const {
 // start values
 	newPhi0 = phi0;
 	newDca = dca;
@@ -277,8 +281,8 @@ void GblSimpleHelix::moveToXY(double xPos, double yPos, double& newPhi0,
  * \param [in] uDir    measurement direction 'u'
  * \param [in] vDir    measurement direction 'v'
  */
-GblHelixPrediction GblSimpleHelix::getPrediction(const Eigen::Vector3d& refPos,
-		const Eigen::Vector3d& uDir, const Eigen::Vector3d& vDir) const {
+GblHelixPrediction GblSimpleHelix::getPrediction(const Eigen::Vector3d &refPos,
+		const Eigen::Vector3d &uDir, const Eigen::Vector3d &vDir) const {
 // normal to (u,v) measurement plane
 	Vector3d nDir = uDir.cross(vDir).normalized();
 // ZS direction
@@ -334,7 +338,8 @@ GblHelixPrediction GblSimpleHelix::getPrediction(const Eigen::Vector3d& refPos,
 
 /// Create a detector layer.
 /**
- * Create detector layer with 1D or 2D measurement (u,v)
+ * Create planar detector layer with 1D or 2D measurement (u,v).
+ *
  * \param [in] aName          name
  * \param [in] aLayer         layer ID
  * \param [in] aDim           dimension (1,2)
@@ -347,9 +352,9 @@ GblHelixPrediction GblSimpleHelix::getPrediction(const Eigen::Vector3d& refPos,
  */
 GblDetectorLayer::GblDetectorLayer(const std::string aName,
 		const unsigned int aLayer, const int aDim, const double thickness,
-		Eigen::Vector3d& aCenter, Eigen::Vector2d& aResolution,
-		Eigen::Vector2d& aPrecision, Eigen::Matrix3d& measTrafo,
-		Eigen::Matrix3d& alignTrafo) :
+		Eigen::Vector3d &aCenter, Eigen::Vector2d &aResolution,
+		Eigen::Vector2d &aPrecision, Eigen::Matrix3d &measTrafo,
+		Eigen::Matrix3d &alignTrafo) :
 		name(aName), layer(aLayer), measDim(aDim), xbyx0(thickness), center(
 				aCenter), resolution(aResolution), precision(aPrecision), global2meas(
 				measTrafo), global2align(alignTrafo) {
@@ -427,7 +432,7 @@ GblHelixPrediction GblDetectorLayer::intersectWithHelix(
  * \param[in] direction  track direction
  */
 Matrix<double, 3, 6> GblDetectorLayer::getRigidBodyDerGlobal(
-		Eigen::Vector3d& position, Eigen::Vector3d& direction) const {
+		Eigen::Vector3d &position, Eigen::Vector3d &direction) const {
 // lever arms (for rotations)
 	Vector3d dist = position;
 // dr/dm (residual vs measurement, 1-tdir*ndir^t/tdir*ndir)
@@ -462,7 +467,7 @@ Matrix<double, 3, 6> GblDetectorLayer::getRigidBodyDerGlobal(
  * \param[in] direction  track direction
  */
 Matrix<double, 2, 6> GblDetectorLayer::getRigidBodyDerLocal(
-		Eigen::Vector3d& position, Eigen::Vector3d& direction) const {
+		Eigen::Vector3d &position, Eigen::Vector3d &direction) const {
 	// track direction in local system
 	Vector3d tLoc = global2align * direction;
 	// local slopes
@@ -490,7 +495,7 @@ Matrix<double, 2, 6> GblDetectorLayer::getRigidBodyDerLocal(
  * \param[in] rotation  rotation of alignment system
  */
 Matrix<double, 6, 6> GblDetectorLayer::getTrafoGlobalToLocal(
-		Eigen::Vector3d& offset, Eigen::Matrix3d& rotation) const {
+		Eigen::Vector3d &offset, Eigen::Matrix3d &rotation) const {
 	// transformation global to local
 	Matrix<double, 6, 6> glo2loc = Matrix<double, 6, 6>::Zero();
 	Matrix3d leverArms;
@@ -509,7 +514,7 @@ Matrix<double, 6, 6> GblDetectorLayer::getTrafoGlobalToLocal(
  * \param[in] rotation  rotation of alignment system
  */
 Matrix<double, 6, 6> GblDetectorLayer::getTrafoLocalToGlobal(
-		Eigen::Vector3d& offset, Eigen::Matrix3d& rotation) const {
+		Eigen::Vector3d &offset, Eigen::Matrix3d &rotation) const {
 	// transformation local to global
 	Matrix<double, 6, 6> loc2glo = Matrix<double, 6, 6>::Zero();
 	Matrix3d leverArms;

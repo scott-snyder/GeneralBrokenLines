@@ -28,7 +28,7 @@
  */
 
 #include <time.h>
-#include "exampleUtil.h"
+#include "GblUtilities.h"
 #include "GblTrajectory.h"
 
 using namespace gbl;
