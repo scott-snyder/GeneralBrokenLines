@@ -28,6 +28,10 @@ GblDetectorLayer* GblDetectorLayerCtor(const char* aName, int aLayer, int aDim, 
 	return layer;
 }
 
+void GblDetectorLayer_delete(GblDetectorLayer* self) {
+	if (self) delete self;
+}
+
 void GblDetectorLayer_print(GblDetectorLayer* self) {
 	self->print();
 }
@@ -60,6 +64,10 @@ GblHelixPrediction* GblDetectorLayer_intersectWithHelix(GblDetectorLayer* self, 
 //Simple Helix
 GblSimpleHelix* GblSimpleHelixCtor(double aRinv, double aPhi0, double aDca, double aDzds, double aZ0) {
 	return new GblSimpleHelix(aRinv, aPhi0, aDca, aDzds, aZ0);
+}
+
+void GblSimpleHelix_delete(GblSimpleHelix* self) {
+	if (self) delete self;
 }
 
 double GblSimpleHelix_getPhi(GblSimpleHelix* self, double aRadius) {
@@ -103,7 +111,6 @@ GblHelixPrediction* GblSimpleHelix_getPrediction(GblSimpleHelix* self, double re
 //Helix Prediction
 GblHelixPrediction* GblHelixPredictionCtor(double sArc, double aPred[], double tDir[], double uDir[], double vDir[],
 																				 double nDir[], double aPos[]) {
-	
 	Map<Vector2d> e_aPred(aPred,2);
 	Map<Vector3d> e_tDir(tDir,3);
 	Map<Vector3d> e_uDir(uDir,3);
@@ -116,12 +123,15 @@ GblHelixPrediction* GblHelixPredictionCtor(double sArc, double aPred[], double t
 																e_nDir, e_aPos);
 }
 
+void GblHelixPrediction_delete(GblHelixPrediction* self) {
+	if (self) delete self;
+}
+
 double GblHelixPrediction_getArcLength(GblHelixPrediction* self) {
 	return self->getArcLength();
 }
 
 void GblHelixPrediction_getMeasPred(GblHelixPrediction* self, double* prediction) {
-	
 	Vector2d e_pred = self->getMeasPred();
 	
 	prediction[0] = e_pred(0);
@@ -129,24 +139,19 @@ void GblHelixPrediction_getMeasPred(GblHelixPrediction* self, double* prediction
 }
 
 void GblHelixPrediction_getPosition(GblHelixPrediction* self, double* position) {
-	
 	Vector3d e_pos = self->getPosition();
 	
 	position[0] = e_pos(0);
 	position[1] = e_pos(1);
 	position[2] = e_pos(2);
-	
-	
 }
 
 void GblHelixPrediction_getDirection(GblHelixPrediction* self, double direction[]) {
-	
 	Vector3d e_dir = self->getDirection();
 	
 	direction[0] = e_dir(0);
 	direction[1] = e_dir(1);
 	direction[2] = e_dir(2);
-	
 }
 
 double GblHelixPrediction_getCosIncidence(GblHelixPrediction* self) {
@@ -154,7 +159,6 @@ double GblHelixPrediction_getCosIncidence(GblHelixPrediction* self) {
 }
 
 void GblHelixPrediction_getCurvilinearDirs(GblHelixPrediction* self, double curvilinear[]) {
-	
 	Matrix<double,2,3> curDirs = self->getCurvilinearDirs();
 	
 	//std::cout<<"Check curvilinear Directions" <<std::endl;
