@@ -1,5 +1,7 @@
 /**
  * \file JavaNativeAccessWrappers.cpp
+ * \author Tom Eichlersmith <eichl008@umn.edu>
+ *
  * Wrappers around construction, getters, setters, and destruction
  * functions of Gbl classes.
  *
@@ -10,6 +12,95 @@
  * \note This file is large however it is not intended to do anything besides
  * interface between JNA and GBL. If any logic in this file affects the
  * calculations done by GBL, that is considered a bug with the implemenation.
+ *
+ * Information on using these wrappers to access the GBL C++ library
+ * from with java using JNA can be found in on the \ref jnausage
+ * page.
+ */
+
+/**
+ * \page jnausage JNA Usage
+ * \brief how to use wrapper functions within java
+ *
+ * More information about JNA can be found at its
+ * [GitHub repository](https://github.com/java-native-access/jna).
+ *
+ * In general, the most difficult part of implementing the JNA-GBL
+ * interaction is getting the transfer of data between the java objects
+ * and the C++/GBL objects done well and safely. The JNA documentation
+ * apart of its repository contains more information about how to do
+ * this well - here I will simply walk through an example accessing a
+ * single class from GBL within java. In reality, a working solution
+ * would require a similar setup for almost all of the different GBL
+ * classes one would be interested in using.
+ *
+ * **It is suggested to enable the JNA_DEBUG build option when
+ * first developing a JNA-based java usage of GBL. This will
+ * help you make sure that you aren't leaking memory and avoid
+ * a program crash.**
+ *
+ * ### Wrapping MilleBinary
+ * It is easiest to simply look at the java source code for this
+ * class so one can see how to interface with it. The basic idea
+ * is to define a singleton that represents the GBL library as
+ * loaded by JNA and then have classes whose job is to wrap
+ * these functions in simpler, object-oriented forms.
+ * ```java
+ * import com.sun.jna.Library;
+ * import com.sun.jna.Native;
+ * import com.sun.jna.Pointer;
+ *
+ * // extension of JNA Library that represents the GBL dynamic library
+ * public interface GBLInterface extends Library {
+ *     GBLInterface INSTANCE = (GBLInterface) Native.loadLibrary("GBL", GBLInterface.class);
+ *     Pointer MilleBinaryCtor(String filename, int filenamesize, int doublePrec, int keepZeros, int aSize);
+ *     void MilleBinary_close(Pointer self);
+ *     // would add more functions whose signatures "match" the ones defined in this file
+ *     // (more on what "match" means below)
+ * }
+ *
+ * // java class that represents a MilleBinary file
+ * public class MilleBinary {
+ *     // hold onto the object dynamically allocated from C++
+ *     private Pointer self;
+ *
+ *     // provide a constructor that is easier for a user than the raw C-wrapped function
+ *     // make parameters easier, for example doing the boolean->integer conversion for the user
+ *     public MilleBinary(String fileName, boolean doublePrec, boolean keepZeros, int aSize) {
+ *         self = GBLInterface.INSTANCE.MilleBinaryCtor(fileName, fileName.length(),
+ *             doubePrec ? 0 : 1, keepZeros ? 0 : 1, aSize);
+ *     }
+ *
+ *     // dynamically allocated memory done by the native library is not cleaned up
+ *     // by the JVM so one must manually clean it up
+ *     public void close() {
+ *         GBLInterface.INSTANCE.MilleBinary_close(self);
+ *     }
+ * };
+ * ```
+ *
+ * ### Matching Function Signatures
+ * For function signatures to "match" between the functions defined in the JNA
+ * libraray extentions (`GBLInterface` above) and the ones defined here, the
+ * return value type, the name, and the argument types need to match. The name is easy,
+ * but the types are slightly more complicated since the typename between java
+ * and C++ are different.
+ *
+ * - The simple types (`int` and `double`) are the same.
+ * - A java `String` is converted to a C-style string `char *`.
+ * - A pointer to any structure in C is represented by Pointer on the JNA side.
+ * - If the C side needs a variable passed by reference, one needs to use
+ *   `IntByReference` (or `DoubleByReference`) on the java side and a pointer
+ *   on the C side.
+ * - If an array is of a known length, one can allocate the array in `java`
+ *   and then simply pass the pointer to the array to the C side.
+ *   - e.g. A length-3 array is common to represent position. Both "sides"
+ *      could use the `double position[3]` syntax and one just has to make
+ *      sure to allocate the correct size on the java side and the C function
+ *      will simply write to those addresses.
+ * - If the array length _must_ be determined by the C side, then one
+ *   must use `PointerByReference`.
+ *
  */
 
 #include "MilleBinary.h"
@@ -29,6 +120,8 @@ using namespace Eigen;
 #include <iostream>
 
 int num_gbl_point = 0;
+int num_gbl_traj  = 0;
+int num_mille_bin = 0;
 #endif
 
 extern "C" { 
@@ -55,6 +148,7 @@ MilleBinary* MilleBinaryCtor(const char* fileName, int filenamesize, int doubleP
 	MilleBinary* mb = new MilleBinary(binName,doublePrecision!=0,keepZeros!=0,aSize);
 #ifdef JNA_DEBUG
 	std::cout << "MilleBinary created at " << mb << std::endl;
+  num_mille_bin++;
 #endif
 	return mb;
 }
@@ -75,6 +169,7 @@ MilleBinary* MilleBinaryCtor(const char* fileName, int filenamesize, int doubleP
 void MilleBinary_close(MilleBinary* self) {
 #ifdef JNA_DEBUG
 	std::cout << "MilleBinary_close(" << self << ")" << std::endl;
+  num_mille_bin--;
 #endif
 	if (self) delete self;
 }
@@ -89,7 +184,7 @@ GblPoint* GblPointCtor(double matrixArray[NROW*NCOL]) {
 	Map<Matrix5d> jacobian(matrixArray,5,5);
 	GblPoint* self = new GblPoint(jacobian);
 #ifdef JNA_DEBUG
-	//std::cout << "GblPointCtor at " << self << " " << ++num_gbl_point << std::endl;
+	std::cout << "GblPointCtor at " << self << " " << ++num_gbl_point << std::endl;
 #endif
 	return self;
 }
@@ -115,7 +210,7 @@ void GblPoint_delete(GblPoint* self) {
  */
 void GblPoint_printPoint(const GblPoint* self, unsigned int level) {
 #ifdef JNA_DEBUG
-	//std::cout << "GblPoint_printPoint(" << self << ", " << level << ")" << std::endl;
+	std::cout << "GblPoint_printPoint(" << self << ", " << level << ")" << std::endl;
 #endif
 	self->printPoint(level);
 }
@@ -290,10 +385,10 @@ std::vector<GblPoint> ptr_array_to_vector(GblPoint* points[], int npoints) {
 	for (int i{0}; i < npoints; ++i) {
 		// get the pointer
 		GblPoint* gblpoint = points[i];
-		// COPY the data into the vector,
+		// MOVE the data into the vector,
 		points_vec.emplace_back(*(gblpoint));
 #ifdef JNA_DEBUG
-		std::cout << "COPY GblPoint " << gblpoint << " -> " << &(points_vec.back()) << std::endl;
+		std::cout << "MOVE GblPoint " << gblpoint << " -> " << &(points_vec.back()) << std::endl;
 #endif
 	}
 
@@ -321,6 +416,7 @@ GblTrajectory* GblTrajectoryCtorPtrArray(GblPoint* points[], int npoints,
 		<< points << ", " << npoints << ", "
 		<< flagCurv << ", " << flagU1dir << ", " << flagU2dir
 		<< ")" << std::endl;
+  num_gbl_traj++;
 #endif
 	
 	return new GblTrajectory(ptr_array_to_vector(points, npoints), 
@@ -348,6 +444,7 @@ GblTrajectory* GblTrajectoryCtorPtrArraySeed(GblPoint* points[], int npoints,
 		<< aLabel << ", " << seedArray << ", "
 		<< flagCurv << ", " << flagU1dir << ", " << flagU2dir
 		<< ")" << std::endl;
+  num_gbl_traj++;
 #endif
 	
 	Map<Matrix5d> seed(seedArray,5,5);
@@ -374,6 +471,7 @@ GblTrajectory* GblTrajectoryCtorPtrComposed(GblPoint* points_1[], int npoints_1,
 		<< points_1 << ", " << npoints_1 << ", " << trafo_1 << ", "
 		<< points_2 << ", " << npoints_2 << ", " << trafo_2 << ")"
 		<< std::endl;
+  num_gbl_traj++;
 #endif
 	
 	
@@ -433,6 +531,10 @@ void GblTrajectory_fit(GblTrajectory* self, double* Chi2, int* Ndf, double* lost
 void GblTrajectory_delete(GblTrajectory* self) {
 #ifdef JNA_DEBUG
 	std::cout << "GblTrajectory_delete(" << self << ")" << std::endl;
+  num_gbl_traj--;
+  if (self) {
+		num_gbl_point -= self->getNumPoints();
+  }
 #endif
 	if (self) delete self;
 }
