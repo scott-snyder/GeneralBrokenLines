@@ -14,8 +14,8 @@ SET( ${PROJECT_NAME}_VERSION_PATCH 1 )
 LIST( APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake )
 INCLUDE( ilcsoft_default_settings )
 
-# enable ROOT support
-OPTION( SUPPORT_ROOT "Support ROOT for user I/O" True )
+# enable ROOT support, check required CXX standard (see below)
+OPTION( SUPPORT_ROOT "Support ROOT for user I/O" False )
 IF( SUPPORT_ROOT )
   FIND_PACKAGE(ROOT REQUIRED)
   ADD_DEFINITIONS(-DGBL_EIGEN_SUPPORT_ROOT)
@@ -24,6 +24,16 @@ FIND_PACKAGE(Eigen3 REQUIRED)
 
 # require proper c++
 #ADD_DEFINITIONS( "-Wall -g -ansi -pedantic -Wno-long-long" )
+# set CMAKE_CXX_STANDARD 
+IF( NOT ${CMAKE_VERSION} VERSION_LESS "3.1.0" )
+  IF( SUPPORT_ROOT )
+    SET( CMAKE_CXX_STANDARD 17 )
+  ELSE()
+    SET( CMAKE_CXX_STANDARD 11 )
+  ENDIF()
+ELSE()
+# defined in cmake/ilcsoft_default_cxx_flags.cmake 
+ENDIF()
 
 # include directories
 IF( SUPPORT_ROOT )
