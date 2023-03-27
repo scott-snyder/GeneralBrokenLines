@@ -148,13 +148,22 @@ long int num_gbl_simple_helix = 0;
 long int num_gbl_helix_prediction = 0;
 
 /**
- * With GCC, we attach functions to library load time or library offload time
- * with the constructor (destructor) attribute.
+ * Print the status of the running counts
+ *
+ * This function is only compiled when either JNA_DEBUG or JNA_MEMORY_MONITOR
+ * are enabled. We include a GCC attribute so that the function is run when
+ * the GBL library is offloaded during execution so we see the status at the
+ * end of program running.
+ *
  * https://gcc.gnu.org/onlinedocs/gcc/Common-Function-Attributes.html
+ *
+ * There are similar attributes for other compilers, but I leave that
+ * for future contributors.
  */
 __attribute__((destructor))
 void print_status() {
   std::cout
+    << "  GBL Structures Left\n"
     << "GBL Points:       " << num_gbl_point << "\n"
     << "GBL Trajectories: " << num_gbl_traj << "\n"
     << "Mille Binaries:   " << num_mille_bin << "\n"
