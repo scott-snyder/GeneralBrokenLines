@@ -101,6 +101,21 @@
  * - If the array length _must_ be determined by the C side, then one
  *   must use `PointerByReference`.
  *
+ * ### Memory Handling
+ * When using JNA to call functions from a native library, the memory
+ * allocated by those functions _is not_ monitored and cleaned up by
+ * java's garbage collector. Effectively, this means you _need_ to
+ * have a `delete` call for every `Ctor` call you make.
+ *
+ * Since this can get complicated very quickly, it is recommended
+ * to develop your java program with JNA_MEMORY_MONITOR enabled
+ * in the GBL C++ library. This will print out a summary of the 
+ * GBL structures still allocated at the end of running allowing
+ * you to make sure that the GBL structures you created are also
+ * deleted.
+ * ```
+ * cmake -B build -S . -DJNA_MEMORY_MONITOR=ON
+ * ```
  */
 
 #include "MilleBinary.h"
@@ -116,12 +131,38 @@ const int NCOL = 5;
 using namespace gbl;
 using namespace Eigen;
 
-#ifdef JNA_DEBUG
+/**
+ * Do the memory monitoring if either JNA_DEBUG or JNA_MEMORY_MONITOR
+ * is defined.
+ */
+#define JNA_DO_MONITOR (defined (JNA_DEBUG) || defined (JNA_MEMORY_MONITOR))
+
+#if JNA_DO_MONITOR
 #include <iostream>
 
-int num_gbl_point = 0;
-int num_gbl_traj  = 0;
-int num_mille_bin = 0;
+long int num_gbl_point = 0;
+long int num_gbl_traj  = 0;
+long int num_mille_bin = 0;
+long int num_gbl_det_layer = 0;
+long int num_gbl_simple_helix = 0;
+long int num_gbl_helix_prediction = 0;
+
+/**
+ * With GCC, we attach functions to library load time or library offload time
+ * with the constructor (destructor) attribute.
+ * https://gcc.gnu.org/onlinedocs/gcc/Common-Function-Attributes.html
+ */
+__attribute__((destructor))
+void print_status() {
+  std::cout
+    << "GBL Points:       " << num_gbl_point << "\n"
+    << "GBL Trajectories: " << num_gbl_traj << "\n"
+    << "Mille Binaries:   " << num_mille_bin << "\n"
+    << "GBL Det Layers:   " << num_gbl_det_layer << "\n"
+    << "GBL Simple Helix: " << num_gbl_simple_helix << "\n"
+    << "GBL Helix Pred:   " << num_gbl_helix_prediction << "\n"
+    << std::flush;
+}
 #endif
 
 extern "C" { 
@@ -148,7 +189,9 @@ MilleBinary* MilleBinaryCtor(const char* fileName, int filenamesize, int doubleP
 	MilleBinary* mb = new MilleBinary(binName,doublePrecision!=0,keepZeros!=0,aSize);
 #ifdef JNA_DEBUG
 	std::cout << "MilleBinary created at " << mb << std::endl;
-  num_mille_bin++;
+#endif
+#if JNA_DO_MONITOR
+  ++num_mille_bin;
 #endif
 	return mb;
 }
@@ -169,7 +212,9 @@ MilleBinary* MilleBinaryCtor(const char* fileName, int filenamesize, int doubleP
 void MilleBinary_close(MilleBinary* self) {
 #ifdef JNA_DEBUG
 	std::cout << "MilleBinary_close(" << self << ")" << std::endl;
-  num_mille_bin--;
+#endif
+#if JNA_DO_MONITOR
+  --num_mille_bin;
 #endif
 	if (self) delete self;
 }
@@ -183,8 +228,11 @@ void MilleBinary_close(MilleBinary* self) {
 GblPoint* GblPointCtor(double matrixArray[NROW*NCOL]) {
 	Map<Matrix5d> jacobian(matrixArray,5,5);
 	GblPoint* self = new GblPoint(jacobian);
+#if JNA_DO_MONITOR
+  ++num_gbl_point;
+#endif
 #ifdef JNA_DEBUG
-	std::cout << "GblPointCtor at " << self << " " << ++num_gbl_point << std::endl;
+	std::cout << "GblPointCtor at " << self << " " << num_gbl_point << std::endl;
 #endif
 	return self;
 }
@@ -198,8 +246,11 @@ GblPoint* GblPointCtor(double matrixArray[NROW*NCOL]) {
  * \param [in] self gbl::GblPoint to delete
  */
 void GblPoint_delete(GblPoint* self) {
+#if JNA_DO_MONITOR
+  --num_gbl_point;
+#endif
 #ifdef JNA_DEBUG
-	std::cout << "GblPoint_delete(" << self << ") " << --num_gbl_point << std::endl;
+	std::cout << "GblPoint_delete(" << self << ") " << num_gbl_point << std::endl;
 #endif
 	if (self) delete self;
 }
@@ -226,6 +277,9 @@ void GblPoint_printPoint(const GblPoint* self, unsigned int level) {
  * \return number of measurements
  */
 int GblPoint_getNumMeasurements(GblPoint* self) {
+#ifdef JNA_DEBUG
+  std::cout << "GblPoint_getNumMeasurements(" << self << ")" << std::endl;
+#endif
   return (self->getMeasEnd() - self->getMeasBegin());
 }
 
@@ -367,7 +421,8 @@ void GblPoint_getGlobalLabelsAndDerivatives(GblPoint* self, int* nlabels, int** 
  *
  * This is a helper function and should not be bound to a function by JNA.
  *
- * \note We *copy* the data pointed to into the vector.
+ * \note We *copy* the data pointed to into the vector, so the points
+ * input into this function **still need to be deleted**.
  *
  * \param [in] points array of pointers to gblGblPoint to put into vector
  * \param [in] npoints number of points (size of array)
@@ -386,7 +441,11 @@ std::vector<GblPoint> ptr_array_to_vector(GblPoint* points[], int npoints) {
 		// get the pointer
 		GblPoint* gblpoint = points[i];
 		// COPY the data into the vector,
+    //  this copy-constructs a /new/ gbl point
 		points_vec.emplace_back(*(gblpoint));
+#if JNA_DO_MONITOR
+    ++num_gbl_point;
+#endif
 #ifdef JNA_DEBUG
 		std::cout << "COPY GblPoint " << gblpoint << " -> " << &(points_vec.back()) << std::endl;
 #endif
@@ -416,6 +475,8 @@ GblTrajectory* GblTrajectoryCtorPtrArray(GblPoint* points[], int npoints,
 		<< points << ", " << npoints << ", "
 		<< flagCurv << ", " << flagU1dir << ", " << flagU2dir
 		<< ")" << std::endl;
+#endif
+#if JNA_DO_MONITOR
   num_gbl_traj++;
 #endif
 	
@@ -444,7 +505,7 @@ GblTrajectory* GblTrajectoryCtorPtrArraySeed(GblPoint* points[], int npoints,
 		<< aLabel << ", " << seedArray << ", "
 		<< flagCurv << ", " << flagU1dir << ", " << flagU2dir
 		<< ")" << std::endl;
-  num_gbl_traj++;
+  ++num_gbl_traj;
 #endif
 	
 	Map<Matrix5d> seed(seedArray,5,5);
@@ -471,7 +532,9 @@ GblTrajectory* GblTrajectoryCtorPtrComposed(GblPoint* points_1[], int npoints_1,
 		<< points_1 << ", " << npoints_1 << ", " << trafo_1 << ", "
 		<< points_2 << ", " << npoints_2 << ", " << trafo_2 << ")"
 		<< std::endl;
-  num_gbl_traj++;
+#endif
+#if JNA_DO_MONITOR
+  ++num_gbl_traj;
 #endif
 	
 	
@@ -531,8 +594,10 @@ void GblTrajectory_fit(GblTrajectory* self, double* Chi2, int* Ndf, double* lost
 void GblTrajectory_delete(GblTrajectory* self) {
 #ifdef JNA_DEBUG
 	std::cout << "GblTrajectory_delete(" << self << ")" << std::endl;
-  num_gbl_traj--;
+#endif
+#if JNA_DO_MONITOR
   if (self) {
+    --num_gbl_traj;
 		num_gbl_point -= self->getNumPoints();
   }
 #endif
@@ -580,6 +645,9 @@ void GblTrajectory_printTrajectory(GblTrajectory* self, int level) {
  * \param [in] self gbl::GblTrajectory to operate on
  */
 void GblTrajectory_printData(GblTrajectory* self) {
+#ifdef JNA_DEBUG
+  std::cout << "GblTrajectory_printData(" << self << ")" << std::endl;
+#endif
 	return self->printData();
 }
 
@@ -589,6 +657,9 @@ void GblTrajectory_printData(GblTrajectory* self) {
  * \param [in] level integer level for printing
  */
 void GblTrajectory_printPoints(GblTrajectory* self, int level) {
+#ifdef JNA_DEBUG
+  std::cout << "GblTrajectory_printPoints(" << self << ", " << level << ")" << std::endl;
+#endif
 	return self->printPoints(level);
 }
 
@@ -623,7 +694,6 @@ void GblTrajectory_getResults(GblTrajectory* self, int aSignedLabel, double* loc
 	Map<Matrix5d>(localCov, 5, 5) = e_localCov; 
 	*nLocalPar = 5;
 	*sizeLocalCov = 5;
-	
 }
 
 /**
@@ -663,7 +733,6 @@ void GblTrajectory_getMeasResults(GblTrajectory* self, int aLabel, int* numData,
 		aResErrors[i] = e_aResErrors(i);
 		aDownWeights[i] = e_aDownWeights(i);
 	}
-	
 }
 
 /**
@@ -697,7 +766,15 @@ void GblTrajectory_milleOut(GblTrajectory* self, MilleBinary* millebinary) {
 GblDetectorLayer* GblDetectorLayerCtor(const char* aName, int aLayer, int aDim, double thickness,
 																			 double aCenter[], double aResolution[], double aPrecision[],
 																			 double measTrafo[], double alignTrafo[]) {
-		
+#ifdef JNA_DEBUG
+  std::cout << "GblDetectorLayerCtor(" << aName << ", " << aLayer
+    << ", " << aDim << ", " << thickness << ", " << aCenter << ", " << aResolution
+    << ", " << aPrecision << ", " << measTrafo << ", " << alignTrafo << ")" << std::endl;
+#endif
+#if JNA_DO_MONITOR
+  ++num_gbl_det_layer;
+#endif
+
 	// uses eigen's Map structure to decompose an array into our type of Vector/Matrix
 	// need to then copy that object into a local variable since Map's only allow const
 	// reference access
@@ -715,6 +792,12 @@ GblDetectorLayer* GblDetectorLayerCtor(const char* aName, int aLayer, int aDim, 
  * \brief delete gbl::GblDetectorLayer
  */
 void GblDetectorLayer_delete(GblDetectorLayer* self) {
+#ifdef JNA_DEBUG
+  std::cout << "GblDetectorLayer_delete(" << self << ")" << std::endl;
+#endif
+#if JNA_DO_MONITOR
+  --num_gbl_det_layer;
+#endif
 	if (self) delete self;
 }
 
@@ -723,6 +806,9 @@ void GblDetectorLayer_delete(GblDetectorLayer* self) {
  * \param [in] self gbl::GblDetectorLayer to operate on
  */
 void GblDetectorLayer_print(GblDetectorLayer* self) {
+#ifdef JNA_DEBUG
+  std::cout << "GblDetectorLayer_print(" << self << ")" << std::endl;
+#endif
 	self->print();
 }
 
@@ -731,6 +817,9 @@ void GblDetectorLayer_print(GblDetectorLayer* self) {
  * \param [in] self gbl::GblDetectorLayer to operate on
  */
 double GblDetectorLayer_getRadiationLength(GblDetectorLayer* self) {
+#ifdef JNA_DEBUG
+  std::cout << "GblDetectorLayer_getRadiationLength(" << self << ")" << std::endl;
+#endif
 	return self->getRadiationLength();
 }
 
@@ -751,6 +840,12 @@ double GblDetectorLayer_getRadiationLength(GblDetectorLayer* self) {
  * \return newly constructed gbl::GblHelixPrediction
  */
 GblHelixPrediction* GblDetectorLayer_intersectWithHelix(GblDetectorLayer* self, GblSimpleHelix* hlx) {
+#ifdef JNA_DEBUG
+  std::cout << "GblDetectorLayer_intersectWithHelix(" << self << ", " << hlx << ")" << std::endl;
+#endif
+#if JNA_DO_MONITOR
+  ++num_gbl_helix_prediction;
+#endif
 	
 	Vector3d center = self->getCenter();
 	Vector3d udir		= (self->getMeasSystemDirs()).row(0);
@@ -768,6 +863,9 @@ GblHelixPrediction* GblDetectorLayer_intersectWithHelix(GblDetectorLayer* self, 
  * \return newly constructed gbl::GblSimpleHelix
  */
 GblSimpleHelix* GblSimpleHelixCtor(double aRinv, double aPhi0, double aDca, double aDzds, double aZ0) {
+#if JNA_DO_MONITOR
+  ++num_gbl_simple_helix;
+#endif
 	return new GblSimpleHelix(aRinv, aPhi0, aDca, aDzds, aZ0);
 }
 
@@ -775,6 +873,9 @@ GblSimpleHelix* GblSimpleHelixCtor(double aRinv, double aPhi0, double aDca, doub
  * \brief delete gbl::GblSimpleHelix
  */
 void GblSimpleHelix_delete(GblSimpleHelix* self) {
+#if JNA_DO_MONITOR
+  --num_gbl_simple_helix;
+#endif
 	if (self) delete self;
 }
 
@@ -846,6 +947,9 @@ GblHelixPrediction* GblSimpleHelix_getPrediction(GblSimpleHelix* self, double re
 	std::cout<<"Cross Check GBL meas predicted position!"<<std::endl;
 	std::cout<<prediction->getMeasPred()<<std::endl;*/
 	
+#if JNA_DO_MONITOR
+  ++num_gbl_helix_prediction;
+#endif
 	// JNA only deals with pointers so we need to dynamically create a new copy
 	return new GblHelixPrediction(prediction);
 }
@@ -870,6 +974,9 @@ GblHelixPrediction* GblHelixPredictionCtor(double sArc, double aPred[], double t
 	Map<Vector3d> e_aPos(aPos,3);
 	
 	
+#if JNA_DO_MONITOR
+  ++num_gbl_helix_prediction;
+#endif
 	return new GblHelixPrediction(sArc, e_aPred, e_tDir, e_uDir, e_vDir, 
 																e_nDir, e_aPos);
 }
@@ -879,6 +986,9 @@ GblHelixPrediction* GblHelixPredictionCtor(double sArc, double aPred[], double t
  * \param [in] self gbl::GblHelixPrediction to delete
  */
 void GblHelixPrediction_delete(GblHelixPrediction* self) {
+#if JNA_DO_MONITOR
+  --num_gbl_helix_prediction;
+#endif
 	if (self) delete self;
 }
 

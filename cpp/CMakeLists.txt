@@ -47,6 +47,16 @@ OPTION(JNA_DEBUG "Debug printouts for helping debug JNA memory issues" OFF)
 IF( JNA_DEBUG )
   TARGET_COMPILE_DEFINITIONS(${PROJECT_NAME} PUBLIC JNA_DEBUG)
 ENDIF()
+# JNA_MEMORY_MONITOR is a subset of JNA_DEBUG,
+#   basically, it turns off the runtime printing and only keeps track of counts
+#   printing the final tally when the program is finished running
+#   this is very helpful when developing a java program using GBL via JNA
+#   to make sure your java program is cleaning up the memory allocated by GBL
+OPTION(JNA_MEMORY_MONITOR 
+  "Only keep track of structures allocated and destructed within JNA wrappers" OFF)
+IF( JNA_MEMORY_MONITOR )
+  TARGET_COMPILE_DEFINITIONS(${PROJECT_NAME} PUBLIC JNA_MEMORY_MONITOR)
+ENDIF()
 
 # the examples, build with "make examples"
 ADD_SUBDIRECTORY( examples/ )
