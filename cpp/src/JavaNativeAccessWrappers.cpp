@@ -486,7 +486,7 @@ GblTrajectory* GblTrajectoryCtorPtrArray(GblPoint* points[], int npoints,
 		<< ")" << std::endl;
 #endif
 #if JNA_DO_MONITOR
-  num_gbl_traj++;
+  ++num_gbl_traj;
 #endif
 	
 	return new GblTrajectory(ptr_array_to_vector(points, npoints), 
@@ -514,6 +514,8 @@ GblTrajectory* GblTrajectoryCtorPtrArraySeed(GblPoint* points[], int npoints,
 		<< aLabel << ", " << seedArray << ", "
 		<< flagCurv << ", " << flagU1dir << ", " << flagU2dir
 		<< ")" << std::endl;
+#endif
+#if JNA_DO_MONITOR
   ++num_gbl_traj;
 #endif
 	
