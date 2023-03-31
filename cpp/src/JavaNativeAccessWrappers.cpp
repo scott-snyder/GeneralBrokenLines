@@ -135,7 +135,11 @@ using namespace Eigen;
  * Do the memory monitoring if either JNA_DEBUG or JNA_MEMORY_MONITOR
  * is defined.
  */
-#define JNA_DO_MONITOR (defined (JNA_DEBUG) || defined (JNA_MEMORY_MONITOR))
+#if (defined (JNA_DEBUG) || defined (JNA_MEMORY_MONITOR))
+#define JNA_DO_MONITOR 1
+#else
+#define JNA_DO_MONITOR 0
+#endif
 
 #if JNA_DO_MONITOR
 #include <iostream>
