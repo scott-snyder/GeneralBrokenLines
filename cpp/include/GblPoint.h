@@ -221,9 +221,9 @@ private:
 	unsigned int theLabel; ///< Label identifying point
 	int theOffset; ///< Offset number at point if not negative (else interpolation needed)
 	int theType; ///< Type (-1: first, 0: inner, 1: last)
-	Matrix5d p2pJacobian; ///< Point-to-point jacobian from previous point
-	Matrix5d prevJacobian; ///< Jacobian to previous scatterer (or first measurement)
-	Matrix5d nextJacobian; ///< Jacobian to next scatterer (or last measurement)
+	Matrix5d p2pJacobian  = Matrix5d::Zero(5,5); ///< Point-to-point jacobian from previous point
+	Matrix5d prevJacobian = Matrix5d::Zero(5,5); ///< Jacobian to previous scatterer (or first measurement)
+	Matrix5d nextJacobian = Matrix5d::Zero(5,5); ///< Jacobian to next scatterer (or last measurement)
 	unsigned int scatDim; ///< Dimension of scatterer (0: none, 2: thin, 4:thick)
 	//Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic,
 	//		Eigen::ColMajor /* default */, 4, 4> scatTransformation; ///< Transformation of diagonalization (of scat. precision matrix)
@@ -231,7 +231,6 @@ private:
 	Eigen::Vector4d scatResiduals; ///< Scattering residuals (initial kinks if iterating)
 	Eigen::Vector4d scatPrecision; ///< Scattering precision (diagonal of inverse covariance matrix)
 	std::vector<GblMeasurement> theMeasurements; ///< List of measurements at point
-
 };
 
 template<typename Projection, typename Residuals, typename Precision,
