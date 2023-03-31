@@ -653,7 +653,7 @@ void GblTrajectory_printTrajectory(GblTrajectory* self, int level) {
 #ifdef JNA_DEBUG
 	std::cout << "GblTrajectory_printTrajectory(" << self << ", " << level << ")" << std::endl;
 #endif
-	return self->printTrajectory();
+	return self->printTrajectory(level);
 }
 
 /**
@@ -723,7 +723,7 @@ void GblTrajectory_getResults(GblTrajectory* self, int aSignedLabel, double* loc
  * \param [out] aResErrors double array of residual errors
  * \param [out] aDownWeights double array of down weights
  */
-void GblTrajectory_getMeasResults(GblTrajectory* self, int aLabel, int* numData, 
+int GblTrajectory_getMeasResults(GblTrajectory* self, int aLabel, int* numData, 
 									double* aResiduals, double* aMeasErrors, double* aResErrors, 
 									double* aDownWeights) {
 #ifdef JNA_DEBUG
@@ -740,6 +740,9 @@ void GblTrajectory_getMeasResults(GblTrajectory* self, int aLabel, int* numData,
 	
 	unsigned int out = self->getMeasResults(aLabel, num_data, e_aResiduals, e_aMeasErrors,
 											e_aResErrors, e_aDownWeights);
+#ifdef JNA_DEBUG
+	std::cout << "  getMeasResults returned the status code " << out << std::endl;
+#endif
 	
 	*numData = num_data;
 	
@@ -749,6 +752,8 @@ void GblTrajectory_getMeasResults(GblTrajectory* self, int aLabel, int* numData,
 		aResErrors[i] = e_aResErrors(i);
 		aDownWeights[i] = e_aDownWeights(i);
 	}
+
+	return out;
 }
 
 /**
