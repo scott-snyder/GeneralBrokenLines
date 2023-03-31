@@ -178,6 +178,45 @@ void print_status() {
 }
 #endif
 
+/**
+ * \brief convert the pointer array of gbl::GblPoint into a vector holding the objects
+ *
+ * This is a helper function and should not be bound to a function by JNA,
+ * so we are keeping it _outside_ the `extern "C"` block so its name is mangled.
+ *
+ * \note We *copy* the data pointed to into the vector, so the points
+ * input into this function **still need to be deleted**.
+ *
+ * \param [in] points array of pointers to gblGblPoint to put into vector
+ * \param [in] npoints number of points (size of array)
+ * \return vector of GblPoints with same content as array
+ */
+std::vector<GblPoint> ptr_array_to_vector(GblPoint* points[], int npoints) {
+	std::vector<GblPoint> points_vec;
+	// since we already know the size of the vector, we 'reserve' the size
+	// so that the vector doesn't need to waste time copying/moving the GblPoints
+	// around as it grows in size
+	// we do *not* use 'resize' since that would involve default-constructing
+	// all the GblPoints
+	points_vec.reserve(npoints);
+
+	for (int i{0}; i < npoints; ++i) {
+		// get the pointer
+		GblPoint* gblpoint = points[i];
+		// COPY the data into the vector,
+		//  this copy-constructs a /new/ gbl point
+		points_vec.emplace_back(*(gblpoint));
+#if JNA_DO_MONITOR
+		++num_gbl_point;
+#endif
+#ifdef JNA_DEBUG
+		std::cout << "COPY GblPoint " << gblpoint << " -> " << &(points_vec.back()) << std::endl;
+#endif
+	}
+
+	return points_vec;
+}
+
 extern "C" { 
 /**
  * \brief Dynamically create new MilleBinary file.
@@ -428,44 +467,6 @@ void GblPoint_getGlobalLabelsAndDerivatives(GblPoint* self, int* nlabels, int** 
 #ifdef JNA_DEBUG
 	std::cout << "  Done with assignment and leaving." << std::endl;
 #endif
-}
-
-/**
- * \brief convert the pointer array of gbl::GblPoint into a vector holding the objects
- *
- * This is a helper function and should not be bound to a function by JNA.
- *
- * \note We *copy* the data pointed to into the vector, so the points
- * input into this function **still need to be deleted**.
- *
- * \param [in] points array of pointers to gblGblPoint to put into vector
- * \param [in] npoints number of points (size of array)
- * \return vector of GblPoints with same content as array
- */
-std::vector<GblPoint> ptr_array_to_vector(GblPoint* points[], int npoints) {
-	std::vector<GblPoint> points_vec;
-	// since we already know the size of the vector, we 'reserve' the size
-	// so that the vector doesn't need to waste time copying/moving the GblPoints
-	// around as it grows in size
-	// we do *not* use 'resize' since that would involve default-constructing
-	// all the GblPoints
-	points_vec.reserve(npoints);
-
-	for (int i{0}; i < npoints; ++i) {
-		// get the pointer
-		GblPoint* gblpoint = points[i];
-		// COPY the data into the vector,
-		//  this copy-constructs a /new/ gbl point
-		points_vec.emplace_back(*(gblpoint));
-#if JNA_DO_MONITOR
-		++num_gbl_point;
-#endif
-#ifdef JNA_DEBUG
-		std::cout << "COPY GblPoint " << gblpoint << " -> " << &(points_vec.back()) << std::endl;
-#endif
-	}
-
-	return points_vec;
 }
 
 /**
