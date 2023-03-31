@@ -411,14 +411,14 @@ void GblPoint_getGlobalLabelsAndDerivatives(GblPoint* self, int* nlabels, int** 
 #endif
 	
 	
-	for (std::size_t il{0}; il < *nlabels; ++il) {
+	for (std::size_t il{0}; il < glabels.size(); ++il) {
 		(*labels)[il] = glabels.at(il);
 		//std::cout<<glabels.at(il)<<std::endl;
 	}
 
 	//std::cout<<"GblPointWrapper::gders"<<std::endl;
 	
-	for (std::size_t id{0}; id < *nlabels; ++id) {
+	for (std::size_t id{0}; id < glabels.size(); ++id) {
 		(*ders)[id] = gders.at(id);
 		//std::cout<<gders.at(il)<<std::endl;
 	}
