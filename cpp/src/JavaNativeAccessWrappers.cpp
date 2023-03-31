@@ -135,7 +135,11 @@ using namespace Eigen;
  * Do the memory monitoring if either JNA_DEBUG or JNA_MEMORY_MONITOR
  * is defined.
  */
-#define JNA_DO_MONITOR (defined (JNA_DEBUG) || defined (JNA_MEMORY_MONITOR))
+#if (defined (JNA_DEBUG) || defined (JNA_MEMORY_MONITOR))
+#define JNA_DO_MONITOR 1
+#else
+#define JNA_DO_MONITOR 0
+#endif
 
 #if JNA_DO_MONITOR
 #include <iostream>
@@ -173,6 +177,45 @@ void print_status() {
 		<< std::flush;
 }
 #endif
+
+/**
+ * \brief convert the pointer array of gbl::GblPoint into a vector holding the objects
+ *
+ * This is a helper function and should not be bound to a function by JNA,
+ * so we are keeping it _outside_ the `extern "C"` block so its name is mangled.
+ *
+ * \note We *copy* the data pointed to into the vector, so the points
+ * input into this function **still need to be deleted**.
+ *
+ * \param [in] points array of pointers to gblGblPoint to put into vector
+ * \param [in] npoints number of points (size of array)
+ * \return vector of GblPoints with same content as array
+ */
+std::vector<GblPoint> ptr_array_to_vector(GblPoint* points[], int npoints) {
+	std::vector<GblPoint> points_vec;
+	// since we already know the size of the vector, we 'reserve' the size
+	// so that the vector doesn't need to waste time copying/moving the GblPoints
+	// around as it grows in size
+	// we do *not* use 'resize' since that would involve default-constructing
+	// all the GblPoints
+	points_vec.reserve(npoints);
+
+	for (int i{0}; i < npoints; ++i) {
+		// get the pointer
+		GblPoint* gblpoint = points[i];
+		// COPY the data into the vector,
+		//  this copy-constructs a /new/ gbl point
+		points_vec.emplace_back(*(gblpoint));
+#if JNA_DO_MONITOR
+		++num_gbl_point;
+#endif
+#ifdef JNA_DEBUG
+		std::cout << "COPY GblPoint " << gblpoint << " -> " << &(points_vec.back()) << std::endl;
+#endif
+	}
+
+	return points_vec;
+}
 
 extern "C" { 
 /**
@@ -407,14 +450,14 @@ void GblPoint_getGlobalLabelsAndDerivatives(GblPoint* self, int* nlabels, int** 
 #endif
 	
 	
-	for (std::size_t il{0}; il < *nlabels; ++il) {
+	for (std::size_t il{0}; il < glabels.size(); ++il) {
 		(*labels)[il] = glabels.at(il);
 		//std::cout<<glabels.at(il)<<std::endl;
 	}
 
 	//std::cout<<"GblPointWrapper::gders"<<std::endl;
 	
-	for (std::size_t id{0}; id < *nlabels; ++id) {
+	for (std::size_t id{0}; id < glabels.size(); ++id) {
 		(*ders)[id] = gders.at(id);
 		//std::cout<<gders.at(il)<<std::endl;
 	}
@@ -424,44 +467,6 @@ void GblPoint_getGlobalLabelsAndDerivatives(GblPoint* self, int* nlabels, int** 
 #ifdef JNA_DEBUG
 	std::cout << "  Done with assignment and leaving." << std::endl;
 #endif
-}
-
-/**
- * \brief convert the pointer array of gbl::GblPoint into a vector holding the objects
- *
- * This is a helper function and should not be bound to a function by JNA.
- *
- * \note We *copy* the data pointed to into the vector, so the points
- * input into this function **still need to be deleted**.
- *
- * \param [in] points array of pointers to gblGblPoint to put into vector
- * \param [in] npoints number of points (size of array)
- * \return vector of GblPoints with same content as array
- */
-std::vector<GblPoint> ptr_array_to_vector(GblPoint* points[], int npoints) {
-	std::vector<GblPoint> points_vec;
-	// since we already know the size of the vector, we 'reserve' the size
-	// so that the vector doesn't need to waste time copying/moving the GblPoints
-	// around as it grows in size
-	// we do *not* use 'resize' since that would involve default-constructing
-	// all the GblPoints
-	points_vec.reserve(npoints);
-
-	for (int i{0}; i < npoints; ++i) {
-		// get the pointer
-		GblPoint* gblpoint = points[i];
-		// COPY the data into the vector,
-		//  this copy-constructs a /new/ gbl point
-		points_vec.emplace_back(*(gblpoint));
-#if JNA_DO_MONITOR
-		++num_gbl_point;
-#endif
-#ifdef JNA_DEBUG
-		std::cout << "COPY GblPoint " << gblpoint << " -> " << &(points_vec.back()) << std::endl;
-#endif
-	}
-
-	return points_vec;
 }
 
 /**
@@ -572,7 +577,7 @@ GblTrajectory* GblTrajectoryCtorPtrComposed(GblPoint* points_1[], int npoints_1,
 	inner_2(1,1)=trafo_2[4];
 	inner_2(1,2)=trafo_2[5];
 
-	std::pair<std::vector<GblPoint>, MatrixXd> track_trafo_2 = std::make_pair(ptr_array_to_vector(points_1, npoints_1), inner_2);
+	std::pair<std::vector<GblPoint>, MatrixXd> track_trafo_2 = std::make_pair(ptr_array_to_vector(points_2, npoints_2), inner_2);
 	
 	return new GblTrajectory({track_trafo_1, track_trafo_2});
 
@@ -649,7 +654,7 @@ void GblTrajectory_printTrajectory(GblTrajectory* self, int level) {
 #ifdef JNA_DEBUG
 	std::cout << "GblTrajectory_printTrajectory(" << self << ", " << level << ")" << std::endl;
 #endif
-	return self->printTrajectory();
+	return self->printTrajectory(level);
 }
 
 /**
@@ -719,7 +724,7 @@ void GblTrajectory_getResults(GblTrajectory* self, int aSignedLabel, double* loc
  * \param [out] aResErrors double array of residual errors
  * \param [out] aDownWeights double array of down weights
  */
-void GblTrajectory_getMeasResults(GblTrajectory* self, int aLabel, int* numData, 
+int GblTrajectory_getMeasResults(GblTrajectory* self, int aLabel, int* numData, 
 									double* aResiduals, double* aMeasErrors, double* aResErrors, 
 									double* aDownWeights) {
 #ifdef JNA_DEBUG
@@ -736,6 +741,9 @@ void GblTrajectory_getMeasResults(GblTrajectory* self, int aLabel, int* numData,
 	
 	unsigned int out = self->getMeasResults(aLabel, num_data, e_aResiduals, e_aMeasErrors,
 											e_aResErrors, e_aDownWeights);
+#ifdef JNA_DEBUG
+	std::cout << "  getMeasResults returned the status code " << out << std::endl;
+#endif
 	
 	*numData = num_data;
 	
@@ -745,6 +753,8 @@ void GblTrajectory_getMeasResults(GblTrajectory* self, int aLabel, int* numData,
 		aResErrors[i] = e_aResErrors(i);
 		aDownWeights[i] = e_aDownWeights(i);
 	}
+
+	return out;
 }
 
 /**
