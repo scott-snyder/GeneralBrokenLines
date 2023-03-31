@@ -576,7 +576,7 @@ GblTrajectory* GblTrajectoryCtorPtrComposed(GblPoint* points_1[], int npoints_1,
 	inner_2(1,1)=trafo_2[4];
 	inner_2(1,2)=trafo_2[5];
 
-	std::pair<std::vector<GblPoint>, MatrixXd> track_trafo_2 = std::make_pair(ptr_array_to_vector(points_1, npoints_1), inner_2);
+	std::pair<std::vector<GblPoint>, MatrixXd> track_trafo_2 = std::make_pair(ptr_array_to_vector(points_2, npoints_2), inner_2);
 	
 	return new GblTrajectory({track_trafo_1, track_trafo_2});
 
