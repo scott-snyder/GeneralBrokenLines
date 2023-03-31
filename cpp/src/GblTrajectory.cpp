@@ -138,6 +138,9 @@
  *  based on std::vector<> for variable sized matrices.
  *  Several GBL methods are implemented as templates to allow more EIGEN compile time optimization.
  *
+ *  \section jna_sec Java Native Access wrappers
+ *  JavaNativeAccessWrappers.cpp are provided by Tom Eichlersmith (Univ. Minnesota).
+ *
  *  \section example_sec Examples
  *  Technical examples are given in example1.cpp, example2.cpp, example3.cpp and example4.cpp.
  *  An example silicon tracker is described in exampleSit.cpp

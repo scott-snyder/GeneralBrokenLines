@@ -11,7 +11,7 @@
  *
  * \note This file is large however it is not intended to do anything besides
  * interface between JNA and GBL. If any logic in this file affects the
- * calculations done by GBL, that is considered a bug with the implemenation.
+ * calculations done by GBL, that is considered a bug with the implementation.
  *
  * Information on using these wrappers to access the GBL C++ library
  * from with java using JNA can be found in on the \ref jnausage
@@ -81,7 +81,7 @@
  *
  * ### Matching Function Signatures
  * For function signatures to "match" between the functions defined in the JNA
- * libraray extentions (`GBLInterface` above) and the ones defined here, the
+ * library extensions (`GBLInterface` above) and the ones defined here, the
  * return value type, the name, and the argument types need to match. The name is easy,
  * but the types are slightly more complicated since the typename between java
  * and C++ are different.
@@ -304,6 +304,7 @@ int GblPoint_getNumMeasurements(GblPoint* self) {
  * \param [in] projArray length-4 array holding the entries in the 2x2 proj matrix
  * \param [in] resArray length-2 array holding residuals
  * \param [in] precArray length-2 array holding the precisions
+ * \param [in] minPrecision Minimal precision to accept measurement
  */
 void GblPoint_addMeasurement2D(GblPoint* self, 
 								 double *projArray,
