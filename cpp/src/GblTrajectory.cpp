@@ -11,7 +11,7 @@
  *  \author Claus Kleinwort, DESY, 2011 (Claus.Kleinwort@desy.de)
  *
  *  \copyright
- *  Copyright (c) 2011 - 2023 Deutsches Elektronen-Synchroton,
+ *  Copyright (c) 2011 - 2024 Deutsches Elektronen-Synchroton,
  *  Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
  *  This library is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU Library General Public License as
@@ -172,10 +172,11 @@ namespace gbl {
  */
 GblTrajectory::GblTrajectory(const std::vector<GblPoint> &aPointList,
 		bool flagCurv, bool flagU1dir, bool flagU2dir) :
-		numAllPoints(aPointList.size()), numPoints(), numOffsetPoints(0), numOffsets(0), numInnerTransformations(
-				0), numInnerTransOffsets(0), numCurvature(flagCurv ? 1 : 0), numParameters(
-				0), numLocals(0), numMeasurements(0), externalPoint(0), skippedMeasLabel(
-				0), maxNumGlobals(0), theDimension(0), thePoints(), theData(), measDataIndex(), scatDataIndex(), externalSeed(), innerTransformations(), externalDerivatives(), externalMeasurements(), externalPrecisions() {
+		numAllPoints(aPointList.size()), numPoints(), numOffsetPoints(0), numOffsets(
+				0), numInnerTransformations(0), numInnerTransOffsets(0), numCurvature(
+				flagCurv ? 1 : 0), numParameters(0), numLocals(0), numMeasurements(
+				0), externalPoint(0), skippedMeasLabel(0), maxNumGlobals(0), theDimension(
+				0), thePoints(), theData(), measDataIndex(), scatDataIndex(), externalSeed(), innerTransformations(), externalDerivatives(), externalMeasurements(), externalPrecisions() {
 
 	if (flagU1dir)
 		theDimension.push_back(0);
@@ -1438,9 +1439,9 @@ void GblTrajectory::prepare() {
 							unsigned int numRelated = 0;
 							while (ilabel < 5) {
 								if (labDer[ilabel] > 0) {
-									while (innerTransLab[iTraj][ifirst]
-											!= labDer[ilabel]
-											and ifirst <= ilast) {
+									while (ifirst <= ilast
+											and innerTransLab[iTraj][ifirst]
+													!= labDer[ilabel]) {
 										++ifirst;
 									}
 									if (ifirst > ilast) {
