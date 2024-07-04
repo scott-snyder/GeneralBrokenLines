@@ -10,7 +10,7 @@ Created on 28 Sep 2018
 # \author Claus Kleinwort, DESY, 2018 (Claus.Kleinwort@desy.de)
 #
 #  \copyright
-#  Copyright (c) 2018-2021 Deutsches Elektronen-Synchroton,
+#  Copyright (c) 2018-2023 Deutsches Elektronen-Synchroton,
 #  Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
 #  This library is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU Library General Public License as
@@ -141,7 +141,7 @@ def exampleSit():
       # as local system
       curviDirs = pred.getCurvilinearDirs()
       # projection matrix (local to measurement)
-      proL2m = np.linalg.inv(np.dot(curviDirs, np.linalg.inv(layer.getMeasSystemDirs())[:, :2]))
+      proL2m = np.linalg.inv(np.dot(curviDirs, np.linalg.inv(layer.getMeasSystemDirs())[:,:2]))
       # propagation
       jacPointToPoint = gblSimpleJacobian((sArc - sOld) / cosLambda, cosLambda, bfac)
       sOld = sArc
@@ -153,7 +153,7 @@ def exampleSit():
         pred = layer.intersectWithHelix2(seed)
         measPred = pred.getMeasPred()
         # 4D measurement
-        pro4D = np.zeros((4, 4)); pro4D[2:, 2:] = proL2m; pro4D[3, :2] = proL2m[1, :] * layer.getSpacing();
+        pro4D = np.zeros((4, 4)); pro4D[2:, 2:] = proL2m; pro4D[3,:2] = proL2m[1,:] * layer.getSpacing();
         res4D = np.array([0., 0., res[0], genHits[l][1] - measPred[1]])
         prec4D = np.array([0., 0., measPrec[0], measPrec[1]])
         point.addMeasurement([pro4D, res4D, prec4D]) 
@@ -350,7 +350,9 @@ class gblSiliconLayer(object):
     # drl/dg (local residuals vs rigid body parameters)
     drldg = np.array([[1.0, 0.0, -uSlope, vPos * uSlope, -uPos * uSlope, vPos], \
                       [0.0, 1.0, -vSlope, vPos * vSlope, -uPos * vSlope, -uPos]])
-    return drldg  
+    # local (alignment) to measurement system
+    local2meas = np.dot(self.__measDirs, self.__ijkDirs.T) 
+    return np.dot(local2meas[:2,:2], drldg)  
 
       
 ## Silicon detector
@@ -431,7 +433,7 @@ class gblSiliconDet(object):
 #
 # Assuming constant magnetic field in (positive) Z-direction
 #
-class gblSimpleHelix(object):  
+class gblSimpleHelix(object): 
   
   ## Constructor.
   #
@@ -468,7 +470,7 @@ class gblSimpleHelix(object):
   # @param[in] vDir    measurement direction 'v'; vector
   # @return prediction; class
   #
-  def getPrediction(self, refPos, uDir, vDir):  
+  def getPrediction(self, refPos, uDir, vDir): 
     # normal to (u,v) measurement plane
     nDir = np.cross(uDir, vDir); nDir /= np.linalg.norm(nDir)
     # ZS direction  
@@ -553,7 +555,7 @@ class gblSimpleHelix(object):
     sc = -rho * newRefPoint[1] + u * self.__dir0[0]
     sd = math.sqrt(1. - rho * sa)
     # transformed parameters
-    if rho == 0.:      
+    if rho == 0.: 
       dca = dp
       sArc = dl
       newPar = [rho, phi, dca]
@@ -584,7 +586,7 @@ class gblHelixPrediction(object):
   # @param[in] nDir     normal to measurement plane; vector
   # @param[in] pos      position at prediction; vector
   #
-  def __init__(self, sArc, pred, tDir, uDir, vDir, nDir, pos):  
+  def __init__(self, sArc, pred, tDir, uDir, vDir, nDir, pos): 
     ## arc-length
     self.__sarc = sArc
     ## prediction

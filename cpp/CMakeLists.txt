@@ -29,7 +29,7 @@ IF( NOT ${CMAKE_VERSION} VERSION_LESS "3.1.0" )
   IF( SUPPORT_ROOT )
     SET( CMAKE_CXX_STANDARD 17 )
   ELSE()
-    SET( CMAKE_CXX_STANDARD 11 )
+    SET( CMAKE_CXX_STANDARD 17 )
   ENDIF()
 ELSE()
 # defined in cmake/ilcsoft_default_cxx_flags.cmake 
