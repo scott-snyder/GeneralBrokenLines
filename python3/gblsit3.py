@@ -10,7 +10,7 @@ Created on 28 Sep 2018
 # \author Claus Kleinwort, DESY, 2018 (Claus.Kleinwort@desy.de)
 #
 #  \copyright
-#  Copyright (c) 2018-2021 Deutsches Elektronen-Synchroton,
+#  Copyright (c) 2018-2024 Deutsches Elektronen-Synchroton,
 #  Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
 #  This library is free software; you can redistribute it and/or modify
 #  it under the terms of the GNU Library General Public License as
@@ -50,7 +50,8 @@ from gblpy3.gblfit import GblPoint, GblTrajectory
 #    - Measurement, defined by two (optionally non-orthogonal) measurement directions,
 #      normal to detector plane and detector position (offset)
 #    - Alignment, defined by two orthogonal directions in detector plane, normal to that
-#      and detector position (offset)
+#      and detector position (offset). If different from measurement system for 1D measurements
+#      the unmeasured component has to be fixed by a linear equality constraint for MP-II.
 # 
 # \remark To exercise (mis)alignment different sets of layers (with different geometry) for simulation and reconstruction can be used.
 #
@@ -76,6 +77,12 @@ from gblpy3.gblfit import GblPoint, GblTrajectory
 #  64  0.  -1.
 #  65  0.  -1.
 #  66  0.  -1.
+#
+# ! from "det.getMP2Constraints()":
+# ! Alignment with MillePede-II requires for 1D measuremnts:
+# Constraint 0. ! fix unmeasured direction in S1D8
+#   72 1.0
+# ! End of lines to be added to MillePede-II steering file
 # \endcode
 #
 def exampleSit():
@@ -96,7 +103,11 @@ def exampleSit():
                         ['S2D7', (12.0, 0., 0.), 0.0033, [(0., 0.0025), (-5., 0.0025)] ],  # strip 2D (double sided), -5 deg stereo angle
                         ['S1D8', (15.0, 0., 0.), 0.0033, [(0., 0.0040)] ]  # strip 1D
                       ], bfac)
-               
+
+  # Alignment with MillePede-II requires for 1D measuremnts to fix the unmeasured direction
+  # with a (linear equality) constraint (unless alignment equal to measurement system).
+  det.getMP2Constraints()
+
   nTry = 1000  #: number of tries
   qbyp = 0.2  # 5 GeV
   binaryFile = open("milleBinary.dat", "wb")
@@ -244,6 +255,8 @@ class gblSiliconLayer(object):
   # @param[in]  layer   layer description; list
   #
   def __init__(self, layer):
+    ## name
+    self.__name = layer[0]
     ## center
     self.__center = np.array(layer[1])
     ## radiation length
@@ -267,8 +280,26 @@ class gblSiliconLayer(object):
     self.__measDirs = np.array([self.__uDir, self.__vDir, self.__nDir]) 
     ## local alignment system (IJK = YZX)
     self.__ijkDirs = np.array([[0., 1., 0.], [0., 0., 1.], [1., 0., 0.]])
+    ## alignment == measurement system?
+    self.__alignInMeasSys = np.array_equal(self.__measDirs, self.__ijkDirs)
     ## spacing (for composite layers)
     self.__spacing = layer[4] if len(layer) > 4 else None
+
+  ## get MP2 constraint
+  #
+  # @param[in]  layer  layer number
+  #
+  def getMP2Constraint(self, layer):
+    # alignment with 1D measurement outside measurement system requires constraint (in v dir.)
+    if self.__resolution[1] > 0. or self.__alignInMeasSys:
+      return
+    # transform vDir into alignment system
+    unMeasured = np.dot(self.__ijkDirs, self.__vDir)
+    print("Constraint 0. ! fix unmeasured direction in", self.__name)
+    for i in range(3):
+      # 'zero' supression
+      if abs(unMeasured[i]) > 1.0e-10:
+        print(" ", layer * 10 + i + 1, unMeasured[i])
     
   ## Get radiation length
   def getRadiationLength(self):
@@ -350,7 +381,12 @@ class gblSiliconLayer(object):
     # drl/dg (local residuals vs rigid body parameters)
     drldg = np.array([[1.0, 0.0, -uSlope, vPos * uSlope, -uPos * uSlope, vPos], \
                       [0.0, 1.0, -vSlope, vPos * vSlope, -uPos * vSlope, -uPos]])
-    return drldg  
+    # avoid numerics in case of unit transformation (below)
+    if self.__alignInMeasSys:
+      return drldg
+    # local (alignment) to measurement system
+    local2meas = np.dot(self.__measDirs, self.__ijkDirs.T)
+    return np.dot(local2meas[:2,:2], drldg)
 
       
 ## Silicon detector
@@ -373,6 +409,13 @@ class gblSiliconDet(object):
   ## Get layers
   def getLayers(self):
     return self.__layers    
+
+  ## get MP2 constraints
+  def getMP2Constraints(self):
+    print("! Alignment with MillePede-II requires for 1D measuremnts:")
+    for l, layer in enumerate(self.__layers):
+      layer.getMP2Constraint(l)
+    print("! End of lines to be added to MillePede-II steering file")
 
   ## Generate hits on helix
   #
