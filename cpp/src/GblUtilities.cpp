@@ -11,7 +11,7 @@
  *  \author Claus Kleinwort, DESY, 2018 (Claus.Kleinwort@desy.de)
  *
  *  \copyright
- *  Copyright (c) 2018-2023 Deutsches Elektronen-Synchroton,
+ *  Copyright (c) 2018-2024 Deutsches Elektronen-Synchroton,
  *  Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
  *  This library is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU Library General Public License as
@@ -361,6 +361,7 @@ GblDetectorLayer::GblDetectorLayer(const std::string aName,
 	udir = global2meas.row(0);
 	vdir = global2meas.row(1);
 	ndir = global2meas.row(2);
+	alignInMeasSys = global2meas.isApprox(global2align);
 }
 
 GblDetectorLayer::~GblDetectorLayer() {
@@ -374,6 +375,27 @@ void GblDetectorLayer::print() const {
 			<< ", res " << resolution.transpose().format(CleanFmt) << ", udir "
 			<< udir.transpose().format(CleanFmt) << ", vdir "
 			<< vdir.transpose().format(CleanFmt) << std::endl;
+}
+
+/// Print MP2 constraint.
+/*
+ * Alignment for **single** 1D measurement outside measurement system requires constraint (in v direction).
+ * If there are multiple 1D measurements for an alignable ('layer') with different orientations the corresponding
+ * constraints must be ignored.
+ */
+void GblDetectorLayer::printMP2Constraint() const {
+	if (measDim > 1 or alignInMeasSys)
+		return;
+	// transform vdir into alignment system
+	Eigen::Vector3d unMeasured = global2align * vdir;
+	std::cout << "Constraint 0. ! fix unmeasured direction in " << name
+			<< std::endl;
+	for (int p = 0; p < 3; p++) {
+		// 'zero' suppression
+		if (fabs(unMeasured(p)) > 1.0e-10)
+			std::cout << " " << layer * 10 + p + 1 << " " << unMeasured(p)
+					<< std::endl;
+	}
 }
 
 /// Get layer ID
@@ -482,6 +504,9 @@ Matrix<double, 2, 6> GblDetectorLayer::getRigidBodyDerLocal(
 	Matrix<double, 2, 6> drldg;
 	drldg << 1.0, 0.0, -uSlope, vPos * uSlope, -uPos * uSlope, vPos, 0.0, 1.0, -vSlope, vPos
 			* vSlope, -uPos * vSlope, -uPos;
+	// avoid numerics in case of unit transformation (below)
+	if (alignInMeasSys)
+		return drldg;
 	// local (alignment) to measurement system
 	Matrix3d local2meas = global2meas * global2align.transpose();
 	return local2meas.block<2, 2>(0, 0) * drldg;

@@ -11,7 +11,7 @@
  *  \author Claus Kleinwort, DESY, 2018 (Claus.Kleinwort@desy.de)
  *
  *  \copyright
- *  Copyright (c) 2018-2023 Deutsches Elektronen-Synchroton,
+ *  Copyright (c) 2018-2024 Deutsches Elektronen-Synchroton,
  *  Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
  *  This library is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU Library General Public License as
@@ -112,6 +112,7 @@ public:
 			Eigen::Matrix3d &measTrafo, Eigen::Matrix3d &alignTrafo);
 	virtual ~GblDetectorLayer();
 	void print() const;
+	void printMP2Constraint() const;
 	unsigned int getLayerID() const;
 	double getRadiationLength() const;
 	Eigen::Vector2d getResolution() const;
@@ -142,6 +143,7 @@ private:
 	Eigen::Vector3d ndir; ///< normal to measurement plane
 	Eigen::Matrix3d global2meas; ///< transformation into measurement system
 	Eigen::Matrix3d global2align; ///< transformation into (local) alignment system
+	bool alignInMeasSys; ///< alignment == measurement system?
 };
 
 }

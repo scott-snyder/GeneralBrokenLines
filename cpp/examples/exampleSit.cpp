@@ -11,7 +11,7 @@
  *  \author Claus Kleinwort, DESY, 2018 (Claus.Kleinwort@desy.de)
  *
  *  \copyright
- *  Copyright (c) 2018-2021 Deutsches Elektronen-Synchroton,
+ *  Copyright (c) 2018-2024 Deutsches Elektronen-Synchroton,
  *  Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
  *  This library is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU Library General Public License as
@@ -41,12 +41,26 @@ using namespace Eigen;
  *  Create points on initial trajectory, create trajectory from points,
  *  fit and write trajectory to MP-II binary file (for rigid body alignment).
  *
- *  Setup:
+ *  **Setup**:
  *   - Beam (mainly) in X direction
  *   - Constant magnetic field in Z direction
  *   - Silicon sensors measuring in YZ plane, orthogonal (pixel) or non-orthogonal (stereo strips) measurement systems
  *   - Multiple scattering in sensors (air in between ignored)
  *   - Curvilinear system (T,U,V) as local coordinate system and (q/p, slopes, offsets) as local track parameters
+ *
+ *  **Alignment with MP-II.**
+ *  The *alignables* are the objects to be aligned. This can be single detector elements (with a 1D or 2D
+ *  measurement) or sets of those with similar or different orientations.
+ *
+ *  **Local systems.**
+ *  Up to three (different) local coordinate systems can be defined at each point:
+ *    - Track model linearization (propagation, fitting), e.g. curvilinear system
+ *    - Measurement, defined by two (optionally non-orthogonal) measurement directions,
+ *      normal to detector plane and detector position (offset)
+ *    - Alignment, defined by two orthogonal directions in detector plane, normal to that
+ *      and detector position (offset).
+ *      If different from measurement system for alignables with a single 1D measurements
+ *      the unmeasured component has to be fixed by a linear equality constraint for MP-II.
  *
  * \remark To exercise (mis)alignment different sets of layers (with different geometry)
  * for simulation and reconstruction can be used.
@@ -73,6 +87,15 @@ using namespace Eigen;
  *  64  0.  -1.
  *  65  0.  -1.
  *  66  0.  -1.
+ * ! from GblDetectorLayer::printMP2Constraint():
+ * ! MillePede-II: constraints for alignables with SINGLE 1D measurements
+ * Constraint 0. ! fix unmeasured direction in S1D8
+ *  71 -0.707107
+ *  72 0.707107
+ * Constraint 0. ! fix unmeasured direction in S1D9
+ *  81 0.707107
+ *  82 0.707107
+ * ! End of lines to be added to MillePede-II steering file
  * end
  * \endcode
  */
@@ -103,16 +126,37 @@ void exampleSit() {
 			CreateLayerSit("S2D7", 6, 12., 0., 0., 0.0033, 0., 0.0025, -5.,
 					0.0025)); // strip 2D, -5 deg stereo angle
 	layers.push_back(
-			CreateLayerSit("S1D8", 7, 15., 0., 0., 0.0033, 0., 0.0040)); // strip 1D, no sensitivity to Z
+			CreateLayerSit("S1D8", 7, 15., 0., 0., 0.0033, 45., 0.0040)); // strip 1D, sensitivity to linear combination of Y and Z
+	layers.push_back(
+			CreateLayerSit("S1D9", 8, 16., 0., 0., 0.0033, -45., 0.0040)); // strip 1D, sensitivity to linear combination of Y and Z
 
 	/* print layers
 	 for (unsigned int iLayer = 0; iLayer < layers.size(); ++iLayer) {
 	 layers[iLayer].print();
 	 } */
 
-	unsigned int nTry = 10000; //: number of tries
-	std::cout << " GblSit $Id$ " << nTry << ", " << layers.size()
+	// Alignment with MillePede-II requires for alignables with single 1D measurements to fix the unmeasured
+	// direction with a (linear equality) constraint (unless alignment equal to measurement system).
+	std::cout
+			<< "! MillePede-II: constraints for alignables with SINGLE 1D measurements"
 			<< std::endl;
+	for (unsigned int iLayer = 0; iLayer < layers.size(); ++iLayer) {
+		// count number of measurements per alignable
+		unsigned int numMeas = 0;
+		for (unsigned int jLayer = 0; jLayer < layers.size(); ++jLayer) {
+			if (layers[iLayer].getLayerID() == layers[jLayer].getLayerID())
+				numMeas++;
+		}
+		// alignable with single measurement
+		if (numMeas == 1)
+			layers[iLayer].printMP2Constraint();
+	}
+	std::cout << "! End of lines to be added to MillePede-II steering file"
+			<< std::endl;
+	std::cout << std::endl;
+
+	unsigned int nTry = 10000; //: number of tries
+	std::cout << " GblSit $Id$ " << nTry << ", " << layers.size() << std::endl;
 	srand(4711);
 	clock_t startTime = clock();
 
@@ -185,7 +229,7 @@ void exampleSit() {
 		std::vector<GblPoint> listOfPoints;
 		for (unsigned int iLayer = 0; iLayer < layers.size(); ++iLayer) {
 			// std::cout << " hit " << iLayer << " " << hits[iLayer].transpose() << std::endl;
-			GblDetectorLayer& layer = layers[iLayer];
+			GblDetectorLayer &layer = layers[iLayer];
 			// prediction from seeding helix
 			GblHelixPrediction pred = layer.intersectWithHelix(seed);
 			double sArc = pred.getArcLength(); // arc-length

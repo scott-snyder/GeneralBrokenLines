@@ -11,7 +11,7 @@
  *  \author Claus Kleinwort, DESY, 2018 (Claus.Kleinwort@desy.de)
  *
  *  \copyright
- *  Copyright (c) 2018-2021 Deutsches Elektronen-Synchroton,
+ *  Copyright (c) 2018-2024 Deutsches Elektronen-Synchroton,
  *  Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
  *  This library is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU Library General Public License as
@@ -41,12 +41,26 @@ using namespace Eigen;
  *  Create points on initial trajectory, create trajectory from points,
  *  fit and write trajectory to MP-II binary file (for rigid body alignment).
  *
- *  Setup:
+ *  **Setup**:
  *   - Beam forward (+Z) direction
  *   - Constant magnetic field in Z direction
  *   - Planar drift chambers with normal in XZ plane, center at Y=0, 1D measurement from (azimuthal) wires, cell size 2 cm.
  *   - Multiple scattering in detectors (gas, wires, walls) (air in between ignored)
  *   - Curvilinear system (T,U,V) as local coordinate system and (q/p, slopes, offsets) as local track parameters
+ *
+ *  **Alignment with MP-II.**
+ *  The *alignables* are the objects to be aligned. This can be single detector elements (with a 1D or 2D
+ *  measurement) or sets of those with similar or different orientations.
+ *
+ *  **Local systems.**
+ *  Up to three (different) local coordinate systems can be defined at each point:
+ *    - Track model linearization (propagation, fitting), e.g. curvilinear system
+ *    - Measurement, defined by two (optionally non-orthogonal) measurement directions,
+ *      normal to detector plane and detector position (offset)
+ *    - Alignment, defined by two orthogonal directions in detector plane, normal to that
+ *      and detector position (offset).
+ *      If different from measurement system for alignables with a single 1D measurements
+ *      the unmeasured component has to be fixed by a linear equality constraint for MP-II.
  *
  * \remark To exercise (mis)alignment different sets of layers (with different geometry)
  * for simulation and reconstruction can be used.
@@ -131,9 +145,28 @@ void exampleDc() {
 	 layers[iLayer].print();
 	 } */
 
-	unsigned int nTry = 10000; //: number of tries
-	std::cout << " GblDc $Id$ " << nTry << ", " << layers.size()
+	// Alignment with MillePede-II requires for alignables with single 1D measurements to fix the unmeasured
+	// direction with a (linear equality) constraint (unless alignment equal to measurement system).
+	std::cout
+			<< "! MillePede-II: constraints for alignables with SINGLE 1D measurements"
 			<< std::endl;
+	for (unsigned int iLayer = 0; iLayer < layers.size(); ++iLayer) {
+		// count number of measurements per alignable
+		unsigned int numMeas = 0;
+		for (unsigned int jLayer = 0; jLayer < layers.size(); ++jLayer) {
+			if (layers[iLayer].getLayerID() == layers[jLayer].getLayerID())
+				numMeas++;
+		}
+		// alignable with single measurement
+		if (numMeas == 1)
+			layers[iLayer].printMP2Constraint();
+	}
+	std::cout << "! End of lines to be added to MillePede-II steering file"
+			<< std::endl;
+	std::cout << std::endl;
+
+	unsigned int nTry = 10000; //: number of tries
+	std::cout << " GblDc $Id$ " << nTry << ", " << layers.size() << std::endl;
 	srand(4711);
 	clock_t startTime = clock();
 
@@ -206,7 +239,7 @@ void exampleDc() {
 		std::vector<GblPoint> listOfPoints;
 		for (unsigned int iLayer = 0; iLayer < layers.size(); ++iLayer) {
 			// std::cout << " hit " << iLayer << " " << hits[iLayer].transpose() << std::endl;
-			GblDetectorLayer& layer = layers[iLayer];
+			GblDetectorLayer &layer = layers[iLayer];
 			// prediction from seeding helix
 			GblHelixPrediction pred = layer.intersectWithHelix(seed);
 			double sArc = pred.getArcLength();	// arc-length
