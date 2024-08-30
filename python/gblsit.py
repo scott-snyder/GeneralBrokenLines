@@ -37,20 +37,26 @@ from gblfit import GblPoint, GblTrajectory
 #  Create points on initial trajectory, create trajectory from points,
 #  fit and write trajectory to MP-II binary file (for rigid body alignment).
 #
-#  Setup:
+#  **Setup**:
 #   - Beam (mainly) in X direction
 #   - Constant magnetic field in Z direction
 #   - Silicon sensors measuring in YZ plane, orthogonal (pixel) or non-orthogonal (stereo strips, double sided or composite) measurement systems
 #   - Multiple scattering in sensors (air inbetween ignored)
 #   - Curvilinear system (T,U,V) as local coordinate system and (q/p, slopes, offsets) as local track parameters
 #
-#  Local systems.
+#  **Alignment with MP-II.**
+#  The *alignables* are the objects to be aligned. This can be single detector elements (with a 1D or 2D
+#  measurement) or sets of those with similar or different orientations.
+#
+#  **Local systems.**
 #  Up to three (different) local coordinate systems can be defined at each point:
 #    - Track model linearization (propagation, fitting), e.g. curvilinear system
 #    - Measurement, defined by two (optionally non-orthogonal) measurement directions,
 #      normal to detector plane and detector position (offset)
 #    - Alignment, defined by two orthogonal directions in detector plane, normal to that
-#      and detector position (offset)
+#      and detector position (offset).
+#      If different from measurement system for alignables with a single 1D measurements
+#      the unmeasured component has to be fixed by a linear equality constraint for MP-II.
 # 
 # \remark To exercise (mis)alignment different sets of layers (with different geometry) for simulation and reconstruction can be used.
 #
@@ -103,8 +109,8 @@ def exampleSit():
                         ['S1D8', (15.0, 0., 0.), 0.0033, [(0., 0.0040)] ]  # strip 1D
                       ], bfac)
 
-  # Alignment with MillePede-II requires for 1D measuremnts to fix the unmeasured direction
-  # with a (linear equality) constraint (unless alignment equal to measurement system).
+  # Alignment with MillePede-II requires for alignables with a single 1D measurements to fix the unmeasured
+  # direction with a (linear equality) constraint (unless alignment equal to measurement system).
   det.getMP2Constraints()
 
   nTry = 1000  #: number of tries
@@ -286,17 +292,20 @@ class gblSiliconLayer(object):
 
   ## get MP2 constraint
   #
+  # Alignment for **single** 1D measurement outside measurement system requires constraint (in v direction).
+  # If there are multiple 1D measurement for an alignable ('layer') with different orientations the corresponding
+  # constraints must be ignored.
+  #
   # @param[in]  layer  layer number
   #
   def getMP2Constraint(self, layer):
-    # alignment with 1D measurement outside measurement system requires constraint (in v dir.)
     if self.__resolution[1] > 0. or self.__alignInMeasSys:
       return
     # transform vDir into alignment system
     unMeasured = np.dot(self.__ijkDirs, self.__vDir)
     print "Constraint 0. ! fix unmeasured direction in", self.__name
     for i in range(3):
-      # 'zero' supression
+      # 'zero' suppression
       if abs(unMeasured[i]) > 1.0e-10:
         print " ", layer * 10 + i + 1, unMeasured[i]
     
@@ -411,7 +420,7 @@ class gblSiliconDet(object):
 
   ## get MP2 constraints
   def getMP2Constraints(self):
-    print "! Alignment with MillePede-II requires for 1D measuremnts:"
+    print "! MillePede-II: constraints for alignables with SINGLE 1D measurements"
     for l, layer in enumerate(self.__layers):
       layer.getMP2Constraint(l)
     print "! End of lines to be added to MillePede-II steering file"
