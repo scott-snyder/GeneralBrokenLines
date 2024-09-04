@@ -379,7 +379,7 @@ void GblDetectorLayer::print() const {
 
 /// Print MP2 constraint.
 /*
- * Alignment for **single** 1D measurement outside measurement system requires constraint (in v direction).
+ * Alignment for **single** 1D measurement outside measurement system requires constraint (for offsets in v direction).
  * If there are multiple 1D measurements for an alignable ('layer') with different orientations the corresponding
  * constraints must be ignored.
  */
@@ -393,9 +393,21 @@ void GblDetectorLayer::printMP2Constraint() const {
 	for (int p = 0; p < 3; p++) {
 		// 'zero' suppression
 		if (fabs(unMeasured(p)) > 1.0e-10)
-			std::cout << " " << layer * 10 + p + 1 << " " << unMeasured(p)
-					<< std::endl;
+			std::cout << " " << getRigidBodyGlobalLabel(p) << " "
+					<< unMeasured(p) << std::endl;
 	}
+}
+
+/// Get global label
+/*
+ * Get global label for rigid body alignment parameters
+ * (3 offsets, 3 rotations) in (local) alignment system.
+ *
+ * \param[in] aPar  parameter index (0..5)
+ */
+unsigned int GblDetectorLayer::getRigidBodyGlobalLabel(
+		const unsigned int aPar) const {
+	return layer * 10 + aPar + 1;
 }
 
 /// Get layer ID

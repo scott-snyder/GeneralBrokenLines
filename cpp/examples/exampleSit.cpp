@@ -48,9 +48,12 @@ using namespace Eigen;
  *   - Multiple scattering in sensors (air in between ignored)
  *   - Curvilinear system (T,U,V) as local coordinate system and (q/p, slopes, offsets) as local track parameters
  *
- *  **Alignment with MP-II.**
- *  The *alignables* are the objects to be aligned. This can be single detector elements (with a 1D or 2D
- *  measurement) or sets of those with similar or different orientations.
+ *  **Alignment with MP-II**:
+ *   - The *alignables* are the objects to be aligned. This can be single detector elements (with a 1D or 2D
+ *     measurement) or sets of those with similar or different orientations.
+ *   - MP-II determines only alignment corrections. For the absolute detector position and
+ *     orientation an external reference is needed or the appropriate number of degrees of freedom
+ *     have to be fixed (in the alignment as internal reference).
  *
  *  **Local systems.**
  *  Up to three (different) local coordinate systems can be defined at each point:
@@ -135,7 +138,7 @@ void exampleSit() {
 	 layers[iLayer].print();
 	 } */
 
-	// Alignment with MillePede-II requires for alignables with single 1D measurements to fix the unmeasured
+	// Alignment with MillePede-II requires for alignables with a single 1D measurements to fix the unmeasured
 	// direction with a (linear equality) constraint (unless alignment equal to measurement system).
 	std::cout
 			<< "! MillePede-II: constraints for alignables with SINGLE 1D measurements"
@@ -255,9 +258,8 @@ void exampleSit() {
 			point.addMeasurement(proL2m, res, measPrecision);
 			// global labels and parameters for rigid body alignment
 			std::vector<int> labGlobal(6);
-			unsigned int layerID = layer.getLayerID();
 			for (int p = 0; p < 6; p++)
-				labGlobal[p] = layerID * 10 + p + 1;
+				labGlobal[p] = layer.getRigidBodyGlobalLabel(p);
 			Vector3d pos = pred.getPosition();
 			Vector3d dir = pred.getDirection();
 			Matrix<double, 2, 6> derGlobal = layer.getRigidBodyDerLocal(pos,

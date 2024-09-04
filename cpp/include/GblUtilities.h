@@ -113,6 +113,7 @@ public:
 	virtual ~GblDetectorLayer();
 	void print() const;
 	void printMP2Constraint() const;
+	unsigned int getRigidBodyGlobalLabel(const unsigned int aPar) const;
 	unsigned int getLayerID() const;
 	double getRadiationLength() const;
 	Eigen::Vector2d getResolution() const;
