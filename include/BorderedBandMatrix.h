@@ -11,7 +11,7 @@
  *  \author Claus Kleinwort, DESY, 2011 (Claus.Kleinwort@desy.de)
  *
  *  \copyright
- *  Copyright (c) 2011 - 2017 Deutsches Elektronen-Synchroton,
+ *  Copyright (c) 2011 - 2025 Deutsches Elektronen-Synchroton,
  *  Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
  *  This library is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU Library General Public License as
@@ -35,14 +35,7 @@
 #include<math.h>
 #include<cstdlib>
 #include "VMatrix.h"
-#if __GNUC__ >= 9
-# pragma GCC diagnostic push
-# pragma GCC diagnostic ignored "-Wdeprecated-copy"
-#endif
 #include <Eigen/Core>
-#if __GNUC__ >= 9
-# pragma GCC diagnostic pop
-#endif
 
 //! Namespace for the general broken lines package
 namespace gbl {
