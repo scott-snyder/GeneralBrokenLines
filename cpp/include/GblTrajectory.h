@@ -13,7 +13,7 @@
  *
  *
  *  \copyright
- *  Copyright (c) 2011 - 2023 Deutsches Elektronen-Synchroton,
+ *  Copyright (c) 2011 - 2024 Deutsches Elektronen-Synchroton,
  *  Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
  *  This library is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU Library General Public License as
@@ -168,6 +168,7 @@ public:
 	void printTrajectory(unsigned int level = 0) const;
 	void printPoints(unsigned int level = 0) const;
 	void printData() const;
+	double getBandCondition() const;
 
 private:
 	unsigned int numAllPoints; ///< Number of all points on trajectory

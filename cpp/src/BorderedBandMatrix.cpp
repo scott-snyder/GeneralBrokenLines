@@ -11,7 +11,7 @@
  *  \author Claus Kleinwort, DESY, 2011 (Claus.Kleinwort@desy.de)
  *
  *  \copyright
- *  Copyright (c) 2011 - 2023 Deutsches Elektronen-Synchroton,
+ *  Copyright (c) 2011 - 2024 Deutsches Elektronen-Synchroton,
  *  Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
  *  This library is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU Library General Public License as
@@ -254,6 +254,18 @@ void BorderedBandMatrix::printMatrix() const {
 	theMixed.print();
 	std::cout << "Band   part " << std::endl;
 	theBand.print();
+}
+
+/// Get condition from band (decomposition)
+double BorderedBandMatrix::getBandCondition() const {
+	// get min. and max. value from diagonal matrix D
+	double diagMin = theBand(0, 0);
+	double diagMax = theBand(0, 0);
+	for (int i = 1; i < numCol; ++i) {
+		diagMin = std::min(diagMin, theBand(0, i));
+		diagMax = std::max(diagMax, theBand(0, i));
+	}
+	return (diagMin > 0.) ? diagMax / diagMin : 0.;
 }
 
 /*============================================================================

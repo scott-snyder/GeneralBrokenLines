@@ -1856,4 +1856,13 @@ void GblTrajectory::printData() const {
 	}
 }
 
+/// Get condition from band (decomposition)
+/**
+ * Return condition or 0. if band part is not positive definite
+ * or -1. if the fit failed or has not been done yet.
+ */
+double GblTrajectory::getBandCondition() const {
+	return (fitOK) ? theMatrix.getBandCondition() : -1.;
+}
+
 }

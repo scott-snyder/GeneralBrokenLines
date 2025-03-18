@@ -11,7 +11,7 @@
  *  \author Claus Kleinwort, DESY, 2011 (Claus.Kleinwort@desy.de)
  *
  *  \copyright
- *  Copyright (c) 2011 - 2021 Deutsches Elektronen-Synchroton,
+ *  Copyright (c) 2011 - 2025 Deutsches Elektronen-Synchroton,
  *  Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
  *  This library is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU Library General Public License as
@@ -153,8 +153,9 @@ void GblData::printData() const {
 
 	if (theType == InternalMeasurement) {
 		std::cout << " measurement at label " << theLabel << " of type "
-				<< theType << " from meas, row " << theMeas << ", " << theRow
-				<< ": " << theValue << ", " << thePrecision << std::endl;
+				<< static_cast<int>(theType) << " from meas, row " << theMeas
+				<< ", " << theRow << ": " << theValue << ", " << thePrecision
+				<< std::endl;
 	} else {
 		std::cout << " measurement at label " << theLabel << " of type "
 				<< theType << " from row " << theRow << ": " << theValue << ", "
