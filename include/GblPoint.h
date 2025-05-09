@@ -13,7 +13,7 @@
  *
  *
  *  \copyright
- *  Copyright (c) 2011 - 2017 Deutsches Elektronen-Synchroton,
+ *  Copyright (c) 2011 - 2025 Deutsches Elektronen-Synchroton,
  *  Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
  *  This library is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU Library General Public License as
@@ -43,7 +43,15 @@
 #include "TMatrixDSymEigen.h"
 #endif
 
+// Suppress clang warnings from eigen 3.4.0
+#ifdef __clang__
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wdeprecated-copy-with-dtor"
+#endif
 #include <Eigen/Dense>
+#ifdef __clang__
+#pragma clang diagnostic pop
+#endif
 
 namespace gbl {
 

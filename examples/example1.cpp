@@ -11,7 +11,7 @@
  *  \author Claus Kleinwort, DESY, 2011 (Claus.Kleinwort@desy.de)
  *
  *  \copyright
- *  Copyright (c) 2011 - 2019 Deutsches Elektronen-Synchroton,
+ *  Copyright (c) 2011 - 2025 Deutsches Elektronen-Synchroton,
  *  Member of the Helmholtz Association, (DESY), HAMBURG, GERMANY \n\n
  *  This library is free software; you can redistribute it and/or modify
  *  it under the terms of the GNU Library General Public License as
@@ -115,7 +115,6 @@ void example1() {
 
 	double Chi2Sum = 0.;
 	int NdfSum = 0;
-	double LostSum = 0.;
 	int numFit = 0;
 
 	for (unsigned int iTry = 1; iTry <= nTry; ++iTry) {
@@ -133,7 +132,6 @@ void example1() {
 		addDer(0, 0) = 1.;
 		addDer(1, 1) = 1.;
 // arclength
-		double s = 0.;
 		Matrix5d jacPointToPoint;
 		jacPointToPoint.setIdentity();
 // create list of points
@@ -190,7 +188,6 @@ void example1() {
 			//jac2 = gblSimpleJacobian2(step, cosLambda, bfac);
 			clPar = jacPointToPoint * clPar;
 			clCov = jacPointToPoint * clCov * jacPointToPoint.adjoint();
-			s += step;
 			if (iLayer < nLayer - 1) {
 				Vector2d scat(0., 0.);
 				// point with scatterer
@@ -209,7 +206,6 @@ void example1() {
 				// propagate to next measurement layer
 				clPar = jacPointToPoint * clPar;
 				clCov = jacPointToPoint * clCov * jacPointToPoint.adjoint();
-				s += step;
 			}
 		}
 //
@@ -257,7 +253,6 @@ void example1() {
 //MP		traj.milleOut(mille);
 		Chi2Sum += Chi2;
 		NdfSum += Ndf;
-		LostSum += lostWeight;
 		numFit++;
 	}
 

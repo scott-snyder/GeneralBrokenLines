@@ -86,7 +86,9 @@ private:
 class VSymMatrix {
 public:
 	VSymMatrix(const unsigned int nRows = 0);
-	virtual ~VSymMatrix();
+	VSymMatrix(const VSymMatrix&) = default;
+	VSymMatrix& operator=(const VSymMatrix&) = default;
+        virtual ~VSymMatrix() = default;
 	void resize(const unsigned int nRows);
 	unsigned int invert();
 	inline double &operator()(unsigned int i, unsigned int j);
