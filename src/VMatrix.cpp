@@ -165,9 +165,6 @@ VSymMatrix::VSymMatrix(const unsigned int nRows) :
 		numRows(nRows), theVec((nRows * nRows + nRows) / 2) {
 }
 
-VSymMatrix::~VSymMatrix() {
-}
-
 /// Resize symmetric matrix.
 /**
  * \param [in] nRows Number of rows.
