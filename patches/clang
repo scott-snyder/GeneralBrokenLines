@@ -1,0 +1,9 @@
+Bottom: b0ad1ed881b4f18caf5c2df68598709c670e128d
+Top:    b0ad1ed881b4f18caf5c2df68598709c670e128d
+Author: sss <sss@karma>
+Date:   2025-05-09 11:35:59 -0400
+
+Fix clang warnings.
+
+Deprecated implicitly-defined copy.
+Unused class members.
