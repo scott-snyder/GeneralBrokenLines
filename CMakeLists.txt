@@ -1,5 +1,5 @@
 # #require a certain version
-CMAKE_MINIMUM_REQUIRED( VERSION 3.1 )
+CMAKE_MINIMUM_REQUIRED( VERSION 3.10 )
 
 # Set default build type
 IF(NOT CMAKE_BUILD_TYPE)
