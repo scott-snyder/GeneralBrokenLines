@@ -1,0 +1,8 @@
+Bottom: a050764b30058b40c477c8dec16f43cc52b465f7
+Top:    a050764b30058b40c477c8dec16f43cc52b465f7
+Author: sss <sss@karma>
+Date:   2025-10-17 21:24:41 -0400
+
+Fix building with eigen.
+
+For newer eigen versions, need to specify Eigen3::Eigen as a link library.
