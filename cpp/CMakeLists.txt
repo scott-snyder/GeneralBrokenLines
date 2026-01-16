@@ -22,12 +22,20 @@ IF( SUPPORT_ROOT )
 ENDIF()
 FIND_PACKAGE(Eigen3 REQUIRED)
 
+find_package(Mille QUIET )
+if (${Mille_FOUND})
+    message ("Found existing Mille installation")
+else()
+    message ("No existing Mille installation found - will clone and build the recommended version")
+    include ("cmake/getMille.cmake")
+endif()
+
 # require proper c++
 #ADD_DEFINITIONS( "-Wall -g -ansi -pedantic -Wno-long-long" )
 # set CMAKE_CXX_STANDARD 
 IF( NOT ${CMAKE_VERSION} VERSION_LESS "3.1.0" )
   IF( SUPPORT_ROOT )
-    SET( CMAKE_CXX_STANDARD 17 )
+    SET( CMAKE_CXX_STANDARD ${ROOT_CXX_STANDARD} )
   ELSE()
     SET( CMAKE_CXX_STANDARD 17 )
   ENDIF()
@@ -51,7 +59,7 @@ AUX_SOURCE_DIRECTORY( ./src library_sources )
 ADD_SHARED_LIBRARY( ${PROJECT_NAME} ${library_sources} )
 INSTALL( TARGETS ${PROJECT_NAME} DESTINATION lib )
 
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${ROOT_LIBS})
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${ROOT_LIBS} Mille2)
 
 OPTION(JNA_DEBUG "Debug printouts for helping debug JNA memory issues" OFF)
 IF( JNA_DEBUG )

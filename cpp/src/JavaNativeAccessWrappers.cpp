@@ -118,7 +118,7 @@
  * ```
  */
 
-#include "MilleBinary.h"
+#include "Mille/MilleFactory.h"
 #include "GblPoint.h"
 #include "GblTrajectory.h"
 #include "GblUtilities.h" 
@@ -232,13 +232,13 @@ extern "C" {
  * \param [in] keepZeros non-zero to keep zeros, zero to not keep them
  * \param [in] aSize size of buffer to keep in memory
  */
-MilleBinary* MilleBinaryCtor(const char* fileName, int filenamesize, int doublePrecision, int keepZeros, int aSize) {
+MilleRecord* MilleBinaryCtor(const char* fileName, int filenamesize, int doublePrecision, int keepZeros, int aSize) {
 #ifdef JNA_DEBUG
 	std::cout << "MilleBinaryCtor(" << fileName << ", " << filenamesize << ", " 
 		<< doublePrecision << ", " << keepZeros << ", " << aSize << ")" << std::endl;
 #endif
 	std::string binName(fileName,filenamesize);
-	MilleBinary* mb = new MilleBinary(binName,doublePrecision!=0,keepZeros!=0,aSize);
+	MilleRecord* mb = spawnMilleRecord(binName,doublePrecision!=0,keepZeros!=0,aSize).release();
 #ifdef JNA_DEBUG
 	std::cout << "MilleBinary created at " << mb << std::endl;
 #endif
@@ -261,7 +261,7 @@ MilleBinary* MilleBinaryCtor(const char* fileName, int filenamesize, int doubleP
  *
  * \param [in] self gbl::MilleBinary to delete
  */
-void MilleBinary_close(MilleBinary* self) {
+void MilleRecord_close(MilleRecord* self) {
 #ifdef JNA_DEBUG
 	std::cout << "MilleBinary_close(" << self << ")" << std::endl;
 #endif
@@ -763,12 +763,12 @@ int GblTrajectory_getMeasResults(GblTrajectory* self, int aLabel, int* numData,
  * \param [in] self gbl::GblTrajectory to write out
  * \param [in] millebinary gbl::MilleBinary to write to
  */
-void GblTrajectory_milleOut(GblTrajectory* self, MilleBinary* millebinary) {
+void GblTrajectory_milleOut(GblTrajectory* self, MilleRecord* millebinary) {
 #ifdef JNA_DEBUG
 	std::cout << "GblTrajectory_milleOut(" << self 
 		<< ", " << millebinary << ")" << std::endl;
 #endif
-	self->milleOut(*millebinary);
+	self->milleOut(millebinary);
 }
 
 /**

@@ -37,7 +37,7 @@
 #include "GblData.h"
 #include "GblPoint.h"
 #include "BorderedBandMatrix.h"
-#include "MilleBinary.h"
+#include "Mille/MilleFactory.h"
 
 //! Namespace for the general broken lines package
 namespace gbl {
@@ -164,7 +164,8 @@ public:
 			std::vector<std::vector<unsigned int> > &aLabelList) const;
 	unsigned int fit(double &Chi2, int &Ndf, double &lostWeight,
 			const std::string &optionList = "", unsigned int aLabel = 0);
-	void milleOut(MilleBinary &aMille);
+	void milleOut(MilleRecord *aMille);
+	void milleOut(std::unique_ptr<MilleRecord> &aMille){milleOut(aMille.get());}
 	void printTrajectory(unsigned int level = 0) const;
 	void printPoints(unsigned int level = 0) const;
 	void printData() const;

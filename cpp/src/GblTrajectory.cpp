@@ -1727,7 +1727,7 @@ unsigned int GblTrajectory::fit(double &Chi2, int &Ndf, double &lostWeight,
 /**
  * Trajectory state after construction (independent of fitting) is used.
  */
-void GblTrajectory::milleOut(MilleBinary &aMille) {
+void GblTrajectory::milleOut(MilleRecord *aMille) {
 	double aValue;
 	double aErr;
 	unsigned int aTraj;
@@ -1753,12 +1753,16 @@ void GblTrajectory::milleOut(MilleBinary &aMille) {
 		if (itData->getType() == InternalMeasurement)
 			thePoints[aTraj][aPoint].getGlobalLabelsAndDerivatives(aMeas, aRow,
 					labGlobal, derGlobal);
-		else
+		else{
 			labGlobal.resize(0);
-		aMille.addData(aValue, aErr, numLocal, labLocal, derLocal, labGlobal,
-				derGlobal);
+			derGlobal.resize(0);
+		}
+		aMille->addData(aValue, aErr, 
+			MilleArrayView<unsigned int>(labLocal, numLocal), 
+			MilleArrayView<double>(derLocal, numLocal), 
+			labGlobal, derGlobal);
 	}
-	aMille.writeRecord();
+	aMille->writeRecord();
 }
 
 /// Print GblTrajectory
