@@ -99,7 +99,7 @@ void exampleComposedGeo() {
 	double beamSize[] = { 0.005, 0.005, 0.3 };
 	const bool useBeamSpot = true;
 
-	auto mille = spawnMilleRecord("milleBinary1.dat"); // for producing MillePede-II binary file
+	auto mille = Mille::spawnMilleRecord("milleBinary1.dat"); // for producing MillePede-II binary file
 
 	double Chi2Sum = 0.;
 	int NdfSum = 0;

@@ -1727,7 +1727,7 @@ unsigned int GblTrajectory::fit(double &Chi2, int &Ndf, double &lostWeight,
 /**
  * Trajectory state after construction (independent of fitting) is used.
  */
-void GblTrajectory::milleOut(MilleRecord *aMille) {
+void GblTrajectory::milleOut(Mille::MilleRecord *aMille) {
 	double aValue;
 	double aErr;
 	unsigned int aTraj;
@@ -1758,8 +1758,8 @@ void GblTrajectory::milleOut(MilleRecord *aMille) {
 			derGlobal.resize(0);
 		}
 		aMille->addData(aValue, aErr, 
-			MilleArrayView<unsigned int>(labLocal, numLocal), 
-			MilleArrayView<double>(derLocal, numLocal), 
+			Mille::MilleArrayView<unsigned int>(labLocal, numLocal), 
+			Mille::MilleArrayView<double>(derLocal, numLocal), 
 			labGlobal, derGlobal);
 	}
 	aMille->writeRecord();
