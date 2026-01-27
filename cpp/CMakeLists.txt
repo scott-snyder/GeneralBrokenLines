@@ -1,6 +1,13 @@
 # #require a certain version
 CMAKE_MINIMUM_REQUIRED( VERSION 3.1 )
 
+# discover the compilers from PATH (when system install is overridden)
+find_program(gcc_loc gcc)
+find_program(gpp_loc g++)
+
+set(CMAKE_C_COMPILER ${gcc_loc})
+set(CMAKE_CXX_COMPILER ${gpp_loc})
+
 # declare the project name
 PROJECT(GBL)
 
