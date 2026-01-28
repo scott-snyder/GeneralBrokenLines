@@ -14,7 +14,7 @@ ELSE()
     # this allows the user to specifically change the path to happen to
     #   correspond to the cmake default path
     IF(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
-        SET(CMAKE_INSTALL_PREFIX "${PROJECT_SOURCE_DIR}" )
+        SET(CMAKE_INSTALL_PREFIX "${PROJECT_BINARY_DIR}/GBLInstall" )
     ENDIF()
 ENDIF()
 

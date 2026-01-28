@@ -30,6 +30,7 @@
 #include <time.h>
 #include "exampleDc.h"
 #include "GblTrajectory.h"
+#include "Mille/MilleFactory.h"
 
 using namespace gbl;
 using namespace Eigen;
@@ -177,7 +178,7 @@ void exampleDc() {
 	// const double bfac = 0.003;  // B*c for 1 T
 	const double bfac = 0.;  // B*c for 0 T
 
-	MilleBinary mille; // for producing MillePede-II binary file
+	auto mille = Mille::spawnMilleRecord("milleBinary1.dat"); // for producing MillePede-II binary file
 
 	double Chi2Sum = 0.;
 	int NdfSum = 0;

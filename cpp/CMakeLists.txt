@@ -1,13 +1,20 @@
 # #require a certain version
 CMAKE_MINIMUM_REQUIRED( VERSION 3.1 )
 
+# discover the compilers from PATH (when system install is overridden)
+find_program(gcc_loc gcc)
+find_program(gpp_loc g++)
+
+set(CMAKE_C_COMPILER ${gcc_loc})
+set(CMAKE_CXX_COMPILER ${gpp_loc})
+
 # declare the project name
 PROJECT(GBL)
 
 # project version
-SET( ${PROJECT_NAME}_VERSION_MAJOR 3 )
-SET( ${PROJECT_NAME}_VERSION_MINOR 1 )
-SET( ${PROJECT_NAME}_VERSION_PATCH 4 )
+SET( ${PROJECT_NAME}_VERSION_MAJOR 4 )
+SET( ${PROJECT_NAME}_VERSION_MINOR 0 )
+SET( ${PROJECT_NAME}_VERSION_PATCH 0 )
 
 # make life easier and simply use the ilcsoft default settings
 # load default ilcsoft settings (install prefix, build type, rpath, etc.)
@@ -22,12 +29,20 @@ IF( SUPPORT_ROOT )
 ENDIF()
 FIND_PACKAGE(Eigen3 REQUIRED)
 
+find_package(Mille QUIET )
+if (${Mille_FOUND})
+    message ("Found existing Mille installation")
+else()
+    message ("No existing Mille installation found - will clone and build the recommended version")
+    include ("cmake/getMille.cmake")
+endif()
+
 # require proper c++
 #ADD_DEFINITIONS( "-Wall -g -ansi -pedantic -Wno-long-long" )
 # set CMAKE_CXX_STANDARD 
 IF( NOT ${CMAKE_VERSION} VERSION_LESS "3.1.0" )
   IF( SUPPORT_ROOT )
-    SET( CMAKE_CXX_STANDARD 17 )
+    SET( CMAKE_CXX_STANDARD ${ROOT_CXX_STANDARD} )
   ELSE()
     SET( CMAKE_CXX_STANDARD 17 )
   ENDIF()
@@ -51,7 +66,7 @@ AUX_SOURCE_DIRECTORY( ./src library_sources )
 ADD_SHARED_LIBRARY( ${PROJECT_NAME} ${library_sources} )
 INSTALL( TARGETS ${PROJECT_NAME} DESTINATION lib )
 
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${ROOT_LIBS})
+TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${ROOT_LIBS} Mille2)
 
 OPTION(JNA_DEBUG "Debug printouts for helping debug JNA memory issues" OFF)
 IF( JNA_DEBUG )
