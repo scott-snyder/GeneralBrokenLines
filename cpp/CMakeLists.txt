@@ -24,10 +24,10 @@ INCLUDE( ilcsoft_default_settings )
 # enable ROOT support, check required CXX standard (see below)
 OPTION( SUPPORT_ROOT "Support ROOT for user I/O" False )
 IF( SUPPORT_ROOT )
-  FIND_PACKAGE(ROOT REQUIRED)
+  FIND_PACKAGE(ROOT REQUIRED CONFIG)
   ADD_DEFINITIONS(-DGBL_EIGEN_SUPPORT_ROOT)
 ENDIF()
-FIND_PACKAGE(Eigen3 REQUIRED)
+FIND_PACKAGE(Eigen3 REQUIRED CONFIG)
 
 find_package(Mille QUIET )
 if (${Mille_FOUND})
@@ -39,34 +39,23 @@ endif()
 
 # require proper c++
 #ADD_DEFINITIONS( "-Wall -g -ansi -pedantic -Wno-long-long" )
-# set CMAKE_CXX_STANDARD 
-IF( NOT ${CMAKE_VERSION} VERSION_LESS "3.1.0" )
-  IF( SUPPORT_ROOT )
-    SET( CMAKE_CXX_STANDARD ${ROOT_CXX_STANDARD} )
-  ELSE()
-    SET( CMAKE_CXX_STANDARD 17 )
-  ENDIF()
-ELSE()
-# defined in cmake/ilcsoft_default_cxx_flags.cmake 
-ENDIF()
 
 # include directories
 INCLUDE_DIRECTORIES( ./include )
-INCLUDE_DIRECTORIES( SYSTEM ${EIGEN3_INCLUDE_DIR} )
-IF( SUPPORT_ROOT )
-  INCLUDE_DIRECTORIES( SYSTEM ${ROOT_INCLUDE_DIRS} )
-ENDIF()
 INSTALL( DIRECTORY ./include DESTINATION . PATTERN ".svn" EXCLUDE )
-
-# declare the stupid ROOT library path
-LINK_DIRECTORIES(${ROOT_LIBRARY_DIR})
 
 # add library
 AUX_SOURCE_DIRECTORY( ./src library_sources )
 ADD_SHARED_LIBRARY( ${PROJECT_NAME} ${library_sources} )
 INSTALL( TARGETS ${PROJECT_NAME} DESTINATION lib )
 
-TARGET_LINK_LIBRARIES(${PROJECT_NAME} ${ROOT_LIBS} Mille2)
+IF( SUPPORT_ROOT )
+  # Use imported targets for correct transitive dependency handling.
+  # ROOT::Matrix provides TMatrixD/TMatrixDSym/TMatrixTBase, ROOT::MathCore provides TVectorD.
+  TARGET_LINK_LIBRARIES(${PROJECT_NAME} Eigen3::Eigen ROOT::Core ROOT::Matrix ROOT::MathCore Mille2)
+ELSE()
+  TARGET_LINK_LIBRARIES(${PROJECT_NAME} Eigen3::Eigen Mille2)
+ENDIF()
 
 OPTION(JNA_DEBUG "Debug printouts for helping debug JNA memory issues" OFF)
 IF( JNA_DEBUG )
