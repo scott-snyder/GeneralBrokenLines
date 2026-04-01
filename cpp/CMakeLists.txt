@@ -1,5 +1,5 @@
 # #require a certain version
-CMAKE_MINIMUM_REQUIRED( VERSION 3.10 )
+CMAKE_MINIMUM_REQUIRED( VERSION 3.14 )
 
 # discover the compilers from PATH (when system install is overridden)
 find_program(gcc_loc gcc)
