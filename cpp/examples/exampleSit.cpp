@@ -103,7 +103,7 @@ using namespace Eigen;
  * end
  * \endcode
  */
-void exampleSit() {
+int main() {
 
 	// detector layers (ordered in X):
 	// name, position (x,y,z), thickness (X/X_0), (1 or 2) measurements (direction in YZ, resolution)
@@ -160,7 +160,7 @@ void exampleSit() {
 	std::cout << std::endl;
 
 	unsigned int nTry = 10000; //: number of tries
-	std::cout << " GblSit $Id$ " << nTry << ", " << layers.size() << std::endl;
+	std::cout << " GblSit " << nTry << ", " << layers.size() << std::endl;
 	srand(4711);
 	clock_t startTime = clock();
 
@@ -305,6 +305,7 @@ void exampleSit() {
 	std::cout << " Tracks fitted " << numFit << std::endl;
 	if (LostSum > 0.)
 		std::cout << " Weight lost   " << LostSum << std::endl;
+	return 0; 
 }
 
 namespace gbl {

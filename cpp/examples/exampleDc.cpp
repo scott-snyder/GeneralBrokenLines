@@ -88,7 +88,7 @@ using namespace Eigen;
  * end
  * \endcode
  */
-void exampleDc() {
+int main() {
 
 	// detector layers (ordered in Z):
 	// name, position (x,y,z), thickness (X/X_0), xz-angle, stereo-angle, resolution
@@ -170,7 +170,7 @@ void exampleDc() {
 	std::cout << std::endl;
 
 	unsigned int nTry = 10000; //: number of tries
-	std::cout << " GblDc $Id$ " << nTry << ", " << layers.size() << std::endl;
+	std::cout << " GblDc " << nTry << ", " << layers.size() << std::endl;
 	srand(4711);
 	clock_t startTime = clock();
 
@@ -316,6 +316,7 @@ void exampleDc() {
 	std::cout << " Tracks fitted " << numFit << std::endl;
 	if (LostSum > 0.)
 		std::cout << " Weight lost   " << LostSum << std::endl;
+	return 0; 
 }
 
 namespace gbl {

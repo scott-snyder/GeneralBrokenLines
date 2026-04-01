@@ -34,7 +34,7 @@
 using namespace gbl;
 using namespace Eigen;
 
-void example3() {
+int main() {
 	/// Simple technical example (measure scattering).
 	/**
 	 * Create points on initial trajectory, create trajectory from points,
@@ -61,7 +61,7 @@ void example3() {
 
 	unsigned int nTry = 1000; //: number of tries
 	unsigned int nLayer = 10; //: number of detector layers
-	std::cout << " Gbltst-eigen $Id$ " << nTry << ", " << nLayer
+	std::cout << " Gbltst-eigen " << nTry << ", " << nLayer
 			<< std::endl;
 
 	srand(4711);
@@ -269,5 +269,6 @@ void example3() {
 			<< sqrt(scatVar[1] / numFit) << std::endl;
 	if (LostSum > 0.)
 		std::cout << " Weight lost   " << LostSum << std::endl;
+	return 0; 
 }
 

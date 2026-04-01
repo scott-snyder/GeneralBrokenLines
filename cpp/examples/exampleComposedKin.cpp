@@ -72,7 +72,7 @@ using namespace Eigen;
  * end
  * \endcode
  */
-void exampleComposedKin() {
+int main() {
 
 	// detector setup, ~ Belle-II CDC
 	const unsigned int nSuper = 9; // number of super layers
@@ -88,7 +88,7 @@ void exampleComposedKin() {
 			153.2, 155.3 }; // +Z end of wires per super layer
 
 	unsigned int nTry = 1000; //: number of tries
-	std::cout << " GblComposedKin $Id$ " << nTry << ", " << nSuper << std::endl;
+	std::cout << " GblComposedKin " << nTry << ", " << nSuper << std::endl;
 	srand(4711);
 	clock_t startTime = clock();
 
@@ -159,32 +159,34 @@ void exampleComposedKin() {
 			for (unsigned int iSuper = 0; iSuper < nSuper; ++iSuper) {
 				double radius = rInner[iSuper];
 				double step = (rOuter[iSuper] - radius) / (nLayer[iSuper] - 1);
-
+				bool abort=false;
 				for (unsigned int iLayer = 0; iLayer < nLayer[iSuper];
 						++iLayer) {
 					// check for |dca| < radius
 					if (fabs(dca) < radius) {
 						// arc length to layer
-						double sArc = hlx.getArcLengthR(radius);
-						if (sArc == 0.)
-							goto theEnd;
+						double sArcAtLayer = hlx.getArcLengthR(radius);
+						if (sArcAtLayer == 0.){
+							abort=true;
+							break;
+						}
 						// phi of position at layer
 						double phiPos = hlx.getPhi(radius);
 						// (virtual) wire position
 						double xPos(cos(phiPos) * radius), yPos(
-								sin(phiPos) * radius), zPos(z0 + sArc * dzds);
+								sin(phiPos) * radius), zPos(z0 + sArcAtLayer * dzds);
 						// add virtual wire
 						if (zPos > zStart[iSuper] and zPos < zEnd[iSuper])
 							layers.push_back(
 									CreateWireCdc("wire", ++cLayer, xPos, yPos,
-											zPos, phi0 + sArc * curv, dzds,
+											zPos, phi0 + sArcAtLayer * curv, dzds,
 											stereo[iSuper], 0.015));
 					}
 					// next layer
 					radius += step;
 				}
+				if (abort) break; 
 			}
-			theEnd:
 
 			//
 			// create GBL trajectory (list of GBL points)
@@ -229,7 +231,7 @@ void exampleComposedKin() {
 				// std::cout << " hit " << lid << " " << hits[iLayer].transpose() << std::endl;
 				// prediction from seeding helix
 				GblHelixPrediction pred = layer.intersectWithHelix(seed);
-				double sArc = pred.getArcLength();	// arc-length
+				double sArcAtLayer = pred.getArcLength();	// arc-length
 				Vector2d measPrediction = pred.getMeasPred(); // measurement prediction
 				Vector2d measPrecision = layer.getPrecision(); // measurement precision
 				// residuals
@@ -242,7 +244,7 @@ void exampleComposedKin() {
 					std::cout << " impact par " << res[0] << " " << res[1]
 							<< " " << seedCurv << " " << seedPhi0 << " "
 							<< seedDca << " " << seedDzds << " " << seedZ0
-							<< " " << sArc << " " << layers.size() << std::endl;
+							<< " " << sArcAtLayer << " " << layers.size() << std::endl;
 				// transformation global system to local (curvilinear) (u,v) (matrix from row vectors)
 				Matrix<double, 2, 3> transG2l = pred.getCurvilinearDirs();
 				// transformation measurement system to global system
@@ -253,8 +255,8 @@ void exampleComposedKin() {
 				Matrix2d proL2m = proM2l.inverse();
 				// propagation
 				Matrix5d jacPointToPoint = gblSimpleJacobian(
-						(sArc - sOld) / cosLambdaSeed, cosLambdaSeed, bfac);
-				sOld = sArc;
+						(sArcAtLayer - sOld) / cosLambdaSeed, cosLambdaSeed, bfac);
+				sOld = sArcAtLayer;
 				// point with (independent) measurements (in measurement system)
 				GblPoint point(jacPointToPoint);
 				if (lid > 0 or (iTrack == 0 and useBeamSpot)) // vertex only for first track (large correlations!)
@@ -342,5 +344,6 @@ void exampleComposedKin() {
 	std::cout << " Tracks fitted " << numFit << std::endl;
 	if (LostSum > 0.)
 		std::cout << " Weight lost   " << LostSum << std::endl;
+	return 0; 
 }
 

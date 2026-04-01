@@ -40,7 +40,7 @@ namespace gbl {
  * \param [in] numMeasReserve number of measurements to reserve (space for)
  */
 GblPoint::GblPoint(const Matrix5d &aJacobian, unsigned int numMeasReserve) :
-		theLabel(0), theOffset(0), theType(0), p2pJacobian(aJacobian), scatDim(0) {
+	p2pJacobian(aJacobian) {
 	theMeasurements.reserve(numMeasReserve);
 }
 
@@ -50,8 +50,7 @@ GblPoint::GblPoint(const Matrix5d &aJacobian, unsigned int numMeasReserve) :
  * Create point on (initial) trajectory. Needs transformation jacobian from previous point.
  * \param [in] aJacobian Transformation jacobian from previous point
  */
-GblPoint::GblPoint(const TMatrixD &aJacobian) :
-		theLabel(0), theOffset(0), theType(0), scatDim(0) {
+GblPoint::GblPoint(const TMatrixD &aJacobian){
 
 	for (unsigned int i = 0; i < 5; ++i) {
 		for (unsigned int j = 0; j < 5; ++j) {

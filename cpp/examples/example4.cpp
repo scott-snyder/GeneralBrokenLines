@@ -34,7 +34,7 @@
 using namespace gbl;
 using namespace Eigen;
 
-void example4() {
+int main() {
 	/// Simple technical example (curvilinear as local system, demonstrating **thick** GBL scatterers).
 	/**
 	 * Create points on initial trajectory, create trajectory from points,
@@ -60,7 +60,7 @@ void example4() {
 	unsigned int nTry = 1000; //: number of tries
 	unsigned int nLayer = 10; //: number of detector layers
 	bool useThickScatterer = true; //: use thick (GBL) scatterers at measurements
-	std::cout << " Gbltst-thickScat $Id$ " << nTry << ", " << nLayer
+	std::cout << " Gbltst-thickScat " << nTry << ", " << nLayer
 			<< ", useThickScat: " << useThickScatterer << std::endl;
 
 	srand(4711);
@@ -177,7 +177,7 @@ void example4() {
 								<< " Singular cov. matrix for thick scatterer at layer "
 								<< iLayer << std::endl;
 						std::cout << scatCov << std::endl;
-						return;
+						return 1;
 					}
 					scatPrecThick = scatCov.inverse();
 					pointMeas.addThickScatterer(scatThick, scatPrecThick);
@@ -287,5 +287,6 @@ void example4() {
 	std::cout << " Tracks fitted " << numFit << std::endl;
 	if (LostSum > 0.)
 		std::cout << " Weight lost   " << LostSum << std::endl;
+	return 0; 
 }
 
