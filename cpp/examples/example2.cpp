@@ -34,7 +34,7 @@
 using namespace gbl;
 using namespace Eigen;
 
-void example2() {
+int main() {
 	/// Simple technical example (measurement as local system).
 	/**
 	 * Create points on initial trajectory, create trajectory from points,
@@ -60,7 +60,7 @@ void example2() {
 //MP	MilleBinary mille; // for producing MillePede-II binary file
 	unsigned int nTry = 1000; //: number of tries
 	unsigned int nLayer = 10; //: number of detector layers
-	std::cout << " Gbltst-eigen $Id$ " << nTry << ", " << nLayer
+	std::cout << " Gbltst-eigen " << nTry << ", " << nLayer
 			<< std::endl;
 
 	srand(4711);
@@ -248,5 +248,6 @@ void example2() {
 	std::cout << " Tracks fitted " << numFit << std::endl;
 	if (LostSum > 0.)
 		std::cout << " Weight lost   " << LostSum << std::endl;
+	return 0; 
 }
 
