@@ -166,38 +166,38 @@ public:
 	double getBandCondition() const;
 
 private:
-	unsigned int numAllPoints; ///< Number of all points on trajectory
-	std::vector<unsigned int> numPoints; ///< Number of points on (sub)trajectory
-	unsigned int numTrajectories; ///< Number of trajectories (in composed trajectory)
-	unsigned int numOffsetPoints; ///< Number of points with offsets on trajectory
-	unsigned int numOffsets; ///< Number of (1D or 2D) offsets on trajectory
-	unsigned int numInnerTransformations; ///< Number of inner transformations to external parameters
-	unsigned int numInnerTransOffsets; ///< Number of (points with) offsets affected by inner transformations to external parameters
-	unsigned int numCurvature; ///< Number of curvature parameters (0 or 1) or external parameters
-	unsigned int numParameters; ///< Number of fit parameters
-	unsigned int numLocals; ///< Total number of (additional) local parameters
-	unsigned int numMeasurements; ///< Total number of measurements
-	unsigned int externalPoint; ///< Label of external point (or 0)
-	unsigned int skippedMeasLabel; ///< Label of point with measurements skipped in fit (for unbiased residuals) (or 0)
-	unsigned int maxNumGlobals; ///< Max. number of global labels/derivatives per point
-	bool constructOK; ///< Trajectory has been successfully constructed (ready for fit/output)
-	bool fitOK; ///< Trajectory has been successfully fitted (results are valid)
-	std::vector<unsigned int> theDimension; ///< List of active dimensions (0=u1, 1=u2) in fit
-	std::vector<std::vector<GblPoint> > thePoints; ///< (list of) List of points on trajectory
-	std::vector<GblData> theData; ///< List of data blocks
-	std::vector<unsigned int> measDataIndex; ///< mapping points to data blocks from measurements
-	std::vector<unsigned int> scatDataIndex; ///< mapping points to data blocks from scatterers
-	Eigen::MatrixXd externalSeed; ///< Precision (inverse covariance matrix) of external seed
+	unsigned int numAllPoints{0}; ///< Number of all points on trajectory
+	std::vector<unsigned int> numPoints{}; ///< Number of points on (sub)trajectory
+	unsigned int numTrajectories{0}; ///< Number of trajectories (in composed trajectory)
+	unsigned int numOffsetPoints{0}; ///< Number of points with offsets on trajectory
+	unsigned int numOffsets{0}; ///< Number of (1D or 2D) offsets on trajectory
+	unsigned int numInnerTransformations{0}; ///< Number of inner transformations to external parameters
+	unsigned int numInnerTransOffsets{0}; ///< Number of (points with) offsets affected by inner transformations to external parameters
+	unsigned int numCurvature{0}; ///< Number of curvature parameters (0 or 1) or external parameters
+	unsigned int numParameters{0}; ///< Number of fit parameters
+	unsigned int numLocals{0}; ///< Total number of (additional) local parameters
+	unsigned int numMeasurements{0}; ///< Total number of measurements
+	unsigned int externalPoint{0}; ///< Label of external point (or 0)
+	unsigned int skippedMeasLabel{0}; ///< Label of point with measurements skipped in fit (for unbiased residuals) (or 0)
+	unsigned int maxNumGlobals{0}; ///< Max. number of global labels/derivatives per point
+	bool constructOK{false}; ///< Trajectory has been successfully constructed (ready for fit/output)
+	bool fitOK{false}; ///< Trajectory has been successfully fitted (results are valid)
+	std::vector<unsigned int> theDimension{}; ///< List of active dimensions (0=u1, 1=u2) in fit
+	std::vector<std::vector<GblPoint> > thePoints{}; ///< (list of) List of points on trajectory
+	std::vector<GblData> theData{}; ///< List of data blocks
+	std::vector<unsigned int> measDataIndex{}; ///< mapping points to data blocks from measurements
+	std::vector<unsigned int> scatDataIndex{}; ///< mapping points to data blocks from scatterers
+	Eigen::MatrixXd externalSeed{}; ///< Precision (inverse covariance matrix) of external seed
 	// composed trajectory
-	std::vector<Eigen::MatrixXd> innerTransformations; ///< Transformations at innermost points of composed trajectory (from common external parameters)
-	std::vector<Eigen::MatrixXd> innerTransDer; ///< Derivatives at innermost points of composed trajectory
-	std::vector<std::array<unsigned int, 5> > innerTransLab; ///< Labels at innermost points of composed trajectory
-	Eigen::MatrixXd externalDerivatives; ///< Derivatives for external measurements of composed trajectory
-	Eigen::VectorXd externalMeasurements; ///< Residuals for external measurements of composed trajectory
-	Eigen::VectorXd externalPrecisions; ///< Precisions for external measurements of composed trajectory
+	std::vector<Eigen::MatrixXd> innerTransformations{}; ///< Transformations at innermost points of composed trajectory (from common external parameters)
+	std::vector<Eigen::MatrixXd> innerTransDer{}; ///< Derivatives at innermost points of composed trajectory
+	std::vector<std::array<unsigned int, 5> > innerTransLab{}; ///< Labels at innermost points of composed trajectory
+	Eigen::MatrixXd externalDerivatives{}; ///< Derivatives for external measurements of composed trajectory
+	Eigen::VectorXd externalMeasurements{}; ///< Residuals for external measurements of composed trajectory
+	Eigen::VectorXd externalPrecisions{}; ///< Precisions for external measurements of composed trajectory
 	// linear equation system
-	VVector theVector; ///< Vector of linear equation system
-	BorderedBandMatrix theMatrix; ///< (Bordered band) matrix of linear equation system
+	VVector theVector{}; ///< Vector of linear equation system
+	BorderedBandMatrix theMatrix{}; ///< (Bordered band) matrix of linear equation system
 
 	std::pair<std::vector<unsigned int>, Eigen::MatrixXd> getJacobian(int aSignedLabel) const;
 	void getFitToLocalJacobian(std::array<unsigned int, 5> &anIndex,

@@ -60,14 +60,14 @@ public:
 	Eigen::Matrix<double, 2, 3> getCurvilinearDirs() const;
 
 private:
-	const double sarc; ///< arc-length at prediction
-	const Eigen::Vector2d pred; ///< prediction for measurement (u,v)
-	const Eigen::Vector3d tdir; ///< track direction at prediction
-	const Eigen::Vector3d udir; ///< measurement direction for u
-	const Eigen::Vector3d vdir; ///< measurement direction for v
-	const Eigen::Vector3d ndir; ///< normal to measurement plane
-	const Eigen::Vector3d pos; ///< position at prediction
-	Eigen::Matrix3d global2meas; ///< transformation into measurement system
+	const double sarc{0.}; ///< arc-length at prediction
+	const Eigen::Vector2d pred{}; ///< prediction for measurement (u,v)
+	const Eigen::Vector3d tdir{}; ///< track direction at prediction
+	const Eigen::Vector3d udir{}; ///< measurement direction for u
+	const Eigen::Vector3d vdir{}; ///< measurement direction for v
+	const Eigen::Vector3d ndir{}; ///< normal to measurement plane
+	const Eigen::Vector3d pos{}; ///< position at prediction
+	Eigen::Matrix3d global2meas = Eigen::Matrix3d::Identity(); ///< transformation into measurement system
 };
 
 ///Simple helix
@@ -88,15 +88,15 @@ public:
 			const Eigen::Vector3d &uDir, const Eigen::Vector3d &vDir) const;
 
 private:
-	const double rinv; ///< curvature (1/Radius)
-	const double phi0; ///< azimuth at PCA (point of closest approach to origin in XY plane, defines arc-length S=0)
-	const double dca; ///< distance to origin in XY plane at PCA
-	const double dzds; ///< slope in ZS plane (dZ/dS)
-	const double z0; ///< offset in ZS plane
-	const double cosPhi0; ///< cos(phi0)
-	const double sinPhi0; ///< sin(phi0)
-	const double xRelCenter; ///< X position of circle center / R
-	const double yRelCenter; ///< Y position of circle center / R
+	const double rinv{0.}; ///< curvature (1/Radius)
+	const double phi0{0.}; ///< azimuth at PCA (point of closest approach to origin in XY plane, defines arc-length S=0)
+	const double dca{0.}; ///< distance to origin in XY plane at PCA
+	const double dzds{0.}; ///< slope in ZS plane (dZ/dS)
+	const double z0{0.}; ///< offset in ZS plane
+	const double cosPhi0{0.}; ///< cos(phi0)
+	const double sinPhi0{0.}; ///< sin(phi0)
+	const double xRelCenter{0.}; ///< X position of circle center / R
+	const double yRelCenter{0.}; ///< Y position of circle center / R
 };
 
 /// Detector layer
@@ -132,18 +132,18 @@ public:
 
 private:
 	std::string name; ///< name
-	unsigned int layer; ///< layer ID
-	unsigned int measDim; ///< measurement dimension (1 or 2)
-	double xbyx0; ///< normalized material thickness
-	Eigen::Vector3d center; ///< center
-	Eigen::Vector2d resolution; ///< measurements resolution
-	Eigen::Vector2d precision; ///< measurements precision
-	Eigen::Vector3d udir; ///< 1. measurement direction
-	Eigen::Vector3d vdir; ///< 2. measurement direction
-	Eigen::Vector3d ndir; ///< normal to measurement plane
-	Eigen::Matrix3d global2meas; ///< transformation into measurement system
-	Eigen::Matrix3d global2align; ///< transformation into (local) alignment system
-	bool alignInMeasSys; ///< alignment == measurement system?
+	unsigned int layer{0}; ///< layer ID
+	unsigned int measDim{0}; ///< measurement dimension (1 or 2)
+	double xbyx0{0.}; ///< normalized material thickness
+	Eigen::Vector3d center{}; ///< center
+	Eigen::Vector2d resolution{}; ///< measurements resolution
+	Eigen::Vector2d precision{}; ///< measurements precision
+	Eigen::Vector3d udir{}; ///< 1. measurement direction
+	Eigen::Vector3d vdir{}; ///< 2. measurement direction
+	Eigen::Vector3d ndir{}; ///< normal to measurement plane
+	Eigen::Matrix3d global2meas = Eigen::Matrix3d::Identity(); ///< transformation into measurement system
+	Eigen::Matrix3d global2align = Eigen::Matrix3d::Identity(); ///< transformation into (local) alignment system
+	bool alignInMeasSys{false}; ///< alignment == measurement system?
 };
 
 }

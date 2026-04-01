@@ -47,11 +47,11 @@
 
 namespace gbl {
 
-typedef Eigen::Matrix<double, 5, 1> Vector5d;
-typedef Eigen::Matrix<double, 2, 3> Matrix23d;
-typedef Eigen::Matrix<double, 2, 5> Matrix25d;
-typedef Eigen::Matrix<double, 3, 2> Matrix32d;
-typedef Eigen::Matrix<double, 5, 5> Matrix5d;
+using Vector5d = Eigen::Matrix<double, 5, 1> ;
+using Matrix23d = Eigen::Matrix<double, 2, 3> ;
+using Matrix25d = Eigen::Matrix<double, 2, 5> ;
+using Matrix32d = Eigen::Matrix<double, 3, 2> ;
+using Matrix5d = Eigen::Matrix<double, 5, 5> ;
 
 /// Measurement at point.
 /**
@@ -111,18 +111,18 @@ public:
 			std::vector<int> &aLabels, std::vector<double> &aDerivatives) const;
 
 private:
-	bool enabled; ///< Enabled flag (to be used)
-	unsigned int measDim; ///< Dimension of measurement (1-5), 0 indicates absence of measurement
-	double measPrecMin; ///< Minimal measurement precision (for usage)
-	Matrix5d measProjection; ///< Projection from measurement to local system
+	bool enabled{true}; ///< Enabled flag (to be used)
+	unsigned int measDim{0}; ///< Dimension of measurement (1-5), 0 indicates absence of measurement
+	double measPrecMin{0.}; ///< Minimal measurement precision (for usage)
+	Matrix5d measProjection{}; ///< Projection from measurement to local system
 
-	Vector5d measResiduals; ///< Measurement residuals
-	Vector5d measPrecision; ///< Measurement precision (diagonal of inverse covariance matrix)
-	bool transFlag; ///< Transformation exists?
+	Vector5d measResiduals{}; ///< Measurement residuals
+	Vector5d measPrecision{}; ///< Measurement precision (diagonal of inverse covariance matrix)
+	bool transFlag{true}; ///< Transformation exists?
 	Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic,
-			Eigen::ColMajor /* default */, 5, 5> measTransformation; ///< Transformation of diagonalization (of meas. precision matrix)
-	Eigen::MatrixXd localDerivatives; ///< Derivatives of measurement vs additional local (fit) parameters
-	std::vector<int> globalLabels; ///< Labels of global (MP-II) derivatives
-	Eigen::MatrixXd globalDerivatives; ///< Derivatives of measurement vs additional global (MP-II) parameters
+			Eigen::ColMajor /* default */, 5, 5> measTransformation{}; ///< Transformation of diagonalization (of meas. precision matrix)
+	Eigen::MatrixXd localDerivatives{}; ///< Derivatives of measurement vs additional local (fit) parameters
+	std::vector<int> globalLabels{}; ///< Labels of global (MP-II) derivatives
+	Eigen::MatrixXd globalDerivatives{}; ///< Derivatives of measurement vs additional global (MP-II) parameters
 };
 }

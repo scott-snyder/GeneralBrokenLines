@@ -34,8 +34,7 @@ using namespace Eigen;
 namespace gbl {
 
 /// Create bordered band matrix.
-BorderedBandMatrix::BorderedBandMatrix() :
-		numSize(0), numBorder(0), numBand(0), numCol(0) {
+BorderedBandMatrix::BorderedBandMatrix() {
 }
 
 BorderedBandMatrix::~BorderedBandMatrix() {
@@ -256,7 +255,7 @@ double BorderedBandMatrix::getBandCondition() const {
 	// get min. and max. value from diagonal matrix D
 	double diagMin = theBand(0, 0);
 	double diagMax = theBand(0, 0);
-	for (int i = 1; i < numCol; ++i) {
+	for (unsigned int i = 1; i < numCol; ++i) {
 		diagMin = std::min(diagMin, theBand(0, i));
 		diagMax = std::max(diagMax, theBand(0, i));
 	}

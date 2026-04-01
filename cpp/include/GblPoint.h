@@ -42,12 +42,12 @@
 
 namespace gbl {
 
-typedef Eigen::Matrix<double, 5, 1> Vector5d;
-typedef Eigen::Matrix<double, 2, 3> Matrix23d;
-typedef Eigen::Matrix<double, 2, 5> Matrix25d;
-typedef Eigen::Matrix<double, 3, 2> Matrix32d;
-typedef Eigen::Matrix<double, 5, 5> Matrix5d;
-typedef Eigen::Matrix<double, 4, 9> Matrix49d;
+using Vector5d = Eigen::Matrix<double, 5, 1> ;
+using Matrix23d = Eigen::Matrix<double, 2, 3> ;
+using Matrix25d = Eigen::Matrix<double, 2, 5> ;
+using Matrix32d = Eigen::Matrix<double, 3, 2> ;
+using Matrix5d = Eigen::Matrix<double, 5, 5> ;
+using Matrix49d = Eigen::Matrix<double, 4, 9> ;
 
 /// Point on trajectory
 /**
@@ -217,19 +217,19 @@ private:
 	void addPrevJacobian(const Matrix5d &aJac);
 	void addNextJacobian(const Matrix5d &aJac);
 
-	unsigned int theLabel; ///< Label identifying point
-	int theOffset; ///< Offset number at point if not negative (else interpolation needed)
-	int theType; ///< Type (-1: first, 0: inner, 1: last)
+	unsigned int theLabel{0}; ///< Label identifying point
+	int theOffset{0}; ///< Offset number at point if not negative (else interpolation needed)
+	int theType{0}; ///< Type (-1: first, 0: inner, 1: last)
 	Matrix5d p2pJacobian  = Matrix5d::Zero(5,5); ///< Point-to-point jacobian from previous point
 	Matrix5d prevJacobian = Matrix5d::Zero(5,5); ///< Jacobian to previous scatterer (or first measurement)
 	Matrix5d nextJacobian = Matrix5d::Zero(5,5); ///< Jacobian to next scatterer (or last measurement)
-	unsigned int scatDim; ///< Dimension of scatterer (0: none, 2: thin, 4:thick)
+	unsigned int scatDim{0}; ///< Dimension of scatterer (0: none, 2: thin, 4:thick)
 	//Eigen::Matrix<double, Eigen::Dynamic, Eigen::Dynamic,
 	//		Eigen::ColMajor /* default */, 4, 4> scatTransformation; ///< Transformation of diagonalization (of scat. precision matrix)
-	Eigen::Matrix4d scatTransformation; ///< Transformation of diagonalization (of scat. precision matrix)
-	Eigen::Vector4d scatResiduals; ///< Scattering residuals (initial kinks if iterating)
-	Eigen::Vector4d scatPrecision; ///< Scattering precision (diagonal of inverse covariance matrix)
-	std::vector<GblMeasurement> theMeasurements; ///< List of measurements at point
+	Eigen::Matrix4d scatTransformation = Eigen::Matrix4d::Zero(); ///< Transformation of diagonalization (of scat. precision matrix)
+	Eigen::Vector4d scatResiduals = Eigen::Vector4d::Zero(); ///< Scattering residuals (initial kinks if iterating)
+	Eigen::Vector4d scatPrecision = Eigen::Vector4d::Zero(); ///< Scattering precision (diagonal of inverse covariance matrix)
+	std::vector<GblMeasurement> theMeasurements{}; ///< List of measurements at point
 };
 
 template<typename Projection, typename Residuals, typename Precision,

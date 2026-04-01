@@ -94,13 +94,13 @@ public:
 	double getBandCondition() const;
 
 private:
-	unsigned int numSize; ///< Matrix size
-	unsigned int numBorder; ///< Border size
-	unsigned int numBand; ///< Band width
-	unsigned int numCol; ///< Band matrix size
-	VSymMatrix theBorder; ///< Border part
-	VMatrix theMixed; ///< Mixed part
-	VMatrix theBand; ///< Band part
+	unsigned int numSize{0}; ///< Matrix size
+	unsigned int numBorder{0}; ///< Border size
+	unsigned int numBand{0}; ///< Band width
+	unsigned int numCol{0}; ///< Band matrix size
+	VSymMatrix theBorder{}; ///< Border part
+	VMatrix theMixed{}; ///< Mixed part
+	VMatrix theBand{}; ///< Band part
 
 	void decomposeBand();
 	VVector solveBand(const VVector &aRightHandSide) const;
