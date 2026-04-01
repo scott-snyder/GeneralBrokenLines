@@ -27,8 +27,7 @@
  *  675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef GBLUTILITIES_H_
-#define GBLUTILITIES_H_
+#pragma once
 
 #include "Eigen/Dense"
 #include<iostream>
@@ -148,4 +147,3 @@ private:
 };
 
 }
-#endif /* GBLUTILITIES_H_ */

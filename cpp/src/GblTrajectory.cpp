@@ -170,13 +170,13 @@ namespace gbl {
  * \param [in] flagU1dir Use in u1 direction
  * \param [in] flagU2dir Use in u2 direction
  */
-GblTrajectory::GblTrajectory(const std::vector<GblPoint> &aPointList,
-		bool flagCurv, bool flagU1dir, bool flagU2dir) :
-		numAllPoints(aPointList.size()), numPoints(), numOffsetPoints(0), numOffsets(
-				0), numInnerTransformations(0), numInnerTransOffsets(0), numCurvature(
-				flagCurv ? 1 : 0), numParameters(0), numLocals(0), numMeasurements(
-				0), externalPoint(0), skippedMeasLabel(0), maxNumGlobals(0), theDimension(
-				0), thePoints(), theData(), measDataIndex(), scatDataIndex(), externalSeed(), innerTransformations(), externalDerivatives(), externalMeasurements(), externalPrecisions() {
+GblTrajectory::GblTrajectory(const std::vector<GblPoint> &aPointList,	bool flagCurv, bool flagU1dir, bool flagU2dir) :
+		numAllPoints(aPointList.size()), numPoints(), numOffsetPoints(0), numOffsets(0),
+		numInnerTransformations(0), numInnerTransOffsets(0), numCurvature(flagCurv ? 1 : 0),
+		numParameters(0), numLocals(0), numMeasurements(0), externalPoint(0),
+		skippedMeasLabel(0), maxNumGlobals(0), theDimension(0), thePoints(),
+		theData(), measDataIndex(), scatDataIndex(), externalSeed(), innerTransformations(),
+		externalDerivatives(), externalMeasurements(), externalPrecisions() {
 
 	if (flagU1dir)
 		theDimension.push_back(0);
@@ -193,12 +193,11 @@ GblTrajectory::GblTrajectory(const std::vector<GblPoint> &aPointList,
  * Composed of curved trajectories in space.
  * \param [in] aPointsAndTransList List containing pairs with list of points and transformation (at inner (first) point)
  */
-GblTrajectory::GblTrajectory(
-		const std::vector<std::pair<std::vector<GblPoint>, Eigen::MatrixXd> > &aPointsAndTransList) :
-		numAllPoints(), numPoints(), numOffsetPoints(0), numOffsets(0), numInnerTransformations(
-				aPointsAndTransList.size()), numParameters(0), numLocals(0), numMeasurements(
-				0), externalPoint(0), skippedMeasLabel(0), maxNumGlobals(0), theDimension(
-				0), thePoints(), theData(), measDataIndex(), scatDataIndex(), externalSeed(), innerTransformations(), externalDerivatives(), externalMeasurements(), externalPrecisions() {
+GblTrajectory::GblTrajectory(const std::vector<std::pair<std::vector<GblPoint>, Eigen::MatrixXd> > &aPointsAndTransList) :
+		numAllPoints(), numPoints(), numOffsetPoints(0), numOffsets(0), numInnerTransformations(aPointsAndTransList.size()),
+		numParameters(0), numLocals(0), numMeasurements(0), externalPoint(0), skippedMeasLabel(0), maxNumGlobals(0),
+		theDimension(0), thePoints(), theData(), measDataIndex(), scatDataIndex(), externalSeed(), innerTransformations(),
+		externalDerivatives(), externalMeasurements(), externalPrecisions() {
 
 	for (unsigned int iTraj = 0; iTraj < aPointsAndTransList.size(); ++iTraj) {
 		thePoints.push_back(aPointsAndTransList[iTraj].first);
@@ -231,14 +230,13 @@ GblTrajectory::GblTrajectory(
  * \param [in] flagU2dir Use in u2 direction
  */
 GblTrajectory::GblTrajectory(const std::vector<GblPoint> &aPointList,
-		unsigned int aLabel, const TMatrixDSym &aSeed, bool flagCurv,
-		bool flagU1dir, bool flagU2dir) :
-numAllPoints(aPointList.size()), numPoints(), numOffsetPoints(0), numOffsets(0),
-numInnerTransformations(0), numInnerTransOffsets(0), numCurvature(flagCurv ? 1 : 0), numParameters(0),
-numLocals(0), numMeasurements(0), externalPoint(aLabel), skippedMeasLabel(0),
-maxNumGlobals(0), theDimension(0), thePoints(), theData(), measDataIndex(),
-scatDataIndex(), externalSeed(), innerTransformations(), externalDerivatives(),
-externalMeasurements(), externalPrecisions() {
+		unsigned int aLabel, const TMatrixDSym &aSeed, bool flagCurv,	bool flagU1dir, bool flagU2dir) :
+		numAllPoints(aPointList.size()), numPoints(), numOffsetPoints(0), numOffsets(0),
+		numInnerTransformations(0), numInnerTransOffsets(0), numCurvature(flagCurv ? 1 : 0), numParameters(0),
+		numLocals(0), numMeasurements(0), externalPoint(aLabel), skippedMeasLabel(0),
+		maxNumGlobals(0), theDimension(0), thePoints(), theData(), measDataIndex(),
+		scatDataIndex(), externalSeed(), innerTransformations(), externalDerivatives(),
+		externalMeasurements(), externalPrecisions() {
 
 	if (flagU1dir)
 	theDimension.push_back(0);
@@ -264,11 +262,11 @@ externalMeasurements(), externalPrecisions() {
  * \param [in] aPointsAndTransList List containing pairs with list of points and transformation (at inner (first) point)
  */
 GblTrajectory::GblTrajectory(const std::vector<std::pair<std::vector<GblPoint>, TMatrixD> > &aPointsAndTransList) :
-numAllPoints(), numPoints(), numOffsetPoints(0), numOffsets(0), numInnerTransformations(aPointsAndTransList.size()),
-numParameters(0), numLocals(0), numMeasurements(0), externalPoint(0),
-skippedMeasLabel(0), maxNumGlobals(0), theDimension(0), thePoints(), theData(),
-measDataIndex(), scatDataIndex(), externalSeed(), innerTransformations(),
-externalDerivatives(), externalMeasurements(), externalPrecisions() {
+		numAllPoints(), numPoints(), numOffsetPoints(0), numOffsets(0), numInnerTransformations(aPointsAndTransList.size()),
+		numParameters(0), numLocals(0), numMeasurements(0), externalPoint(0),
+		skippedMeasLabel(0), maxNumGlobals(0), theDimension(0), thePoints(), theData(),
+		measDataIndex(), scatDataIndex(), externalSeed(), innerTransformations(),
+		externalDerivatives(), externalMeasurements(), externalPrecisions() {
 
 	for (unsigned int iTraj = 0; iTraj < aPointsAndTransList.size(); ++iTraj) {
 		thePoints.emplace_back(std::move(aPointsAndTransList[iTraj].first));
@@ -305,13 +303,12 @@ externalDerivatives(), externalMeasurements(), externalPrecisions() {
  * \param [in] extPrecisions Precision of external measurements
  */
 GblTrajectory::GblTrajectory(const std::vector<std::pair<std::vector<GblPoint>, TMatrixD> > &aPointsAndTransList,
-		const TMatrixD &extDerivatives, const TVectorD &extMeasurements,
-		const TVectorD &extPrecisions) :
-numAllPoints(), numPoints(), numOffsetPoints(0), numOffsets(0), numInnerTransformations(aPointsAndTransList.size()),
-numParameters(0), numLocals(0), numMeasurements(0), externalPoint(0),
-skippedMeasLabel(0), maxNumGlobals(0), theDimension(0), thePoints(), theData(),
-measDataIndex(), scatDataIndex(), externalSeed(), innerTransformations(),
-externalDerivatives(), externalMeasurements(), externalPrecisions() {
+		const TMatrixD &extDerivatives, const TVectorD &extMeasurements, const TVectorD &extPrecisions) :
+		numAllPoints(), numPoints(), numOffsetPoints(0), numOffsets(0), numInnerTransformations(aPointsAndTransList.size()),
+		numParameters(0), numLocals(0), numMeasurements(0), externalPoint(0),
+		skippedMeasLabel(0), maxNumGlobals(0), theDimension(0), thePoints(), theData(),
+		measDataIndex(), scatDataIndex(), externalSeed(), innerTransformations(),
+		externalDerivatives(), externalMeasurements(), externalPrecisions() {
 
 	// convert from ROOT
 	unsigned int nExtMeas = extDerivatives.GetNrows();
@@ -361,12 +358,11 @@ externalDerivatives(), externalMeasurements(), externalPrecisions() {
  * \param [in] extPrecisions Precision of external measurements
  */
 GblTrajectory::GblTrajectory(const std::vector<std::pair<std::vector<GblPoint>, TMatrixD> > &aPointsAndTransList,
-		const TMatrixD &extDerivatives, const TVectorD &extMeasurements,
-		const TMatrixDSym &extPrecisions) :
-numAllPoints(), numPoints(), numOffsetPoints(0), numOffsets(0), numInnerTransformations(aPointsAndTransList.size()),
-numParameters(0), numLocals(0), numMeasurements(0), externalPoint(0),
-skippedMeasLabel(0), maxNumGlobals(0), theDimension(0), thePoints(), theData(),
-measDataIndex(), scatDataIndex(), externalSeed(), innerTransformations() {
+		const TMatrixD &extDerivatives, const TVectorD &extMeasurements, const TMatrixDSym &extPrecisions) :
+		numAllPoints(), numPoints(), numOffsetPoints(0), numOffsets(0), numInnerTransformations(aPointsAndTransList.size()),
+		numParameters(0), numLocals(0), numMeasurements(0), externalPoint(0),
+		skippedMeasLabel(0), maxNumGlobals(0), theDimension(0), thePoints(), theData(),
+		measDataIndex(), scatDataIndex(), externalSeed(), innerTransformations() {
 
 	// diagonalize external measurement
 	TMatrixDSymEigen extEigen(extPrecisions);
@@ -567,8 +563,7 @@ void GblTrajectory::calcJacobians() {
  * \return List of fit parameters with non zero derivatives and
  * corresponding transformation matrix
  */
-std::pair<std::vector<unsigned int>, MatrixXd> GblTrajectory::getJacobian(
-		int aSignedLabel) const {
+std::pair<std::vector<unsigned int>, MatrixXd> GblTrajectory::getJacobian(int aSignedLabel) const {
 
 	unsigned int nDim = theDimension.size();
 	unsigned int nCurv = numCurvature;

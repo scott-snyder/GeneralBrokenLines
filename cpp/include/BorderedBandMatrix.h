@@ -27,8 +27,7 @@
  *  675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef BORDEREDBANDMATRIX_H_
-#define BORDEREDBANDMATRIX_H_
+#pragma once
 
 #include<iostream>
 #include<vector>
@@ -111,4 +110,3 @@ private:
 			const VSymMatrix &aSymArray) const;
 };
 }
-#endif /* BORDEREDBANDMATRIX_H_ */

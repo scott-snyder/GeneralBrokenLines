@@ -39,8 +39,7 @@ VMatrix::VMatrix(const unsigned int nRows, const unsigned int nCols) :
 }
 
 VMatrix::VMatrix(const VMatrix &aMatrix) :
-		numRows(aMatrix.numRows), numCols(aMatrix.numCols), theVec(
-				aMatrix.theVec) {
+		numRows(aMatrix.numRows), numCols(aMatrix.numCols), theVec(aMatrix.theVec) {
 
 }
 
