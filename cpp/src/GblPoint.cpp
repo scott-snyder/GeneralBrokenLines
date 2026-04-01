@@ -40,8 +40,7 @@ namespace gbl {
  * \param [in] numMeasReserve number of measurements to reserve (space for)
  */
 GblPoint::GblPoint(const Matrix5d &aJacobian, unsigned int numMeasReserve) :
-		theLabel(0), theOffset(0), theType(0), p2pJacobian(aJacobian), scatDim(
-				0) {
+		theLabel(0), theOffset(0), theType(0), p2pJacobian(aJacobian), scatDim(0) {
 	theMeasurements.reserve(numMeasReserve);
 }
 
@@ -78,8 +77,7 @@ GblPoint::~GblPoint() {
 void GblPoint::addMeasurement(const TMatrixD &aProjection,
 		const TVectorD &aResiduals, const TVectorD &aPrecision,
 		double minPrecision) {
-	theMeasurements.emplace_back(aProjection, aResiduals, aPrecision,
-			minPrecision);
+	theMeasurements.emplace_back(aProjection, aResiduals, aPrecision,	minPrecision);
 }
 
 /// Add a measurement to a point.
@@ -95,8 +93,7 @@ void GblPoint::addMeasurement(const TMatrixD &aProjection,
 void GblPoint::addMeasurement(const TMatrixD &aProjection,
 		const TVectorD &aResiduals, const TMatrixDSym &aPrecision,
 		double minPrecision) {
-	theMeasurements.emplace_back(aProjection, aResiduals, aPrecision,
-			minPrecision);
+	theMeasurements.emplace_back(aProjection, aResiduals, aPrecision,	minPrecision);
 }
 
 /// Add a measurement to a point.
@@ -292,8 +289,7 @@ void GblPoint::addScatterer(const TVectorD &aResiduals,
  * \param [in] aResiduals Scatterer residuals
  * \param [in] aPrecision Scatterer precision (matrix)
  */
-void GblPoint::addScatterer(const TVectorD &aResiduals,
-		const TMatrixDSym &aPrecision) {
+void GblPoint::addScatterer(const TVectorD &aResiduals,	const TMatrixDSym &aPrecision) {
 	scatDim = 2;
 	TMatrixDSymEigen scatEigen(aPrecision);
 	TMatrixD aTransformation = scatEigen.GetEigenVectors();
@@ -339,8 +335,7 @@ void GblPoint::addScatterer(const TVectorD &aResiduals,
  * \param [in] aResiduals Scatterer residuals
  * \param [in] aPrecision Scatterer precision (full 4x4 matrix)
  */
-void GblPoint::addThickScatterer(const TVectorD &aResiduals,
-		const TMatrixDSym &aPrecision) {
+void GblPoint::addThickScatterer(const TVectorD &aResiduals, const TMatrixDSym &aPrecision) {
 	scatDim = 4;
 	TMatrixDSymEigen scatEigen(aPrecision);
 	TMatrixD aTransformation = scatEigen.GetEigenVectors();
@@ -372,8 +367,7 @@ unsigned int GblPoint::getScatDim() const {
  * \param [out] aResiduals Scatterer residuals
  * \param [out] aPrecision Scatterer precision (diagonal)
  */
-void GblPoint::getScatterer(Matrix4d &aTransformation, Vector4d &aResiduals,
-		Vector4d &aPrecision) const {
+void GblPoint::getScatterer(Matrix4d &aTransformation, Vector4d &aResiduals,	Vector4d &aPrecision) const {
 	aTransformation.topLeftCorner(scatDim, scatDim) =
 			scatTransformation.topLeftCorner(scatDim, scatDim);
 	aResiduals.head(scatDim) = scatResiduals.head(scatDim);

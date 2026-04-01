@@ -28,8 +28,7 @@
  *  675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef GBLMEASUREMENT_H_
-#define GBLMEASUREMENT_H_
+#pragma once
 
 #include<iostream>
 #include<vector>
@@ -127,5 +126,3 @@ private:
 	Eigen::MatrixXd globalDerivatives; ///< Derivatives of measurement vs additional global (MP-II) parameters
 };
 }
-
-#endif /* GBLMEASUREMENT_H_ */

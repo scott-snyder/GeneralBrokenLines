@@ -47,8 +47,7 @@ BorderedBandMatrix::~BorderedBandMatrix() {
  * \param nBorder [in] Size of border (=1 for q/p + additional local parameters)
  * \param nBand [in] Band width (usually = 5, for simplified jacobians = 4, +2 for steps)
  */
-void BorderedBandMatrix::resize(unsigned int nSize, unsigned int nBorder,
-		unsigned int nBand) {
+void BorderedBandMatrix::resize(unsigned int nSize, unsigned int nBorder,	unsigned int nBand) {
 	numSize = nSize;
 	numBorder = nBorder;
 	numCol = nSize - nBorder;
@@ -108,8 +107,7 @@ void BorderedBandMatrix::addBlockMatrix(double aWeight,
  * \param anIndex [in] List of rows/colums to be used
  * \param aVector [in] Vector
  */
-void BorderedBandMatrix::addBlockMatrix(double aWeight, unsigned int aSize,
-		unsigned int *anIndex, double *aVector) {
+void BorderedBandMatrix::addBlockMatrix(double aWeight, unsigned int aSize,	unsigned int *anIndex, double *aVector) {
 	int nBorder = numBorder;
 	for (unsigned int i = 0; i < aSize; ++i) {
 		int iIndex = anIndex[i] - 1; // anIndex has to be sorted
@@ -135,8 +133,7 @@ void BorderedBandMatrix::addBlockMatrix(double aWeight, unsigned int aSize,
  * Get (compressed) block from bordered band matrix: aMatrix(i,j) = BBmatrix(anIndex(i),anIndex(j)).
  * \param anIndex [in] List of rows/colums to be used
  */
-MatrixXd BorderedBandMatrix::getBlockMatrix(
-		const std::vector<unsigned int> anIndex) const {
+MatrixXd BorderedBandMatrix::getBlockMatrix(const std::vector<unsigned int> anIndex) const {
 
 	MatrixXd aMatrix(anIndex.size(), anIndex.size());
 	int nBorder = numBorder;
@@ -164,8 +161,7 @@ MatrixXd BorderedBandMatrix::getBlockMatrix(
  * \param aSize [in] Matrix size
  * \param anIndex [in] Array of rows/colums to be used
  */
-MatrixXd BorderedBandMatrix::getBlockMatrix(unsigned int aSize,
-		unsigned int *anIndex) const {
+MatrixXd BorderedBandMatrix::getBlockMatrix(unsigned int aSize,	unsigned int *anIndex) const {
 
 	MatrixXd aMatrix(aSize, aSize);
 	int nBorder = numBorder;
@@ -214,8 +210,7 @@ MatrixXd BorderedBandMatrix::getBlockMatrix(unsigned int aSize,
  * \param [in] aRightHandSide Right hand side (vector) 'b' of A*x=b
  * \param [out] aSolution Solution (vector) x of A*x=b
  */
-void BorderedBandMatrix::solveAndInvertBorderedBand(
-		const VVector &aRightHandSide, VVector &aSolution) {
+void BorderedBandMatrix::solveAndInvertBorderedBand(const VVector &aRightHandSide, VVector &aSolution) {
 
 	// decompose band
 	decomposeBand();
@@ -395,8 +390,7 @@ VMatrix BorderedBandMatrix::invertBand() {
 /**
  * \return Band part of product
  */
-VMatrix BorderedBandMatrix::bandOfAVAT(const VMatrix &anArray,
-		const VSymMatrix &aSymArray) const {
+VMatrix BorderedBandMatrix::bandOfAVAT(const VMatrix &anArray, const VSymMatrix &aSymArray) const {
 	int nBand = numBand;
 	int nCol = numCol;
 	int nBorder = numBorder;

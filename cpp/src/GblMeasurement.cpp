@@ -44,8 +44,7 @@ namespace gbl {
  * \param [in] minPrecision Minimal precision to accept measurement
  */
 GblMeasurement::GblMeasurement(const Eigen::MatrixXd &aProjection,
-		const Eigen::VectorXd &aResiduals, const Eigen::MatrixXd &aPrecision,
-		double minPrecision) {
+		const Eigen::VectorXd &aResiduals, const Eigen::MatrixXd &aPrecision,	double minPrecision) {
 	enabled = true;
 	measDim = aResiduals.rows();
 	measPrecMin = minPrecision;
@@ -244,8 +243,7 @@ void GblMeasurement::addLocals(const Eigen::MatrixXd &aDerivatives) {
  * \param [in] aLabels Global derivatives labels
  * \param [in] aDerivatives Global derivatives (matrix)
  */
-void GblMeasurement::addGlobals(const std::vector<int> &aLabels,
-		const Eigen::MatrixXd &aDerivatives) {
+void GblMeasurement::addGlobals(const std::vector<int> &aLabels, const Eigen::MatrixXd &aDerivatives) {
 	if (measDim) {
 		globalLabels = aLabels;
 		globalDerivatives.resize(aDerivatives.rows(), aDerivatives.cols());
@@ -288,8 +286,7 @@ void GblMeasurement::addLocals(const TMatrixD &aDerivatives) {
  * \param [in] aLabels Global derivatives labels
  * \param [in] aDerivatives Global derivatives (matrix)
  */
-void GblMeasurement::addGlobals(const std::vector<int> &aLabels,
-		const TMatrixD &aDerivatives) {
+void GblMeasurement::addGlobals(const std::vector<int> &aLabels, const TMatrixD &aDerivatives) {
 	if (measDim) {
 		globalLabels = aLabels;
 		unsigned int numDer = aDerivatives.GetNcols();

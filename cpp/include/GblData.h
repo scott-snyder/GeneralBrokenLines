@@ -29,8 +29,7 @@
  *  675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef GBLDATA_H_
-#define GBLDATA_H_
+#pragma once
 
 #include<iostream>
 #include<vector>
@@ -58,8 +57,7 @@ enum dataBlockType {
 class GblData {
 public:
 	GblData(unsigned int aLabel, dataBlockType aType, double aValue,
-			double aPrec, unsigned int aTraj = 0, unsigned int aPoint = 0,
-			unsigned int aMeas = 0);
+			double aPrec, unsigned int aTraj = 0, unsigned int aPoint = 0, unsigned int aMeas = 0);
 	GblData(const GblData&) = default;
 	GblData& operator=(const GblData&) = default;
 	GblData(GblData&&) = default;
@@ -250,5 +248,3 @@ void GblData::addDerivatives(unsigned int iRow,unsigned int nDer,
 }
 
 }
-
-#endif /* GBLDATA_H_ */

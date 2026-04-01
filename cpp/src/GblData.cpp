@@ -46,9 +46,9 @@ namespace gbl {
 GblData::GblData(unsigned int aLabel, dataBlockType aType, double aValue,
 		double aPrec, unsigned int aTraj, unsigned int aPoint,
 		unsigned int aMeas) :
-		theLabel(aLabel), theRow(0), theType(aType), theValue(aValue), thePrecision(
-				aPrec), theTrajectory(aTraj), thePoint(aPoint), theMeas(aMeas), theDWMethod(
-				0), theDownWeight(1.), thePrediction(0.), theNumLocal(0), moreParameters(), moreDerivatives() {
+		theLabel(aLabel), theRow(0), theType(aType), theValue(aValue), thePrecision(aPrec),
+		theTrajectory(aTraj), thePoint(aPoint), theMeas(aMeas), theDWMethod(0),
+		theDownWeight(1.), thePrediction(0.), theNumLocal(0), moreParameters(), moreDerivatives() {
 
 }
 

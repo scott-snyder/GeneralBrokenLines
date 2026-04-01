@@ -29,8 +29,7 @@
  *  675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef GBLPOINT_H_
-#define GBLPOINT_H_
+#pragma once
 
 #include "GblMeasurement.h"
 
@@ -297,4 +296,3 @@ void GblPoint::addGlobals(const std::vector<int> &aLabels,
 }
 
 }
-#endif /* GBLPOINT_H_ */

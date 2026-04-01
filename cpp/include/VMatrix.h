@@ -27,8 +27,7 @@
  *  675 Mass Ave, Cambridge, MA 02139, USA.
  */
 
-#ifndef VMATRIX_H_
-#define VMATRIX_H_
+#pragma once
 
 #include<iostream>
 #include<iomanip>
@@ -135,4 +134,3 @@ inline double VSymMatrix::operator()(unsigned int iRow,
 	return theVec[(iRow * iRow + iRow) / 2 + iCol]; // assuming iCol <= iRow
 }
 }
-#endif /* VMATRIX_H_ */
