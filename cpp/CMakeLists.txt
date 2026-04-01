@@ -1,5 +1,5 @@
 # #require a certain version
-CMAKE_MINIMUM_REQUIRED( VERSION 3.1 )
+CMAKE_MINIMUM_REQUIRED( VERSION 3.10 )
 
 # discover the compilers from PATH (when system install is overridden)
 find_program(gcc_loc gcc)
@@ -52,7 +52,7 @@ INSTALL( TARGETS ${PROJECT_NAME} DESTINATION lib )
 IF( SUPPORT_ROOT )
   # Use imported targets for correct transitive dependency handling.
   # ROOT::Matrix provides TMatrixD/TMatrixDSym/TMatrixTBase, ROOT::MathCore provides TVectorD.
-  TARGET_LINK_LIBRARIES(${PROJECT_NAME} Eigen3::Eigen ROOT::Core ROOT::Matrix ROOT::MathCore Mille2)
+  TARGET_LINK_LIBRARIES(${PROJECT_NAME} Eigen3::Eigen ROOT::Core ROOT::Matrix ROOT::MathCore  Mille2)
 ELSE()
   TARGET_LINK_LIBRARIES(${PROJECT_NAME} Eigen3::Eigen Mille2)
 ENDIF()
