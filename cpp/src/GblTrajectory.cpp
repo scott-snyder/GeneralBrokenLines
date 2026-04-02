@@ -250,7 +250,7 @@ GblTrajectory::GblTrajectory(const std::vector<GblPoint> &aPointList,
  * \param [in] aPointsAndTransList List containing pairs with list of points and transformation (at inner (first) point)
  */
 GblTrajectory::GblTrajectory(const std::vector<std::pair<std::vector<GblPoint>, TMatrixD> > &aPointsAndTransList) :
-		nnumInnerTransformations(aPointsAndTransList.size()) {
+		numInnerTransformations(aPointsAndTransList.size()) {
 
 	for (unsigned int iTraj = 0; iTraj < aPointsAndTransList.size(); ++iTraj) {
 		thePoints.emplace_back(std::move(aPointsAndTransList[iTraj].first));

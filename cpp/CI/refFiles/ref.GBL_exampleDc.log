@@ -1,0 +1,7 @@
+! MillePede-II: constraints for alignables with SINGLE 1D measurements
+! End of lines to be added to MillePede-II steering file
+
+ GblDc 10000, 36
+ Time elapsed 1.40924 s
+ Chi2/Ndf = 1.00577
+ Tracks fitted 10000

@@ -1,0 +1,1204 @@
+ GblComposedKin 100, 9
+ gen(inline)  1: 0.0012683 -1.57984 -0.00959347 -0.992928 -0.0716078
+ impact par 0.00959347 -0.0716078 0.0012683 -1.57984 -0.00959347 -0.992928 -0.0716078 0 30
+ impact par -0.00959347 -0.0716078 -0.0012683 1.56176 0.00959347 0.992928 -0.0716078 -0 57
+ Fit 0: 66.5039, 79, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 87
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 172
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  2: 0.000959828 1.82179 0.00126368 0.370634 -0.242087
+ impact par -0.00126368 -0.242087 0.000959828 1.82179 0.00126368 0.370634 -0.242087 0 57
+ impact par 0.00126368 -0.242087 -0.000959828 4.96338 -0.00126368 -0.370634 -0.242087 -0 57
+ Fit 1: 94.5963, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  3: 0.00106064 1.0962 -0.00339758 -0.623571 -0.188022
+ impact par 0.00339758 -0.188022 0.00106064 1.0962 -0.00339758 -0.623571 -0.188022 0 57
+ impact par -0.00339758 -0.188022 -0.00106064 4.2378 0.00339758 0.623571 -0.188022 -0 57
+ Fit 2: 121.765, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  4: 0.00112333 -1.45783 0.00478502 -0.746908 0.162917
+ impact par -0.00478502 0.162917 0.00112333 -1.45783 0.00478502 -0.746908 0.162917 0 45
+ impact par 0.00478502 0.162917 -0.00112333 1.68376 -0.00478502 0.746908 0.162917 -0 57
+ Fit 3: 85.1528, 94, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 102
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 202
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  5: 0.001057 3.04211 -0.000659513 0.615882 -0.0768415
+ impact par 0.000659513 -0.0768415 0.001057 3.04211 -0.000659513 0.615882 -0.0768415 0 57
+ impact par -0.000659513 -0.0768415 -0.001057 6.1837 0.000659513 -0.615882 -0.0768415 -0 57
+ Fit 4: 88.644, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  6: 0.00096426 -1.93653 -0.00566315 -0.384576 -0.133268
+ impact par 0.00566315 -0.133268 0.00096426 -1.93653 -0.00566315 -0.384576 -0.133268 0 57
+ impact par -0.00566315 -0.133268 -0.00096426 1.20506 0.00566315 0.384576 -0.133268 -0 57
+ Fit 5: 133.419, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  7: 0.000938649 1.46948 0.00301243 -0.296194 -0.0267537
+ impact par -0.00301243 -0.0267537 0.000938649 1.46948 0.00301243 -0.296194 -0.0267537 0 57
+ impact par 0.00301243 -0.0267537 -0.000938649 4.61107 -0.00301243 0.296194 -0.0267537 -0 57
+ Fit 6: 114.861, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  8: 0.000900396 2.85658 0.00865783 0.0296851 0.281835
+ impact par -0.00865783 0.281835 0.000900396 2.85658 0.00865783 0.0296851 0.281835 0 57
+ impact par 0.00865783 0.281835 -0.000900396 5.99817 -0.00865783 -0.0296851 0.281835 -0 57
+ Fit 7: 99.0521, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  9: 0.000902271 1.24932 -0.00309108 0.0710804 0.0996833
+ impact par 0.00309108 0.0996833 0.000902271 1.24932 -0.00309108 0.0710804 0.0996833 0 57
+ impact par -0.00309108 0.0996833 -0.000902271 4.39091 0.00309108 -0.0710804 0.0996833 -0 57
+ Fit 8: 134.201, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  10: 0.000900018 -1.75959 -0.00279125 -0.00635958 0.0292071
+ impact par 0.00279125 0.0292071 0.000900018 -1.75959 -0.00279125 -0.00635958 0.0292071 0 57
+ impact par -0.00279125 0.0292071 -0.000900018 1.382 0.00279125 0.00635958 0.0292071 -0 57
+ Fit 9: 133.009, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  11: 0.00120673 0.140563 0.00130828 0.893188 0.142742
+ impact par -0.00130828 0.142742 0.00120673 0.140563 0.00130828 0.893188 0.142742 2.30006e-14 57
+ impact par 0.00130828 0.142742 -0.00120673 3.28216 -0.00130828 -0.893188 0.142742 -0 35
+ Fit 10: 99.6009, 84, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 92
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 182
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  12: 0.00114578 1.83927 0.00366583 0.787875 0.194702
+ impact par -0.00366583 0.194702 0.00114578 1.83927 0.00366583 0.787875 0.194702 0 57
+ impact par 0.00366583 0.194702 -0.00114578 4.98086 -0.00366583 -0.787875 0.194702 -0 42
+ Fit 11: 90.8877, 91, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 99
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 196
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  13: 0.000962585 -2.28188 0.005197 0.379358 0.269551
+ impact par -0.005197 0.269551 0.000962585 -2.28188 0.005197 0.379358 0.269551 0 57
+ impact par 0.005197 0.269551 -0.000962585 0.859709 -0.005197 -0.379358 0.269551 -0 57
+ Fit 12: 122.145, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  14: 0.000983865 -0.136232 0.00427975 0.441646 0.363567
+ impact par -0.00427975 0.363567 0.000983865 -0.136232 0.00427975 0.441646 0.363567 0 57
+ impact par 0.00427975 0.363567 -0.000983865 3.00536 -0.00427975 -0.441646 0.363567 -0 57
+ Fit 13: 100.131, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  15: 0.000919079 -0.663297 -0.00437728 0.206994 -0.440387
+ impact par 0.00437728 -0.440387 0.000919079 -0.663297 -0.00437728 0.206994 -0.440387 0 57
+ impact par -0.00437728 -0.440387 -0.000919079 2.4783 0.00437728 -0.206994 -0.440387 -0 57
+ Fit 14: 77.4634, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  16: 0.000938976 -0.829273 0.00481178 0.297469 0.369685
+ impact par -0.00481178 0.369685 0.000938976 -0.829273 0.00481178 0.297469 0.369685 -1.18238e-13 57
+ impact par 0.00481178 0.369685 -0.000938976 2.31232 -0.00481178 -0.297469 0.369685 -0 57
+ Fit 15: 108.102, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  17: 0.00105188 2.62323 0.00888824 0.604965 0.179452
+ impact par -0.00888824 0.179452 0.00105188 2.62323 0.00888824 0.604965 0.179452 0 57
+ impact par 0.00888824 0.179452 -0.00105188 5.76482 -0.00888824 -0.604965 0.179452 -0 57
+ Fit 16: 76.7329, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  18: 0.000925315 -1.33233 -0.000547469 0.238845 0.369845
+ impact par 0.000547469 0.369845 0.000925315 -1.33233 -0.000547469 0.238845 0.369845 0 57
+ impact par -0.000547469 0.369845 -0.000925315 1.80927 0.000547469 -0.238845 0.369845 -0 57
+ Fit 17: 84.1318, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  19: 0.000909241 -2.94041 -0.000905325 0.143672 -0.190219
+ impact par 0.000905325 -0.190219 0.000909241 -2.94041 -0.000905325 0.143672 -0.190219 0 57
+ impact par -0.000905325 -0.190219 -0.000909241 0.201182 0.000905325 -0.143672 -0.190219 -3.05261e-14 57
+ Fit 18: 133.605, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  20: 0.000918169 -2.43827 0.00171305 0.201947 0.00271535
+ impact par -0.00171305 0.00271535 0.000918169 -2.43827 0.00171305 0.201947 0.00271535 0 57
+ impact par 0.00171305 0.00271535 -0.000918169 0.703327 -0.00171305 -0.201947 0.00271535 1.20917e-13 57
+ Fit 19: 124.592, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  21: 0.00111611 -0.656265 0.0103711 0.733412 -0.254527
+ impact par -0.0103711 -0.254527 0.00111611 -0.656265 0.0103711 0.733412 -0.254527 0 57
+ impact par 0.0103711 -0.254527 -0.00111611 2.48533 -0.0103711 -0.733412 -0.254527 -0 46
+ Fit 20: 68.7376, 95, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 103
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 204
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  22: 0.00090018 0.962649 0.00536237 0.0200221 0.242597
+ impact par -0.00536237 0.242597 0.00090018 0.962649 0.00536237 0.0200221 0.242597 0 57
+ impact par 0.00536237 0.242597 -0.00090018 4.10424 -0.00536237 -0.0200221 0.242597 -0 57
+ Fit 21: 128.285, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  23: 0.000905067 1.78081 0.000699107 -0.106267 0.542791
+ impact par -0.000699107 0.542791 0.000905067 1.78081 0.000699107 -0.106267 0.542791 0 57
+ impact par 0.000699107 0.542791 -0.000905067 4.9224 -0.000699107 0.106267 0.542791 -0 57
+ Fit 22: 105.881, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  24: 0.00115907 0.628827 0.00291394 0.811526 0.0643044
+ impact par -0.00291394 0.0643044 0.00115907 0.628827 0.00291394 0.811526 0.0643044 0 57
+ impact par 0.00291394 0.0643044 -0.00115907 3.77042 -0.00291394 -0.811526 0.0643044 -0 40
+ Fit 23: 91.588, 89, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 97
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 192
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  25: 0.00123022 2.26015 -0.00041469 -0.931906 0.745917
+ impact par 0.00041469 0.745917 0.00123022 2.26015 -0.00041469 -0.931906 0.745917 0 32
+ impact par -0.00041469 0.745917 -0.00123022 5.40175 0.00041469 0.931906 0.745917 -0 57
+ Fit 24: 90.524, 81, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 89
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 176
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  26: 0.000910353 -1.60361 0.000981495 -0.152116 0.444062
+ impact par -0.000981495 0.444062 0.000910353 -1.60361 0.000981495 -0.152116 0.444062 0 57
+ impact par 0.000981495 0.444062 -0.000910353 1.53798 -0.000981495 0.152116 0.444062 -0 57
+ Fit 25: 122.754, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  27: 0.000913471 0.735886 -0.00136236 0.173664 0.340336
+ impact par 0.00136236 0.340336 0.000913471 0.735886 -0.00136236 0.173664 0.340336 0 57
+ impact par -0.00136236 0.340336 -0.000913471 3.87748 0.00136236 -0.173664 0.340336 -0 57
+ Fit 26: 112.257, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  28: 0.00125265 -2.98032 0.000223364 0.968094 0.0513753
+ impact par -0.000223364 0.0513753 0.00125265 -2.98032 0.000223364 0.968094 0.0513753 0 57
+ impact par 0.000223364 0.0513753 -0.00125265 0.161277 -0.000223364 -0.968094 0.0513753 -0 31
+ Fit 27: 58.2729, 80, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 88
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 174
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  29: 0.00101423 -0.449391 -0.011719 -0.519568 0.413711
+ impact par 0.011719 0.413711 0.00101423 -0.449391 -0.011719 -0.519568 0.413711 0 57
+ impact par -0.011719 0.413711 -0.00101423 2.6922 0.011719 0.519568 0.413711 -0 57
+ Fit 28: 103.357, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  30: 0.000901447 1.73176 -0.00281318 0.0567252 -0.399758
+ impact par 0.00281318 -0.399758 0.000901447 1.73176 -0.00281318 0.0567252 -0.399758 0 57
+ impact par -0.00281318 -0.399758 -0.000901447 4.87335 0.00281318 -0.0567252 -0.399758 -0 57
+ Fit 29: 126.012, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  31: 0.000999523 -2.93326 0.00690106 -0.483104 -0.20862
+ impact par -0.00690106 -0.20862 0.000999523 -2.93326 0.00690106 -0.483104 -0.20862 0 57
+ impact par 0.00690106 -0.20862 -0.000999523 0.208334 -0.00690106 0.483104 -0.20862 -2.77688e-14 57
+ Fit 30: 101.206, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  32: 0.000911182 1.42634 0.00307919 0.158125 -0.118873
+ impact par -0.00307919 -0.118873 0.000911182 1.42634 0.00307919 0.158125 -0.118873 0 57
+ impact par 0.00307919 -0.118873 -0.000911182 4.56794 -0.00307919 -0.158125 -0.118873 -0 57
+ Fit 31: 104.411, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  33: 0.000904539 -1.03101 0.00671022 0.100564 0.380328
+ impact par -0.00671022 0.380328 0.000904539 -1.03101 0.00671022 0.100564 0.380328 0 57
+ impact par 0.00671022 0.380328 -0.000904539 2.11058 -0.00671022 -0.100564 0.380328 -0 57
+ Fit 32: 116.965, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  34: 0.000965097 -0.610907 -0.00234756 0.387158 -0.0435997
+ impact par 0.00234756 -0.0435997 0.000965097 -0.610907 -0.00234756 0.387158 -0.0435997 0 57
+ impact par -0.00234756 -0.0435997 -0.000965097 2.53069 0.00234756 -0.387158 -0.0435997 -0 57
+ Fit 33: 134.304, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  35: 0.00101026 0.193652 -0.00428698 0.509928 0.280773
+ impact par 0.00428698 0.280773 0.00101026 0.193652 -0.00428698 0.509928 0.280773 0 57
+ impact par -0.00428698 0.280773 -0.00101026 3.33524 0.00428698 -0.509928 0.280773 -0 57
+ Fit 34: 106.634, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  36: 0.00112129 -1.16714 -0.00738015 -0.743112 0.030321
+ impact par 0.00738015 0.030321 0.00112129 -1.16714 -0.00738015 -0.743112 0.030321 0 45
+ impact par -0.00738015 0.030321 -0.00112129 1.97445 0.00738015 0.743112 0.030321 -0 57
+ Fit 35: 114.308, 94, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 102
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 202
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  37: 0.000973878 -2.19393 0.00842612 -0.413416 -0.314963
+ impact par -0.00842612 -0.314963 0.000973878 -2.19393 0.00842612 -0.413416 -0.314963 0 57
+ impact par 0.00842612 -0.314963 -0.000973878 0.947663 -0.00842612 0.413416 -0.314963 -0 57
+ Fit 36: 105.617, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  38: 0.000900003 -0.347857 0.00357037 -0.00256331 0.23809
+ impact par -0.00357037 0.23809 0.000900003 -0.347857 0.00357037 -0.00256331 0.23809 0 57
+ impact par 0.00357037 0.23809 -0.000900003 2.79374 -0.00357037 0.00256331 0.23809 -0 57
+ Fit 37: 88.7409, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  39: 0.000973171 1.35231 1.11042e-05 -0.411353 -0.0693022
+ impact par -1.11042e-05 -0.0693022 0.000973171 1.35231 1.11042e-05 -0.411353 -0.0693022 0 57
+ impact par 1.11042e-05 -0.0693022 -0.000973171 4.4939 -1.11042e-05 0.411353 -0.0693022 -0 57
+ Fit 38: 111.964, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  40: 0.00126374 2.07109 -0.00143211 0.985721 -0.0541826
+ impact par 0.00143211 -0.0541826 0.00126374 2.07109 -0.00143211 0.985721 -0.0541826 0 57
+ impact par -0.00143211 -0.0541826 -0.00126374 5.21268 0.00143211 -0.985721 -0.0541826 -0 30
+ Fit 39: 58.3289, 79, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 87
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 172
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  41: 0.00122327 0.735227 -0.00143989 0.920533 -0.195429
+ impact par 0.00143989 -0.195429 0.00122327 0.735227 -0.00143989 0.920533 -0.195429 0 57
+ impact par -0.00143989 -0.195429 -0.00122327 3.87682 0.00143989 -0.920533 -0.195429 -0 32
+ Fit 40: 88.2531, 81, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 89
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 176
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  42: 0.00114971 -3.04423 -0.00732911 -0.794916 0.402537
+ impact par 0.00732911 0.402537 0.00114971 -3.04423 -0.00732911 -0.794916 0.402537 0 41
+ impact par -0.00732911 0.402537 -0.00114971 0.0973591 0.00732911 0.794916 0.402537 -0 57
+ Fit 41: 97.9686, 90, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 98
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 194
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  43: 0.00119765 2.25959 0.00797151 -0.877962 -0.221841
+ impact par -0.00797151 -0.221841 0.00119765 2.25959 0.00797151 -0.877962 -0.221841 0 35
+ impact par 0.00797151 -0.221841 -0.00119765 5.40118 -0.00797151 0.877962 -0.221841 -0 57
+ Fit 42: 81.0335, 84, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 92
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 182
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  44: 0.000905235 0.238412 0.00468679 -0.108015 0.285013
+ impact par -0.00468679 0.285013 0.000905235 0.238412 0.00468679 -0.108015 0.285013 -3.06612e-14 57
+ impact par 0.00468679 0.285013 -0.000905235 3.38 -0.00468679 0.108015 0.285013 -0 57
+ Fit 43: 106.81, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  45: 0.00101972 2.27755 -0.00637257 0.532664 0.140329
+ impact par 0.00637257 0.140329 0.00101972 2.27755 -0.00637257 0.532664 0.140329 0 57
+ impact par -0.00637257 0.140329 -0.00101972 5.41915 0.00637257 -0.532664 0.140329 -0 57
+ Fit 44: 80.9113, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  46: 0.000900036 0.774173 -0.00281237 0.0089618 0.482265
+ impact par 0.00281237 0.482265 0.000900036 0.774173 -0.00281237 0.0089618 0.482265 0 57
+ impact par -0.00281237 0.482265 -0.000900036 3.91577 0.00281237 -0.0089618 0.482265 -0 57
+ Fit 45: 120.413, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  47: 0.000927106 -2.35397 -0.00841114 0.247271 0.1333
+ impact par 0.00841114 0.1333 0.000927106 -2.35397 -0.00841114 0.247271 0.1333 0 57
+ impact par -0.00841114 0.1333 -0.000927106 0.787627 0.00841114 -0.247271 0.1333 -0 57
+ Fit 46: 132.797, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  48: 0.00095231 -1.6612 0.0042469 -0.345864 0.0404344
+ impact par -0.0042469 0.0404344 0.00095231 -1.6612 0.0042469 -0.345864 0.0404344 0 57
+ impact par 0.0042469 0.0404344 -0.00095231 1.4804 -0.0042469 0.345864 0.0404344 -0 57
+ Fit 47: 95.0391, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  49: 0.00115003 1.34732 -0.00654395 -0.795495 -0.0708649
+ impact par 0.00654395 -0.0708649 0.00115003 1.34732 -0.00654395 -0.795495 -0.0708649 0 41
+ impact par -0.00654395 -0.0708649 -0.00115003 4.48891 0.00654395 0.795495 -0.0708649 -0 57
+ Fit 48: 76.3365, 90, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 98
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 194
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  50: 0.00123896 2.12345 0.00581693 -0.946088 -0.205507
+ impact par -0.00581693 -0.205507 0.00123896 2.12345 0.00581693 -0.946088 -0.205507 0 31
+ impact par 0.00581693 -0.205507 -0.00123896 5.26504 -0.00581693 0.946088 -0.205507 -0 57
+ Fit 49: 82.0345, 80, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 88
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 174
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  51: 0.00119328 -2.34295 0.00437638 -0.870583 0.397533
+ impact par -0.00437638 0.397533 0.00119328 -2.34295 0.00437638 -0.870583 0.397533 0 36
+ impact par 0.00437638 0.397533 -0.00119328 0.79864 -0.00437638 0.870583 0.397533 -0 57
+ Fit 50: 71.3047, 85, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 93
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 184
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  52: 0.00090439 1.12475 -0.000813878 -0.0988925 0.0936582
+ impact par 0.000813878 0.0936582 0.00090439 1.12475 -0.000813878 -0.0988925 0.0936582 0 57
+ impact par -0.000813878 0.0936582 -0.00090439 4.26635 0.000813878 0.0988925 0.0936582 -0 57
+ Fit 51: 85.0269, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  53: 0.000925954 -1.41514 -0.00728409 0.241881 0.402343
+ impact par 0.00728409 0.402343 0.000925954 -1.41514 -0.00728409 0.241881 0.402343 0 57
+ impact par -0.00728409 0.402343 -0.000925954 1.72645 0.00728409 -0.241881 0.402343 -0 57
+ Fit 52: 117.359, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  54: 0.00105032 -2.83803 0.00497394 0.601607 -0.250238
+ impact par -0.00497394 -0.250238 0.00105032 -2.83803 0.00497394 0.601607 -0.250238 0 57
+ impact par 0.00497394 -0.250238 -0.00105032 0.303564 -0.00497394 -0.601607 -0.250238 -0 57
+ Fit 53: 85.2971, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  55: 0.00113109 -1.912 0.000970736 0.76122 0.0638077
+ impact par -0.000970736 0.0638077 0.00113109 -1.912 0.000970736 0.76122 0.0638077 0 57
+ impact par 0.000970736 0.0638077 -0.00113109 1.22959 -0.000970736 -0.76122 0.0638077 -0 43
+ Fit 54: 96.9745, 92, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 100
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 198
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  56: 0.00127249 1.89124 -0.00114127 0.999531 0.0086728
+ impact par 0.00114127 0.0086728 0.00127249 1.89124 -0.00114127 0.999531 0.0086728 0 57
+ impact par -0.00114127 0.0086728 -0.00127249 5.03283 0.00114127 -0.999531 0.0086728 -0 29
+ Fit 55: 75.8099, 78, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 86
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 170
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  57: 0.00090017 -1.90971 -0.0105771 -0.0194319 -0.19012
+ impact par 0.0105771 -0.19012 0.00090017 -1.90971 -0.0105771 -0.0194319 -0.19012 0 57
+ impact par -0.0105771 -0.19012 -0.00090017 1.23188 0.0105771 0.0194319 -0.19012 -0 57
+ Fit 56: 98.7263, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  58: 0.00101393 3.00993 0.000423737 -0.518853 -0.320313
+ impact par -0.000423737 -0.320313 0.00101393 3.00993 0.000423737 -0.518853 -0.320313 0 57
+ impact par 0.000423737 -0.320313 -0.00101393 6.15153 -0.000423737 0.518853 -0.320313 -0 57
+ Fit 57: 141.719, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  59: 0.00102327 3.00767 0.00555233 0.541013 -0.52541
+ impact par -0.00555233 -0.52541 0.00102327 3.00767 0.00555233 0.541013 -0.52541 0 57
+ impact par 0.00555233 -0.52541 -0.00102327 6.14926 -0.00555233 -0.541013 -0.52541 -0 57
+ Fit 58: 85.9443, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  60: 0.000974495 -2.49172 1.90085e-05 -0.415206 0.400043
+ impact par -1.90085e-05 0.400043 0.000974495 -2.49172 1.90085e-05 -0.415206 0.400043 0 57
+ impact par 1.90085e-05 0.400043 -0.000974495 0.649871 -1.90085e-05 0.415206 0.400043 1.13928e-13 57
+ Fit 59: 124.247, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  61: 0.000911555 -0.360551 0.00241479 0.160759 -0.136682
+ impact par -0.00241479 -0.136682 0.000911555 -0.360551 0.00241479 0.160759 -0.136682 0 57
+ impact par 0.00241479 -0.136682 -0.000911555 2.78104 -0.00241479 -0.160759 -0.136682 -0 57
+ Fit 60: 101.878, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  62: 0.000985543 -0.813734 0.0081615 -0.44624 -0.203144
+ impact par -0.0081615 -0.203144 0.000985543 -0.813734 0.0081615 -0.44624 -0.203144 1.12651e-13 57
+ impact par 0.0081615 -0.203144 -0.000985543 2.32786 -0.0081615 0.44624 -0.203144 -0 57
+ Fit 61: 91.9314, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  63: 0.00106849 -0.535387 -0.00225951 0.63989 0.176167
+ impact par 0.00225951 0.176167 0.00106849 -0.535387 -0.00225951 0.63989 0.176167 1.03906e-13 57
+ impact par -0.00225951 0.176167 -0.00106849 2.60621 0.00225951 -0.63989 0.176167 -0 56
+ Fit 62: 91.5291, 105, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 113
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 224
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  64: 0.00092698 -2.07419 0.00361569 -0.246688 0.181101
+ impact par -0.00361569 0.181101 0.00092698 -2.07419 0.00361569 -0.246688 0.181101 0 57
+ impact par 0.00361569 0.181101 -0.00092698 1.0674 -0.00361569 0.246688 0.181101 -0 57
+ Fit 63: 123.615, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  65: 0.000956775 -0.826544 0.00167204 -0.360759 0.0923451
+ impact par -0.00167204 0.0923451 0.000956775 -0.826544 0.00167204 -0.360759 0.0923451 0 57
+ impact par 0.00167204 0.0923451 -0.000956775 2.31505 -0.00167204 0.360759 0.0923451 -0 57
+ Fit 64: 108.314, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  66: 0.000994039 -2.98935 0.00444675 -0.468928 -0.0283488
+ impact par -0.00444675 -0.0283488 0.000994039 -2.98935 0.00444675 -0.468928 -0.0283488 0 57
+ impact par 0.00444675 -0.0283488 -0.000994039 0.152245 -0.00444675 0.468928 -0.0283488 -0 57
+ Fit 65: 101.347, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  67: 0.00103735 -1.47604 0.00444422 0.573152 -0.327137
+ impact par -0.00444422 -0.327137 0.00103735 -1.47604 0.00444422 0.573152 -0.327137 0 57
+ impact par 0.00444422 -0.327137 -0.00103735 1.66555 -0.00444422 -0.573152 -0.327137 -0 57
+ Fit 66: 117.623, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  68: 0.000900071 -1.79625 0.00278307 0.012566 -0.0689744
+ impact par -0.00278307 -0.0689744 0.000900071 -1.79625 0.00278307 0.012566 -0.0689744 0 57
+ impact par 0.00278307 -0.0689744 -0.000900071 1.34534 -0.00278307 -0.012566 -0.0689744 -0 57
+ Fit 67: 113.062, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  69: 0.00093335 0.0770891 -0.00365371 0.274745 0.352133
+ impact par 0.00365371 0.352133 0.00093335 0.0770891 -0.00365371 0.274745 0.352133 0 57
+ impact par -0.00365371 0.352133 -0.00093335 3.21868 0.00365371 -0.274745 0.352133 -0 57
+ Fit 68: 88.6993, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  70: 0.00108571 -1.24784 -0.00775642 -0.674736 0.145445
+ impact par 0.00775642 0.145445 0.00108571 -1.24784 -0.00775642 -0.674736 0.145445 0 53
+ impact par -0.00775642 0.145445 -0.00108571 1.89376 0.00775642 0.674736 0.145445 -0 57
+ Fit 69: 83.0875, 102, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 110
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 218
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  71: 0.001205 -2.67529 -0.00305361 -0.890289 -0.0459182
+ impact par 0.00305361 -0.0459182 0.001205 -2.67529 -0.00305361 -0.890289 -0.0459182 0 35
+ impact par -0.00305361 -0.0459182 -0.001205 0.466303 0.00305361 0.890289 -0.0459182 -0 57
+ Fit 70: 73.6247, 84, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 92
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 182
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  72: 0.00125911 -2.44412 0.00825627 -0.97838 -0.162116
+ impact par -0.00825627 -0.162116 0.00125911 -2.44412 0.00825627 -0.97838 -0.162116 0 30
+ impact par 0.00825627 -0.162116 -0.00125911 0.697472 -0.00825627 0.97838 -0.162116 -0 57
+ Fit 71: 108.013, 79, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 87
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 172
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  73: 0.00111175 0.350062 -0.000696009 -0.725199 -0.013486
+ impact par 0.000696009 -0.013486 0.00111175 0.350062 -0.000696009 -0.725199 -0.013486 4.99313e-14 47
+ impact par -0.000696009 -0.013486 -0.00111175 3.49165 0.000696009 0.725199 -0.013486 -0 57
+ Fit 72: 114.97, 96, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 104
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 206
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  74: 0.000914252 0.230802 -0.00593564 0.17867 0.0133913
+ impact par 0.00593564 0.0133913 0.000914252 0.230802 -0.00593564 0.17867 0.0133913 3.03588e-14 57
+ impact par -0.00593564 0.0133913 -0.000914252 3.3724 0.00593564 -0.17867 0.0133913 -0 57
+ Fit 73: 124.882, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  75: 0.000958114 0.312145 -0.00187246 -0.36512 -0.482806
+ impact par 0.00187246 -0.482806 0.000958114 0.312145 -0.00187246 -0.36512 -0.482806 0 57
+ impact par -0.00187246 -0.482806 -0.000958114 3.45374 0.00187246 0.36512 -0.482806 -0 57
+ Fit 74: 108.88, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  76: 0.00102249 -2.88034 0.00452977 -0.539188 -0.275365
+ impact par -0.00452977 -0.275365 0.00102249 -2.88034 0.00452977 -0.539188 -0.275365 0 57
+ impact par 0.00452977 -0.275365 -0.00102249 0.261249 -0.00452977 0.539188 -0.275365 -0 57
+ Fit 75: 102.069, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  77: 0.000911044 -0.534573 0.0029059 -0.157138 0.147144
+ impact par -0.0029059 0.147144 0.000911044 -0.534573 0.0029059 -0.157138 0.147144 0 57
+ impact par 0.0029059 0.147144 -0.000911044 2.60702 -0.0029059 0.157138 0.147144 -0 57
+ Fit 76: 91.1029, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  78: 0.000911839 1.14687 -0.00250937 0.162734 0.133122
+ impact par 0.00250937 0.133122 0.000911839 1.14687 -0.00250937 0.162734 0.133122 0 57
+ impact par -0.00250937 0.133122 -0.000911839 4.28846 0.00250937 -0.162734 0.133122 -0 57
+ Fit 77: 106.61, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  79: 0.00112345 -0.747483 -0.00233436 -0.747123 0.387887
+ impact par 0.00233436 0.387887 0.00112345 -0.747483 -0.00233436 -0.747123 0.387887 0 45
+ impact par -0.00233436 0.387887 -0.00112345 2.39411 0.00233436 0.747123 0.387887 -0 57
+ Fit 78: 108.458, 94, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 102
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 202
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  80: 0.000971422 -1.98072 -0.00553125 -0.406217 -0.234538
+ impact par 0.00553125 -0.234538 0.000971422 -1.98072 -0.00553125 -0.406217 -0.234538 0 57
+ impact par -0.00553125 -0.234538 -0.000971422 1.16088 0.00553125 0.406217 -0.234538 -0 57
+ Fit 79: 100.245, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  81: 0.00105423 1.78383 -0.00304669 0.610008 -0.290484
+ impact par 0.00304669 -0.290484 0.00105423 1.78383 -0.00304669 0.610008 -0.290484 0 57
+ impact par -0.00304669 -0.290484 -0.00105423 4.92542 0.00304669 -0.610008 -0.290484 -0 57
+ Fit 80: 87.3982, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  82: 0.00123541 0.971957 0.00455881 -0.940339 -0.094389
+ impact par -0.00455881 -0.094389 0.00123541 0.971957 0.00455881 -0.940339 -0.094389 0 31
+ impact par 0.00455881 -0.094389 -0.00123541 4.11355 -0.00455881 0.940339 -0.094389 -0 57
+ Fit 81: 74.8371, 80, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 88
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 174
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  83: 0.000900482 -2.21346 0.00681277 -0.0327259 0.615681
+ impact par -0.00681277 0.615681 0.000900482 -2.21346 0.00681277 -0.0327259 0.615681 0 57
+ impact par 0.00681277 0.615681 -0.000900482 0.92813 -0.00681277 0.0327259 0.615681 -0 57
+ Fit 82: 123.071, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  84: 0.00111926 -2.31812 0.00234867 0.739323 0.0106177
+ impact par -0.00234867 0.0106177 0.00111926 -2.31812 0.00234867 0.739323 0.0106177 0 57
+ impact par 0.00234867 0.0106177 -0.00111926 0.823468 -0.00234867 -0.739323 0.0106177 -0 45
+ Fit 83: 85.7743, 94, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 102
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 202
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  85: 0.00108921 -2.20138 -0.00059455 -0.681673 0.237868
+ impact par 0.00059455 0.237868 0.00108921 -2.20138 -0.00059455 -0.681673 0.237868 0 51
+ impact par -0.00059455 0.237868 -0.00108921 0.940208 0.00059455 0.681673 0.237868 1.01929e-13 57
+ Fit 84: 102.876, 100, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 108
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 214
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  86: 0.00102604 -0.00421742 0.00475985 0.547448 0.189532
+ impact par -0.00475985 0.189532 0.00102604 -0.00421742 0.00475985 0.547448 0.189532 0 57
+ impact par 0.00475985 0.189532 -0.00102604 3.13738 -0.00475985 -0.547448 0.189532 -0 57
+ Fit 85: 118.38, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  87: 0.00111021 2.22013 0.00322037 -0.722286 -0.47638
+ impact par -0.00322037 -0.47638 0.00111021 2.22013 0.00322037 -0.722286 -0.47638 0 47
+ impact par 0.00322037 -0.47638 -0.00111021 5.36172 -0.00322037 0.722286 -0.47638 -0 57
+ Fit 86: 85.4184, 96, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 104
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 206
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  88: 0.00090237 2.16649 0.00112091 0.0726183 0.690711
+ impact par -0.00112091 0.690711 0.00090237 2.16649 0.00112091 0.0726183 0.690711 0 57
+ impact par 0.00112091 0.690711 -0.00090237 5.30808 -0.00112091 -0.0726183 0.690711 -0 57
+ Fit 87: 132.513, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  89: 0.00090383 -0.544074 0.00375525 0.0923583 -0.257919
+ impact par -0.00375525 -0.257919 0.00090383 -0.544074 0.00375525 0.0923583 -0.257919 0 57
+ impact par 0.00375525 -0.257919 -0.00090383 2.59752 -0.00375525 -0.0923583 -0.257919 -0 57
+ Fit 88: 118.884, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  90: 0.00113231 -2.05368 -0.00228115 -0.763463 -0.153833
+ impact par 0.00228115 -0.153833 0.00113231 -2.05368 -0.00228115 -0.763463 -0.153833 0 43
+ impact par -0.00228115 -0.153833 -0.00113231 1.08791 0.00228115 0.763463 -0.153833 -0 57
+ Fit 89: 106.489, 92, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 100
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 198
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  91: 0.000973887 -2.40103 -0.00153108 0.41344 0.0498032
+ impact par 0.00153108 0.0498032 0.000973887 -2.40103 -0.00153108 0.41344 0.0498032 0 57
+ impact par -0.00153108 0.0498032 -0.000973887 0.740558 0.00153108 -0.41344 0.0498032 -0 57
+ Fit 90: 126.15, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  92: 0.000987783 -2.04569 -0.000329127 -0.452314 0.316681
+ impact par 0.000329127 0.316681 0.000987783 -2.04569 -0.000329127 -0.452314 0.316681 0 57
+ impact par -0.000329127 0.316681 -0.000987783 1.09591 0.000329127 0.452314 0.316681 -0 57
+ Fit 91: 102.762, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  93: 0.0011695 1.08338 0.00599295 -0.8298 -0.252245
+ impact par -0.00599295 -0.252245 0.0011695 1.08338 0.00599295 -0.8298 -0.252245 0 37
+ impact par 0.00599295 -0.252245 -0.0011695 4.22497 -0.00599295 0.8298 -0.252245 -0 57
+ Fit 92: 102.723, 86, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 94
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 186
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  94: 0.00110505 3.0057 0.000736466 0.712447 0.529644
+ impact par -0.000736466 0.529644 0.00110505 3.0057 0.000736466 0.712447 0.529644 0 57
+ impact par 0.000736466 0.529644 -0.00110505 6.14729 -0.000736466 -0.712447 0.529644 -0 48
+ Fit 93: 124.37, 97, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 105
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 208
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  95: 0.00093315 -2.94359 0.00331535 0.273905 -0.0369575
+ impact par -0.00331535 -0.0369575 0.00093315 -2.94359 0.00331535 0.273905 -0.0369575 0 57
+ impact par 0.00331535 -0.0369575 -0.00093315 0.198003 -0.00331535 -0.273905 -0.0369575 -0 57
+ Fit 94: 97.9069, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  96: 0.00105154 2.58572 -0.00676086 -0.60423 0.410755
+ impact par 0.00676086 0.410755 0.00105154 2.58572 -0.00676086 -0.60423 0.410755 0 57
+ impact par -0.00676086 0.410755 -0.00105154 5.72731 0.00676086 0.60423 0.410755 -0 57
+ Fit 95: 125.364, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  97: 0.00102559 3.05882 -0.00419541 0.546413 -0.531107
+ impact par 0.00419541 -0.531107 0.00102559 3.05882 -0.00419541 0.546413 -0.531107 0 57
+ impact par -0.00419541 -0.531107 -0.00102559 6.20042 0.00419541 -0.546413 -0.531107 -0 57
+ Fit 96: 114.553, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  98: 0.00109288 2.99943 -0.000470917 -0.688882 0.409417
+ impact par 0.000470917 0.409417 0.00109288 2.99943 -0.000470917 -0.688882 0.409417 0 51
+ impact par -0.000470917 0.409417 -0.00109288 6.14103 0.000470917 0.688882 0.409417 -0 57
+ Fit 97: 73.633, 100, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 108
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 214
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  99: 0.00117184 2.06924 -0.00345565 -0.83386 0.284565
+ impact par 0.00345565 0.284565 0.00117184 2.06924 -0.00345565 -0.83386 0.284565 0 38
+ impact par -0.00345565 0.284565 -0.00117184 5.21083 0.00345565 0.83386 0.284565 -0 57
+ Fit 98: 86.6778, 87, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 95
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 188
+ Constructed OK 
+ Fitted OK 
+ gen(inline)  100: 0.000971401 -2.39359 -0.000863168 0.406155 0.506301
+ impact par 0.000863168 0.506301 0.000971401 -2.39359 -0.000863168 0.406155 0.506301 0 57
+ impact par -0.000863168 0.506301 -0.000971401 0.748002 0.000863168 -0.406155 0.506301 -0 57
+ Fit 99: 113.501, 106, 0
+Composed GblTrajectory, 2 subtrajectories, type 2
+ Number of GblPoints          : 114
+ Number of points with offsets: 4
+ Number of (1D or 2D) offsets : 4
+ Number of fit parameters     : 8
+ Number of measurements       : 226
+ Constructed OK 
+ Fitted OK 
+ Time elapsed 0.091399 s
+ Chi2/Ndf = 1.02051
+ Tracks fitted 100

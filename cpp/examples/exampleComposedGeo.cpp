@@ -73,7 +73,7 @@ using namespace Eigen;
  * end
  * \endcode
  */
-int main() {
+int main(int argc, char* argv[]) {
 
 	// detector setup, ~ Belle-II CDC
 	const unsigned int nSuper = 9; // number of super layers
@@ -89,6 +89,7 @@ int main() {
 			153.2, 155.3 }; // +Z end of wires per super layer
 
 	unsigned int nTry = 1000; //: number of tries
+	if (argc > 1) nTry = std::atoi(argv[1]); 
 	std::cout << " GblComposedGeo " << nTry << ", " << nSuper << std::endl;
 	srand(4711);
 	clock_t startTime = clock();

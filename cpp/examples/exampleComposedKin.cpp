@@ -72,7 +72,7 @@ using namespace Eigen;
  * end
  * \endcode
  */
-int main() {
+int main(int argc, char* argv[]) {
 
 	// detector setup, ~ Belle-II CDC
 	const unsigned int nSuper = 9; // number of super layers
@@ -88,6 +88,7 @@ int main() {
 			153.2, 155.3 }; // +Z end of wires per super layer
 
 	unsigned int nTry = 1000; //: number of tries
+	if (argc > 1) nTry = std::atoi(argv[1]); 
 	std::cout << " GblComposedKin " << nTry << ", " << nSuper << std::endl;
 	srand(4711);
 	clock_t startTime = clock();
@@ -115,12 +116,12 @@ int main() {
 		iEvent++;
 		nTrack = 2;
 		// helix parameter for track generation
-		const double qbyp = 0.2; // 5 GeV
+		const double genQbyp = 0.2; // 5 GeV
 		const double genDca = beamSize[0] * unrm(); // normal
 		const double genZ0 = beamSize[2] * unrm(); // normal
 		const double genPhi0 = M_PI * (2. * unif() - 1.); // uniform, [-30..30] deg
 		const double genDzds = 2. * unif() - 1.; // uniform, lambda ~ [-45..45] deg
-		const double genCurv = bfac * qbyp * sqrt(1. + genDzds * genDzds);
+		const double genCurv = bfac * genQbyp * sqrt(1. + genDzds * genDzds);
 
 		std::cout << " gen(inline)  " << iEvent << ": " << genCurv << " "
 				<< genPhi0 << " " << genDca << " " << genDzds << " " << genZ0
