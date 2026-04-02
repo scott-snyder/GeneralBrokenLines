@@ -87,7 +87,7 @@
  *  A. Strandlie, W. Wittek, NIM A, 566 (2006) 687-698.
  *
  *  The source code is available at the DESY GitLab server, see:
- *  https://gitlab.desy.de/claus.kleinwort/general-broken-lines/-/wikis/home
+ *  https://gitlab.desy.de/millepede/general-broken-lines
  *
  *  \section call_sec Calling sequence
  *
