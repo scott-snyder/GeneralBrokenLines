@@ -1,8 +1,10 @@
 # GeneralBrokenLines
 
-![GBL logo](./doc/gbl-logo.png)
+![GBL logo](GblLogo.png)
 
-A trajectory based on General Broken Lines is a track refit to add the description of multiple scattering to an initial trajectory based on the propagation in a magnetic field (and average energy loss). It is constructed from a sequence of (pairs of) thin scatterers describing the multiple scattering in the material between adjacent measurement planes
+A trajectory based on General Broken Lines is a track refit to add the description of multiple scattering to an initial trajectory based on the propagation in a magnetic field (and average energy loss). It is constructed from a sequence of (pairs of) thin scatterers describing the multiple scattering in the material between adjacent measurement planes.
+
+Detailed documentation can be found at https://millepede.pages.desy.de/general-broken-lines/
 
 
 ## Obtaining the code 
@@ -49,3 +51,8 @@ To make your system pick up the library and the example programs, you can call t
 To build the documentation, you need doxygen (version > 1.7.0 recommended ) on your system.
 Invoke, also in the build directory:
   `make doc`
+
+## Contributing
+
+Contributions in form of issues or merge requests are very welcome! 
+If you do not have access to the DESY GitHub instance, please feel free to use the [GitHub mirror](https://github.com/GeneralBrokenLines/GeneralBrokenLines) to submit a PR. 
