@@ -11,24 +11,45 @@ set(CMAKE_CXX_COMPILER ${gpp_loc})
 # declare the project name
 PROJECT(GBL)
 
-# project version
-SET( ${PROJECT_NAME}_VERSION_MAJOR 4 )
-SET( ${PROJECT_NAME}_VERSION_MINOR 0 )
-SET( ${PROJECT_NAME}_VERSION_PATCH 1 )
+## ========= Versioning ==========
+set( ${PROJECT_NAME}_VERSION_MAJOR 4 )
+set( ${PROJECT_NAME}_VERSION_MINOR 0 )
+set( ${PROJECT_NAME}_VERSION_PATCH 2 )
+set( ${PROJECT_NAME}_SOVERSION "${${PROJECT_NAME}_VERSION_MAJOR}.${${PROJECT_NAME}_VERSION_MINOR}" )
+set( ${PROJECT_NAME}_VERSION   "${${PROJECT_NAME}_SOVERSION}.${${PROJECT_NAME}_VERSION_PATCH}" )
 
-# make life easier and simply use the ilcsoft default settings
-# load default ilcsoft settings (install prefix, build type, rpath, etc.)
-LIST( APPEND CMAKE_MODULE_PATH ${CMAKE_CURRENT_SOURCE_DIR}/cmake )
-INCLUDE( ilcsoft_default_settings )
 
-# enable ROOT support, check required CXX standard (see below)
-OPTION( SUPPORT_ROOT "Support ROOT for user I/O" False )
-IF( SUPPORT_ROOT )
-  FIND_PACKAGE(ROOT REQUIRED CONFIG)
-  ADD_DEFINITIONS(-DGBL_EIGEN_SUPPORT_ROOT)
-ENDIF()
-FIND_PACKAGE(Eigen3 REQUIRED CONFIG)
 
+## ========= Options ==========
+option( SUPPORT_ROOT "Support ROOT for user I/O" False )
+option(JNA_DEBUG "Debug printouts for helping debug JNA memory issues" OFF)
+option(JNA_MEMORY_MONITOR 
+  "Only keep track of structures allocated and destructed within JNA wrappers" OFF)
+
+
+## ========= Compiler flags and install prefix ==========
+set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wshadow -pedantic -Wno-long-long -Wuninitialized -Wl,-no-undefined  -Wno-unused-function -O3" )
+
+# install prefix - default to a local install 
+if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
+    set_property(CACHE CMAKE_INSTALL_PREFIX  PROPERTY VALUE "${PROJECT_BINARY_DIR}/GBLInstall" )
+endif()
+set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lib)
+set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
+
+
+## ========= Dependencies =====   
+
+# obtain ROOT 
+if( SUPPORT_ROOT )
+  find_package(ROOT REQUIRED CONFIG)
+  add_definitions(-DGBL_EIGEN_SUPPORT_ROOT)
+endif()
+
+# Eigen3 
+find_package(Eigen3 REQUIRED CONFIG)
+
+# Mille 
 find_package(Mille QUIET )
 if (${Mille_FOUND})
     message ("Found existing Mille installation")
@@ -37,66 +58,92 @@ else()
     include ("cmake/getMille.cmake")
 endif()
 
-# require proper c++
-#ADD_DEFINITIONS( "-Wall -g -ansi -pedantic -Wno-long-long" )
+# ======== Configure the actual build ===== 
 
-# include directories
-INCLUDE_DIRECTORIES( ./include )
-INSTALL( DIRECTORY ./include DESTINATION . PATTERN ".svn" EXCLUDE )
+add_library(${PROJECT_NAME} SHARED)
+target_sources(${PROJECT_NAME} 
+              PRIVATE 
+                src/BorderedBandMatrix.cpp  src/GblData.cpp  src/GblMeasurement.cpp  src/GblPoint.cpp  src/GblTrajectory.cpp  src/GblUtilities.cpp  src/JavaNativeAccessWrappers.cpp  src/VMatrix.cpp
+              PUBLIC 
+              FILE_SET HEADERS 
+                BASE_DIRS include
+                FILES include/BorderedBandMatrix.h  include/GblData.h  include/GblMeasurement.h  include/GblPoint.h  include/GblTrajectory.h  include/GblUtilities.h  include/VMatrix.h
+              )
 
-# add library
-AUX_SOURCE_DIRECTORY( ./src library_sources )
-ADD_SHARED_LIBRARY( ${PROJECT_NAME} ${library_sources} )
-INSTALL( TARGETS ${PROJECT_NAME} DESTINATION lib )
+install( TARGETS ${PROJECT_NAME} DESTINATION lib )
 
-IF( SUPPORT_ROOT )
+target_link_libraries(${PROJECT_NAME} PUBLIC Eigen3::Eigen Mille2)
+
+if( SUPPORT_ROOT )
   # Use imported targets for correct transitive dependency handling.
   # ROOT::Matrix provides TMatrixD/TMatrixDSym/TMatrixTBase, ROOT::MathCore provides TVectorD.
-  TARGET_LINK_LIBRARIES(${PROJECT_NAME} Eigen3::Eigen ROOT::Core ROOT::Matrix ROOT::MathCore  Mille2)
-ELSE()
-  TARGET_LINK_LIBRARIES(${PROJECT_NAME} Eigen3::Eigen Mille2)
-ENDIF()
+  target_link_libraries(${PROJECT_NAME} PUBLIC ROOT::Core ROOT::Matrix ROOT::MathCore )
+endif() 
 
-OPTION(JNA_DEBUG "Debug printouts for helping debug JNA memory issues" OFF)
-IF( JNA_DEBUG )
-  TARGET_COMPILE_DEFINITIONS(${PROJECT_NAME} PUBLIC JNA_DEBUG)
-ENDIF()
+if( JNA_DEBUG )
+  target_compile_definitions(${PROJECT_NAME} PUBLIC JNA_DEBUG)
+endif()
 # JNA_MEMORY_MONITOR is a subset of JNA_DEBUG,
 #   basically, it turns off the runtime printing and only keeps track of counts
 #   printing the final tally when the program is finished running
 #   this is very helpful when developing a java program using GBL via JNA
 #   to make sure your java program is cleaning up the memory allocated by GBL
-OPTION(JNA_MEMORY_MONITOR 
-  "Only keep track of structures allocated and destructed within JNA wrappers" OFF)
-IF( JNA_MEMORY_MONITOR )
-  TARGET_COMPILE_DEFINITIONS(${PROJECT_NAME} PUBLIC JNA_MEMORY_MONITOR)
-ENDIF()
+if( JNA_MEMORY_MONITOR )
+  target_compile_definitions(${PROJECT_NAME} PUBLIC JNA_MEMORY_MONITOR)
+endif()
 
-# the examples, build with "make examples"
-ADD_SUBDIRECTORY( examples/ )
+# install GBL
+install(
+  TARGETS ${PROJECT_NAME}
+  EXPORT ${PROJECT_NAME}-targets
+  LIBRARY DESTINATION lib
+  FILE_SET HEADERS 
+  DESTINATION include
+)
+
+# the examples
+add_subdirectory( examples/ )
   
+# ======== Configure documentation ===== 
+
 # add a target to generate API documentation with Doxygen
-FIND_PACKAGE(Doxygen)
+find_package(Doxygen)
 
 if(DOXYGEN_FOUND)
 
-    INCLUDE(GlobalSVNRevision)
-    
-    CONFIGURE_FILE(${CMAKE_CURRENT_SOURCE_DIR}/doc/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile @ONLY)
+    configure_file(${CMAKE_CURRENT_SOURCE_DIR}/doc/Doxyfile.in ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile @ONLY)
 
-    ADD_CUSTOM_TARGET(doc
+    add_custom_target(doc
         ${DOXYGEN_EXECUTABLE} ${CMAKE_CURRENT_BINARY_DIR}/doc/Doxyfile
-        WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/doc
+        WORKING_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/doc
         COMMENT "Generating API documentation with Doxygen" VERBATIM
     )
 
-ELSE()
+else()
     MESSAGE( STATUS "Doxygen not installed or found -- API documentation can't be generatred!" )
 
-ENDIF(DOXYGEN_FOUND)
+endif(DOXYGEN_FOUND)
 
-# display some variables and write them to cache
-DISPLAY_STD_VARIABLES()
+# ======== Add a setup script for the user ==== 
 
-# generate and install following configuration files
-GENERATE_PACKAGE_CONFIGURATION_FILES( GBLConfig.cmake GBLConfigVersion.cmake )
+
+configure_file(
+    ${PROJECT_SOURCE_DIR}/cmake/setup.sh.cmake.in
+    ${PROJECT_BINARY_DIR}/gblsetup.sh @ONLY)
+
+install(FILES ${PROJECT_BINARY_DIR}/gblsetup.sh
+         DESTINATION . )
+
+
+# ======== Create and install package config and version files ===== 
+configure_file(
+${PROJECT_SOURCE_DIR}/cmake/GBLConfig.cmake.in
+${PROJECT_BINARY_DIR}/cmake/GBLConfig.cmake @ONLY)
+
+configure_file(
+${PROJECT_SOURCE_DIR}/cmake/GBLConfig-version.cmake.in
+${PROJECT_BINARY_DIR}/cmake/GBLConfig-version.cmake @ONLY)
+
+install(FILES ${PROJECT_BINARY_DIR}/cmake/GBLConfig.cmake
+        ${PROJECT_BINARY_DIR}/cmake/GBLConfig-version.cmake
+        DESTINATION lib/cmake/${PROJECT_NAME}/)

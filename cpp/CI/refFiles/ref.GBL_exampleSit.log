@@ -1,0 +1,13 @@
+! MillePede-II: constraints for alignables with SINGLE 1D measurements
+Constraint 0. ! fix unmeasured direction in S1D8
+ 71 -0.707107
+ 72 0.707107
+Constraint 0. ! fix unmeasured direction in S1D9
+ 81 0.707107
+ 82 0.707107
+! End of lines to be added to MillePede-II steering file
+
+ GblSit 10000, 9
+ Time elapsed 0.677249 s
+ Chi2/Ndf = 1.00322
+ Tracks fitted 10000
