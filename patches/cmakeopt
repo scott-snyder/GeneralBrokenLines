@@ -1,0 +1,6 @@
+Bottom: 176fe3e5270260794f3fa0041e1fb11ed9d79610
+Top:    176fe3e5270260794f3fa0041e1fb11ed9d79610
+Author: sss <sss@karma>
+Date:   2026-04-03 09:46:41 -0400
+
+Don't unconditionally use -O3.
