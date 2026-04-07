@@ -14,7 +14,7 @@ PROJECT(GBL)
 ## ========= Versioning ==========
 set( ${PROJECT_NAME}_VERSION_MAJOR 4 )
 set( ${PROJECT_NAME}_VERSION_MINOR 0 )
-set( ${PROJECT_NAME}_VERSION_PATCH 2 )
+set( ${PROJECT_NAME}_VERSION_PATCH 3 )
 set( ${PROJECT_NAME}_SOVERSION "${${PROJECT_NAME}_VERSION_MAJOR}.${${PROJECT_NAME}_VERSION_MINOR}" )
 set( ${PROJECT_NAME}_VERSION   "${${PROJECT_NAME}_SOVERSION}.${${PROJECT_NAME}_VERSION_PATCH}" )
 
@@ -28,7 +28,7 @@ option(JNA_MEMORY_MONITOR
 
 
 ## ========= Compiler flags and install prefix ==========
-set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wshadow -pedantic -Wno-long-long -Wuninitialized -Wl,-no-undefined  -Wno-unused-function -O3" )
+set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wshadow -pedantic -Wno-long-long -Wuninitialized -Wno-unused-function -O3" )
 
 # install prefix - default to a local install 
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
