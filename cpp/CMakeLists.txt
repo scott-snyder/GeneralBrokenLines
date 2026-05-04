@@ -28,7 +28,7 @@ option(JNA_MEMORY_MONITOR
 
 
 ## ========= Compiler flags and install prefix ==========
-set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wshadow -pedantic -Wno-long-long -Wuninitialized -Wno-unused-function -O3" )
+set(CMAKE_CXX_FLAGS "-Wall -Wextra -Wshadow -pedantic -Wno-long-long -Wuninitialized -Wno-unused-function " )
 
 # install prefix - default to a local install 
 if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
