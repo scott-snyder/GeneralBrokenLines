@@ -1,20 +1,13 @@
 # #require a certain version
 CMAKE_MINIMUM_REQUIRED( VERSION 3.14 )
 
-# discover the compilers from PATH (when system install is overridden)
-find_program(gcc_loc gcc)
-find_program(gpp_loc g++)
-
-set(CMAKE_C_COMPILER ${gcc_loc})
-set(CMAKE_CXX_COMPILER ${gpp_loc})
-
 # declare the project name
 PROJECT(GBL)
 
 ## ========= Versioning ==========
 set( ${PROJECT_NAME}_VERSION_MAJOR 4 )
 set( ${PROJECT_NAME}_VERSION_MINOR 0 )
-set( ${PROJECT_NAME}_VERSION_PATCH 4 )
+set( ${PROJECT_NAME}_VERSION_PATCH 5 )
 set( ${PROJECT_NAME}_SOVERSION "${${PROJECT_NAME}_VERSION_MAJOR}.${${PROJECT_NAME}_VERSION_MINOR}" )
 set( ${PROJECT_NAME}_VERSION   "${${PROJECT_NAME}_SOVERSION}.${${PROJECT_NAME}_VERSION_PATCH}" )
 
