@@ -63,8 +63,6 @@ private:
 	const double sarc{0.}; ///< arc-length at prediction
 	const Eigen::Vector2d pred{}; ///< prediction for measurement (u,v)
 	const Eigen::Vector3d tdir{}; ///< track direction at prediction
-	const Eigen::Vector3d udir{}; ///< measurement direction for u
-	const Eigen::Vector3d vdir{}; ///< measurement direction for v
 	const Eigen::Vector3d ndir{}; ///< normal to measurement plane
 	const Eigen::Vector3d pos{}; ///< position at prediction
 	Eigen::Matrix3d global2meas = Eigen::Matrix3d::Identity(); ///< transformation into measurement system

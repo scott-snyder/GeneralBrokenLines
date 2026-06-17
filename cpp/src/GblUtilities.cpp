@@ -110,7 +110,7 @@ double unif() {
 GblHelixPrediction::GblHelixPrediction(double sArc, const Vector2d &aPred,
 		const Vector3d &tDir, const Vector3d &uDir, const Vector3d &vDir,
 		const Vector3d &nDir, const Vector3d &aPos) :
-		sarc(sArc), pred(aPred), tdir(tDir), udir(uDir), vdir(vDir), ndir(nDir), pos(
+		sarc(sArc), pred(aPred), tdir(tDir), ndir(nDir), pos(
 				aPos) {
 	global2meas << uDir.transpose(), vDir.transpose(), nDir.transpose();
 }
