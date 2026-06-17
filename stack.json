@@ -1,13 +1,17 @@
 {
   "version": 5,
-  "prev": "0681c5286d1b7126ab1484c191ddaa20af826005",
-  "head": "cd91deaeb0febf378c370f61e3406537ac061de8",
+  "prev": "205e9fb482a3af0122b8b45d03c53fa5de76800b",
+  "head": "54658ef2116014c82ad2d94c90153c7ad7319982",
   "applied": [
-    "cmakeopt"
+    "cmakeopt",
+    "clang"
   ],
   "unapplied": [],
   "hidden": [],
   "patches": {
+    "clang": {
+      "oid": "54658ef2116014c82ad2d94c90153c7ad7319982"
+    },
     "cmakeopt": {
       "oid": "cd91deaeb0febf378c370f61e3406537ac061de8"
     }
